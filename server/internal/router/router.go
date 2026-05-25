@@ -37,6 +37,7 @@ func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *han
 	{
 		prot.GET("/users/me", uh.Me)
 		prot.PATCH("/users/me", uh.PatchMe)
+		prot.POST("/users/me/password", uh.ChangePassword)
 		prot.POST("/users/me/avatar", uh.UploadAvatar)
 		prot.GET("/media/capabilities", mdh.Capabilities)
 		prot.POST("/media/upload-presign", mdh.PresignUpload)

@@ -103,7 +103,27 @@ func (r *UserRepo) Create(ctx context.Context, p CreateUserParams) (*model.User,
 }
 
 func (r *UserRepo) CheckPassword(hash, password string) bool {
+	if hash == "" {
+		return false
+	}
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+}
+
+func (r *UserRepo) UpdatePassword(ctx context.Context, id, newPassword string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	hashStr := string(hash)
+	res := r.activeUserQuery().WithContext(ctx).Where("id = ?", id).
+		Updates(map[string]any{"password_hash": hashStr})
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return errors.New("user not found")
+	}
+	return nil
 }
 
 func (r *UserRepo) GetByID(ctx context.Context, id string) (*model.User, error) {

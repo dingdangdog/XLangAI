@@ -499,6 +499,48 @@ func (h *UserHandler) PatchMe(c *gin.Context) {
 	h.Me(c)
 }
 
+// ChangePassword 修改当前用户密码（需已设置密码；OAuth/短信注册用户无密码时不可用）。
+func (h *UserHandler) ChangePassword(c *gin.Context) {
+	if !h.authEnabled(c, settings.AuthPasswordEnabled) {
+		return
+	}
+	uid := c.GetString("user_id")
+	if uid == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	var req struct {
+		OldPassword string `json:"old_password" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required,min=6"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	u, err := h.repo.GetByID(c.Request.Context(), uid)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+	if u.PasswordHash == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "password not set"})
+		return
+	}
+	if !h.repo.CheckPassword(u.PasswordHash, req.OldPassword) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid current password"})
+		return
+	}
+	if req.OldPassword == req.NewPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "new password must differ from current password"})
+		return
+	}
+	if err := h.repo.UpdatePassword(c.Request.Context(), uid, req.NewPassword); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
 // UploadAvatar 接收 multipart 字段 `file` 上传，或 JSON/form 字段 `avatar_url`（客户端已直传 R2 后确认）。
 func (h *UserHandler) UploadAvatar(c *gin.Context) {
 	uid := c.GetString("user_id")
@@ -619,7 +661,7 @@ func avatarMimeType(name string) string {
 }
 
 func toUserResp(ctx context.Context, langRepo *repository.LangRepo, u *model.User) gin.H {
-	resp := gin.H{"id": u.ID, "status": u.Status}
+	resp := gin.H{"id": u.ID, "status": u.Status, "has_password": u.PasswordHash != ""}
 	if u.Role != "" {
 		resp["role"] = u.Role
 	}
