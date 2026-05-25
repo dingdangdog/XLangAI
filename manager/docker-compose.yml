@@ -1,0 +1,7 @@
+# 统一部署已移至仓库根目录 `docker-compose.yml`（manager + Go API 单镜像）。
+#
+# 在仓库根目录执行：
+#   docker compose up -d --build
+#
+# 或显式指定文件：
+#   docker compose -f docker-compose.yml up -d --build

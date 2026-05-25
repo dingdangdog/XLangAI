@@ -1,0 +1,83 @@
+/*
+ * Verdant 主题色（对齐 client/lib/theme/verdant_theme.dart）
+ * 明暗模式写死，不从后端读取。
+ */
+
+:root {
+  --color-background: 249 250 251;
+  --color-foreground: 17 24 39;
+  --color-surface: 255 255 255;
+  --color-surface-muted: 243 244 246;
+  --color-border: 229 231 235;
+  --color-muted: 75 85 99;
+
+  --color-primary-50: 236 253 245;
+  --color-primary-100: 209 250 229;
+  --color-primary-200: 167 243 208;
+  --color-primary-300: 110 231 183;
+  --color-primary-400: 52 211 153;
+  --color-primary-500: 16 185 129;
+  --color-primary-600: 5 150 105;
+  --color-primary-700: 4 120 87;
+  --color-primary-800: 6 95 70;
+  --color-primary-900: 6 78 59;
+  --color-primary-950: 4 47 46;
+
+  --color-accent-50: 240 253 250;
+  --color-accent-100: 204 251 241;
+  --color-accent-200: 153 246 228;
+  --color-accent-300: 94 234 212;
+  --color-accent-400: 45 212 191;
+  --color-accent-500: 13 148 136;
+  --color-accent-600: 15 118 110;
+  --color-accent-700: 17 94 89;
+  --color-accent-800: 19 78 74;
+  --color-accent-900: 19 63 61;
+  --color-accent-950: 4 47 46;
+
+  --color-danger-50: 254 242 242;
+  --color-danger-500: 239 68 68;
+  --color-danger-600: 220 38 38;
+}
+
+body {
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+}
+
+.dark {
+  --color-background: 17 24 23;
+  --color-foreground: 249 250 251;
+  --color-surface: 31 41 39;
+  --color-surface-muted: 24 32 30;
+  --color-border: 55 65 62;
+  --color-muted: 156 163 160;
+
+  --color-primary-50: 4 47 46;
+  --color-primary-100: 6 78 59;
+  --color-primary-200: 6 95 70;
+  --color-primary-300: 4 120 87;
+  --color-primary-400: 5 150 105;
+  --color-primary-500: 16 185 129;
+  --color-primary-600: 52 211 153;
+  --color-primary-700: 110 231 183;
+  --color-primary-800: 167 243 208;
+  --color-primary-900: 209 250 229;
+  --color-primary-950: 236 253 245;
+
+  --color-accent-50: 4 47 46;
+  --color-accent-100: 19 63 61;
+  --color-accent-200: 19 78 74;
+  --color-accent-300: 17 94 89;
+  --color-accent-400: 15 118 110;
+  --color-accent-500: 45 212 191;
+  --color-accent-600: 94 234 212;
+  --color-accent-700: 153 246 228;
+  --color-accent-800: 204 251 241;
+  --color-accent-900: 240 253 250;
+  --color-accent-950: 240 253 250;
+
+  --color-danger-50: 69 10 10;
+  --color-danger-500: 248 113 113;
+  --color-danger-600: 239 68 68;
+}

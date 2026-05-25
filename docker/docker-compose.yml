@@ -1,0 +1,36 @@
+# XlangAI 统一部署：单镜像暴露运营后台 3312 与 Go API 8080
+# 用法：docker compose up -d --build
+#
+# 默认值见 ../Dockerfile；此处仅覆盖部署相关项。
+# 宿主机端口：MANAGER_HOST_PORT / XLANGAI_SERVER_HOST_PORT（不影响容器内 PORT / XLANGAI_SERVER_PORT）
+
+services:
+  xlangai:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: xlangai:latest
+    container_name: xlangai
+    restart: unless-stopped
+    ports:
+      - "${MANAGER_HOST_PORT:-3312}:3312"
+      - "${XLANGAI_SERVER_HOST_PORT:-8080}:8080"
+    environment:
+      # 共享基础设施
+      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/wlltalk?schema=public
+
+      # Nuxt runtimeConfig — manager 私有
+      NUXT_MANAGER_AUTH_SECRET: change-me-in-production
+      NUXT_MANAGER_ADMIN_USERNAME: admin
+      NUXT_MANAGER_ADMIN_PASSWORD: "123456"
+      NUXT_MANAGER_ADMIN_NICKNAME: Adminer
+
+      # Go API
+      JWT_SECRET: change-me-in-production
+      GIN_MODE: ${GIN_MODE:-release}
+      XLANGAI_VERBOSE_LOGS: ${XLANGAI_VERBOSE_LOGS:-0}
+      XLANGAI_FFMPEG_PATH: ffmpeg
+    volumes:
+      - ./data/storage:/app/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

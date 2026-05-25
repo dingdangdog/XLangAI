@@ -1,0 +1,10 @@
+.gocache
+.env
+jsdemo
+
+*.zip
+*.tar
+*.exe
+.alma-snapshots
+server/storage/
+

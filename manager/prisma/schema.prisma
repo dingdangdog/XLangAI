@@ -1,0 +1,428 @@
+// 与 prisma/migrations 中 PostgreSQL 表结构一致（约定式外键，不在 Prisma 中声明 relation）
+// 表名前缀：sys_ 系统/运营配置，usr_ 用户与对话域，bak_ 注销/归档备份
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Language {
+  id                String   @id @default(uuid())
+  code              String   @unique @db.VarChar(10)
+  name              String   @db.VarChar(100)
+  nameNative        String?  @map("name_native") @db.VarChar(100)
+  /// 试听文案模板，支持 {name} / {{name}} / {{voice_role_name}} 占位符
+  previewSampleText String?  @map("preview_sample_text") @db.VarChar(500)
+  sortOrder         Int      @default(0) @map("sort_order")
+  status            String   @default("active") @db.VarChar(20)
+  remark            String?  @db.VarChar(500)
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([code])
+  @@index([status])
+  @@map("sys_languages")
+}
+
+model SysLlmServiceConfig {
+  id        String   @id @default(uuid())
+  code      String   @unique @db.VarChar(100)
+  name      String   @db.VarChar(200)
+  protocol  String   @default("openai") @db.VarChar(50)
+  baseUrl   String?  @map("base_url") @db.VarChar(512)
+  apiKey    String?  @map("api_key") @db.VarChar(500)
+  modelCode String   @map("model_code") @db.VarChar(100)
+  config    String?  @db.Text
+  status    String   @default("active") @db.VarChar(20)
+  sortOrder Int      @default(0) @map("sort_order")
+  remark    String?  @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([protocol])
+  @@index([status])
+  @@map("sys_llm_service_configs")
+}
+
+model SysSttServiceConfig {
+  id        String   @id @default(uuid())
+  code      String   @unique @db.VarChar(100)
+  name      String   @db.VarChar(200)
+  protocol  String   @default("openai") @db.VarChar(50)
+  baseUrl   String?  @map("base_url") @db.VarChar(512)
+  apiKey    String?  @map("api_key") @db.VarChar(500)
+  modelCode String   @map("model_code") @db.VarChar(100)
+  config    String?  @db.Text
+  status    String   @default("active") @db.VarChar(20)
+  sortOrder Int      @default(0) @map("sort_order")
+  remark    String?  @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([protocol])
+  @@index([status])
+  @@map("sys_stt_service_configs")
+}
+
+/// 翻译服务商配置：机翻 REST 与 OpenAI 兼容 LLM 翻译；全局仅允许一条 status = active。
+model SysTranslateServiceConfig {
+  id          String   @id @default(uuid())
+  code        String   @unique @db.VarChar(100)
+  name        String   @db.VarChar(200)
+  protocol    String   @default("openai") @db.VarChar(50)
+  baseUrl     String?  @map("base_url") @db.VarChar(512)
+  apiKey      String?  @map("api_key") @db.VarChar(500)
+  apiSecret   String?  @map("api_secret") @db.VarChar(500)
+  modelCode   String   @map("model_code") @db.VarChar(100)
+  llmConfigId String?  @map("llm_config_id") @db.VarChar(36)
+  config      String?  @db.Text
+  status      String   @default("inactive") @db.VarChar(20)
+  sortOrder   Int      @default(0) @map("sort_order")
+  remark      String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([protocol])
+  @@index([status])
+  @@index([llmConfigId])
+  @@map("sys_translate_service_configs")
+}
+
+/// 对象存储 / 图床：R2、七牛、阿里云 OSS、本地目录；全局仅允许一条 status = active。
+model SysObjectStorageConfig {
+  id            String   @id @default(uuid())
+  code          String   @unique @db.VarChar(100)
+  name          String   @db.VarChar(200)
+  provider      String   @default("local") @db.VarChar(50)
+  baseUrl       String?  @map("base_url") @db.VarChar(512)
+  publicBaseUrl String?  @map("public_base_url") @db.VarChar(512)
+  apiKey        String?  @map("api_key") @db.VarChar(500)
+  secretKey     String?  @map("secret_key") @db.VarChar(500)
+  bucket        String?  @db.VarChar(128)
+  region        String?  @db.VarChar(64)
+  config        String?  @db.Text
+  status        String   @default("inactive") @db.VarChar(20)
+  sortOrder     Int      @default(0) @map("sort_order")
+  remark        String?  @db.VarChar(500)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([provider])
+  @@index([status])
+  @@map("sys_object_storage_configs")
+}
+
+/// 系统变量（KEY-VALUE）：登录开关、媒体存储策略等；与厂商密钥表无关。
+model SysSystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique @db.VarChar(128)
+  value       String   @db.Text
+  valueType   String   @default("string") @map("value_type") @db.VarChar(20)
+  description String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([key])
+  @@map("sys_system_settings")
+}
+
+model TtsServiceConfig {
+  id        String   @id @default(uuid())
+  code      String   @unique @db.VarChar(100)
+  name      String   @db.VarChar(200)
+  provider  String   @db.VarChar(50)
+  baseUrl   String?  @map("base_url") @db.VarChar(512)
+  apiKey    String?  @map("api_key") @db.VarChar(500)
+  region    String?  @db.VarChar(64)
+  modelCode String   @map("model_code") @db.VarChar(100)
+  config    String?  @db.Text
+  status    String   @default("active") @db.VarChar(20)
+  sortOrder Int      @default(0) @map("sort_order")
+  remark    String?  @db.VarChar(500)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([provider])
+  @@index([status])
+  @@map("sys_tts_service_configs")
+}
+
+model VoiceRole {
+  id                   String    @id @default(uuid())
+  languageId           String?   @map("language_id") @db.VarChar(36)
+  ttsServiceConfigId   String?   @map("tts_service_config_id") @db.VarChar(36)
+  voiceCode            String    @map("voice_code") @db.VarChar(50)
+  name                 String    @db.VarChar(100)
+  gender               String?   @db.VarChar(20)
+  config               String?   @db.Text
+  /// 客户端播放用 URL（cloud 为公网地址，server 为 /api/v1/audio/...）
+  previewAudioUrl      String?   @map("preview_audio_url") @db.VarChar(500)
+  /// 服务器本地副本文件名，便于迁移与 cloud 模式下的本地归档
+  previewLocalFilename String?   @map("preview_local_filename") @db.VarChar(200)
+  previewGeneratedAt   DateTime? @map("preview_generated_at") @db.Timestamptz(6)
+  status               String    @default("active") @db.VarChar(20)
+  sortOrder            Int       @default(0) @map("sort_order")
+  remark               String?   @db.VarChar(500)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([languageId])
+  @@index([ttsServiceConfigId])
+  @@index([status])
+  @@map("sys_voice_roles")
+}
+
+model PromptTemplate {
+  id         String   @id @default(uuid())
+  code       String   @unique @db.VarChar(50)
+  name       String   @db.VarChar(200)
+  content    String   @db.Text
+  variables  String?  @db.Text
+  languageId String?  @map("language_id") @db.VarChar(36)
+  status     String   @default("active") @db.VarChar(20)
+  sortOrder  Int      @default(0) @map("sort_order")
+  remark     String?  @db.VarChar(500)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([code])
+  @@index([status])
+  @@map("sys_prompt_templates")
+}
+
+model MembershipTier {
+  id           String   @id @default(uuid())
+  code         String   @unique @db.VarChar(20)
+  name         String   @db.VarChar(100)
+  dailyLimit   Int?     @map("daily_limit")
+  monthlyLimit Int?     @map("monthly_limit")
+  features     String?  @db.Text
+  status       String   @default("active") @db.VarChar(20)
+  sortOrder    Int      @default(0) @map("sort_order")
+  remark       String?  @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([code])
+  @@index([status])
+  @@map("sys_membership_tiers")
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  phone                 String?   @db.VarChar(20)
+  email                 String?   @db.VarChar(255)
+  passwordHash          String?   @map("password_hash") @db.VarChar(255)
+  nickname              String?   @db.VarChar(100)
+  avatarUrl             String?   @map("avatar_url") @db.VarChar(500)
+  tierId                String?   @map("tier_id") @db.VarChar(36)
+  /// 用户母语（sys_languages.id），用于客户端 STT 双语辅助识别等；与练习会话的目标语言无关。
+  languageId            String?   @map("language_id") @db.VarChar(36)
+  settings              String?   @db.Text
+  /// 可抵扣 LLM 对话的 token 余额（与 OpenAI usage.total_tokens 同量纲）；内购消耗型核销时累加。
+  tokenBalance          BigInt    @default(0) @map("token_balance")
+  /// 当前商店订阅权益到期时间（UTC）；到期后 Go 端在 Principal 中按逻辑回落到免费档额度。
+  subscriptionExpiresAt DateTime? @map("subscription_expires_at") @db.Timestamptz(6)
+  /// Apple Sign In identityToken 的 `sub`；与密码登录并存时用于关联。
+  appleSub              String?   @unique @map("apple_sub") @db.VarChar(255)
+  /// Google id_token 的 `sub`。
+  googleSub             String?   @unique @map("google_sub") @db.VarChar(255)
+  status                String    @default("active") @db.VarChar(20)
+  lastLoginAt           DateTime? @map("last_login_at") @db.Timestamptz(6)
+  remark                String?   @db.VarChar(500)
+  deletedAt             DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tierId])
+  @@index([status])
+  @@index([phone])
+  @@index([email])
+  @@map("usr_users")
+}
+
+/// 内购商品目录：与 App Store Connect / Google Play 商品 ID 对齐；Go 端 `/api/v1/billing/catalog` 读取。
+model BillingProduct {
+  id               String   @id @default(uuid()) @db.VarChar(36)
+  code             String   @unique @db.VarChar(64)
+  /// subscription 或 consumable（与 Go 端校验一致）。
+  kind             String   @db.VarChar(32)
+  iosProductId     String   @map("ios_product_id") @db.VarChar(200)
+  androidProductId String   @map("android_product_id") @db.VarChar(200)
+  tierCode         String?  @map("tier_code") @db.VarChar(20)
+  tokenGrant       BigInt   @default(0) @map("token_grant")
+  sortOrder        Int      @default(0) @map("sort_order")
+  status           String   @default("active") @db.VarChar(20)
+  remark           String?  @db.VarChar(500)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status])
+  @@map("sys_billing_products")
+}
+
+/// 已核销的商店交易（幂等）；唯一键 (platform, store_transaction_id)。
+model StoreTransaction {
+  id                 String   @id @default(uuid()) @db.VarChar(36)
+  userId             String   @map("user_id") @db.VarChar(36)
+  platform           String   @db.VarChar(16)
+  storeTransactionId String   @map("store_transaction_id") @db.VarChar(512)
+  productCode        String   @map("product_code") @db.VarChar(64)
+  rawPayload         String?  @map("raw_payload") @db.Text
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([platform, storeTransactionId])
+  @@index([userId])
+  @@map("usr_store_transactions")
+}
+
+model UserUsage {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id") @db.VarChar(36)
+  date           DateTime @db.Date
+  usageCount     Int      @default(0) @map("usage_count")
+  tokenCount     Int      @default(0) @map("token_count")
+  translateCount Int      @default(0) @map("translate_count")
+  translateChars Int      @default(0) @map("translate_chars")
+  ttsCount       Int      @default(0) @map("tts_count")
+  ttsChars       Int      @default(0) @map("tts_chars")
+  sttCount       Int      @default(0) @map("stt_count")
+  sttAudioBytes  BigInt   @default(0) @map("stt_audio_bytes")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("usr_user_usage")
+}
+
+/// 按 UTC 自然日、服务类型与配置 ID 聚合的系统用量（LLM token / TTS·翻译字符 / STT 音频字节等）。
+model SysServiceUsageDaily {
+  id           String   @id @default(uuid())
+  date         DateTime @db.Date
+  serviceType  String   @map("service_type") @db.VarChar(20)
+  configId     String   @map("config_id") @db.VarChar(36)
+  requestCount Int      @default(0) @map("request_count")
+  unitCount    BigInt   @default(0) @map("unit_count")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([date, serviceType, configId])
+  @@index([serviceType, configId, date])
+  @@map("sys_service_usage_daily")
+}
+
+model Conversation {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id") @db.VarChar(36)
+  languageId  String    @map("language_id") @db.VarChar(36)
+  voiceRoleId String?   @map("voice_role_id") @db.VarChar(36)
+  llmConfigId String?   @map("llm_config_id") @db.VarChar(36)
+  promptId    String?   @map("prompt_id") @db.VarChar(36)
+  title       String?   @default("新对话") @db.VarChar(200)
+  status      String    @default("active") @db.VarChar(20)
+  remark      String?   @db.VarChar(500)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("usr_conversations")
+}
+
+model Message {
+  id               String    @id @default(uuid())
+  conversationId   String    @map("conversation_id") @db.VarChar(36)
+  role             String    @db.VarChar(20)
+  content          String    @db.Text
+  audioUrl         String?   @map("audio_url") @db.VarChar(500)
+  originalAudioUrl String?   @map("original_audio_url") @db.VarChar(500)
+  sttText          String?   @map("stt_text") @db.Text
+  durationMs       Int?      @map("duration_ms")
+  metadata         String?   @db.Text
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([conversationId])
+  @@index([createdAt])
+  @@map("usr_messages")
+}
+
+model UsersBackup {
+  id           String    @id @db.VarChar(36)
+  phone        String?   @db.VarChar(20)
+  email        String?   @db.VarChar(255)
+  passwordHash String?   @map("password_hash") @db.VarChar(255)
+  nickname     String?   @db.VarChar(100)
+  avatarUrl    String?   @map("avatar_url") @db.VarChar(500)
+  tierId       String?   @map("tier_id") @db.VarChar(36)
+  languageId   String?   @map("language_id") @db.VarChar(36)
+  settings     String?   @db.Text
+  status       String?   @db.VarChar(20)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz(6)
+  remark       String?   @db.VarChar(500)
+  createdAt    DateTime? @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
+  cancelledAt  DateTime  @default(now()) @map("cancelled_at") @db.Timestamptz(6)
+  backupBatch  String    @map("backup_batch") @db.VarChar(36)
+
+  @@index([backupBatch])
+  @@map("bak_usr_users")
+}
+
+model ConversationsBackup {
+  id          String    @id @db.VarChar(36)
+  userId      String    @map("user_id") @db.VarChar(36)
+  languageId  String    @map("language_id") @db.VarChar(36)
+  voiceRoleId String?   @map("voice_role_id") @db.VarChar(36)
+  llmConfigId String?   @map("llm_config_id") @db.VarChar(36)
+  promptId    String?   @map("prompt_id") @db.VarChar(36)
+  title       String?   @db.VarChar(200)
+  status      String?   @db.VarChar(20)
+  remark      String?   @db.VarChar(500)
+  createdAt   DateTime? @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
+  cancelledAt DateTime  @default(now()) @map("cancelled_at") @db.Timestamptz(6)
+  backupBatch String    @map("backup_batch") @db.VarChar(36)
+
+  @@index([backupBatch])
+  @@map("bak_usr_conversations")
+}
+
+model MessagesBackup {
+  id               String   @id @db.VarChar(36)
+  conversationId   String   @map("conversation_id") @db.VarChar(36)
+  role             String   @db.VarChar(20)
+  content          String   @db.Text
+  audioUrl         String?  @map("audio_url") @db.VarChar(500)
+  originalAudioUrl String?  @map("original_audio_url") @db.VarChar(500)
+  sttText          String?  @map("stt_text") @db.Text
+  durationMs       Int?     @map("duration_ms")
+  metadata         String?  @db.Text
+  createdAt        DateTime @map("created_at") @db.Timestamptz(6)
+  cancelledAt      DateTime @default(now()) @map("cancelled_at") @db.Timestamptz(6)
+  backupBatch      String   @map("backup_batch") @db.VarChar(36)
+
+  @@index([backupBatch])
+  @@map("bak_usr_messages")
+}
+
+model UserUsageBackup {
+  id          String    @id @db.VarChar(36)
+  userId      String    @map("user_id") @db.VarChar(36)
+  date        DateTime  @db.Date
+  usageCount  Int       @default(0) @map("usage_count")
+  tokenCount  Int       @default(0) @map("token_count")
+  createdAt   DateTime? @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
+  cancelledAt DateTime  @default(now()) @map("cancelled_at") @db.Timestamptz(6)
+  backupBatch String    @map("backup_batch") @db.VarChar(36)
+
+  @@map("bak_usr_user_usage")
+}

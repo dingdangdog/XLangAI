@@ -1,0 +1,39 @@
+# Git / IDE
+.git
+.gitignore
+.cursor
+.idea
+.fleet
+.vscode
+**/.DS_Store
+
+# 客户端与 UI 稿（不进统一镜像）
+client/
+stitch/
+docs/
+design/
+changelog/
+
+# Node（manager 在子目录单独 COPY）
+manager/node_modules
+manager/.output
+manager/.nuxt
+manager/.nitro
+manager/.data
+manager/dist
+manager/.cache
+manager/**/*.log
+
+# Go 构建缓存
+server/storage
+
+# 本地数据与密钥
+data/
+**/.env
+**/.env.*
+!**/.env.example
+**/env
+
+# 其它
+**/*.md
+!manager/README.md

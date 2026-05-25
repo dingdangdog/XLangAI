@@ -1,0 +1,4 @@
+PORT=8080
+DATABASE_URL=postgresql://postgres:123456@localhost:5432/wlltalk?sslmode=disable
+JWT_SECRET=your-secret-key-change-in-production
+XLANGAI_DEV_FULL_ACCESS=true
