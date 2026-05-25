@@ -1,35 +1,34 @@
-# XlangAI 统一部署：单镜像暴露运营后台 3312 与 Go API 8080
-# 用法：docker compose up -d --build
-#
-# 默认值见 ../Dockerfile；此处仅覆盖部署相关项。
-# 宿主机端口：MANAGER_HOST_PORT / XLANGAI_SERVER_HOST_PORT（不影响容器内 PORT / XLANGAI_SERVER_PORT）
+# XlangAI Unified Deployment: Single Image Exposure of Operations Backend 3312 and Go API 8080
 
 services:
   xlangai:
     build:
       context: ..
       dockerfile: Dockerfile
-    image: xlangai:latest
+    image: dingdangdog/xlangai:latest
     container_name: xlangai
     restart: unless-stopped
     ports:
-      - "${MANAGER_HOST_PORT:-3312}:3312"
-      - "${XLANGAI_SERVER_HOST_PORT:-8080}:8080"
+      - "3312:3312"
+      - "8080:8080"
     environment:
-      # 共享基础设施
+      # Manager & Server Shared Database
       DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/xlangai?schema=public
 
-      # Nuxt runtimeConfig — manager 私有
+      # Nuxt runtimeConfig — Manager Private
+      NUXT_MANAGER_AUTO_SEED: "true"
       NUXT_MANAGER_AUTH_SECRET: change-me-in-production
       NUXT_MANAGER_ADMIN_USERNAME: admin
-      NUXT_MANAGER_ADMIN_PASSWORD: "123456"
+      NUXT_MANAGER_ADMIN_PASSWORD: "Change-me-in-production"
       NUXT_MANAGER_ADMIN_NICKNAME: Adminer
+      NUXT_MANAGER_ADMIN_SEED: "true"
+      # NUXT_MANAGER_TEST_ACCOUNT_SEED: "false"
 
       # Go API
       JWT_SECRET: change-me-in-production
-      GIN_MODE: ${GIN_MODE:-release}
-      XLANGAI_VERBOSE_LOGS: ${XLANGAI_VERBOSE_LOGS:-0}
       XLANGAI_FFMPEG_PATH: ffmpeg
+      GIN_MODE: "release"
+      # XLANGAI_VERBOSE_LOGS: ${XLANGAI_VERBOSE_LOGS:-0}
     volumes:
       - ./data/storage:/app/storage
     extra_hosts:

@@ -55,7 +55,7 @@ async function azureTts(
       "Ocp-Apim-Subscription-Key": key,
       "Content-Type": "application/ssml+xml",
       "X-Microsoft-OutputFormat": fmt,
-      "User-Agent": "alai-manager",
+      "User-Agent": "xlangai-manager",
     },
     body: ssml,
   });

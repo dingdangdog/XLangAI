@@ -95,6 +95,8 @@ ENV BUNDLED_AUDIO_DIR="/app/bootstrap-storage/audio"
 # ── 6. Go API（XLANGAI_* / JWT_*）──────────────────────────────────────
 ENV XLANGAI_SERVER_PORT=8080
 ENV JWT_SECRET="change-me-in-production"
+ENV GIN_MODE="release"
+ENV XLANGAI_VERBOSE_LOGS="0"
 
 EXPOSE 3312 8080
 
