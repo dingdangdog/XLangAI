@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"wlltalk/server/internal/entity"
+	"xlangai/server/internal/entity"
 
 	"gorm.io/gorm"
 )

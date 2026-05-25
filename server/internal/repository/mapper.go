@@ -3,9 +3,9 @@ package repository
 import (
 	"strings"
 
-	"wlltalk/server/internal/entity"
-	"wlltalk/server/internal/messagemeta"
-	"wlltalk/server/internal/model"
+	"xlangai/server/internal/entity"
+	"xlangai/server/internal/messagemeta"
+	"xlangai/server/internal/model"
 )
 
 func userToModel(u *entity.User) *model.User {

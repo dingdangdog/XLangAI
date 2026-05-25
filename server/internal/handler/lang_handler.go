@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"wlltalk/server/internal/cache"
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/cache"
+	"xlangai/server/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )

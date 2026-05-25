@@ -18,5 +18,5 @@ NUXT_MANAGER_ADMIN_SEED=true
 NUXT_PUBLIC_OFFICIAL_HOME_URL=https://xlangai.com
 
 # ── 共享基础设施（Prisma / 跨服务路径）──────────────────────────────────
-DATABASE_URL=postgresql://postgres:123456@localhost:5432/wlltalk?schema=public
+DATABASE_URL=postgresql://postgres:123456@localhost:5432/xlangai?schema=public
 AUDIO_DIR=../server/storage/audio

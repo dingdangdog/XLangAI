@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"wlltalk/server/internal/objectstore"
+	"xlangai/server/internal/objectstore"
 )
 
 // PresignBlocked 预签名被拒绝（配置不满足），Reason 为中文说明。

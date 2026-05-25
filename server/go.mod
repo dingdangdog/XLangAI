@@ -1,4 +1,4 @@
-module wlltalk/server
+module xlangai/server
 
 go 1.26
 

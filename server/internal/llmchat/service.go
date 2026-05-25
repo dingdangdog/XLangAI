@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"wlltalk/server/internal/ai"
+	"xlangai/server/internal/ai"
 )
 
 var (

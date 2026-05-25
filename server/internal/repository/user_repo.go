@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"wlltalk/server/internal/entity"
-	"wlltalk/server/internal/model"
+	"xlangai/server/internal/entity"
+	"xlangai/server/internal/model"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -276,7 +276,7 @@ func (r *UserRepo) UpdateProfile(ctx context.Context, id string, nickname, avata
 func (r *UserRepo) ApplySubscriptionEntitlement(ctx context.Context, userID string, tierID *string, subExpires *time.Time) error {
 	return r.activeUserQuery().WithContext(ctx).Where("id = ?", userID).
 		Updates(map[string]any{
-			"tier_id":                   tierID,
+			"tier_id":                 tierID,
 			"subscription_expires_at": subExpires,
 		}).Error
 }

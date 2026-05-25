@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"wlltalk/server/internal/ai"
+	"xlangai/server/internal/ai"
 )
 
 func chatOpenAI(ctx context.Context, in ServiceInput, systemPrompt string, messages []Message) (string, *ai.ChatUsage, error) {

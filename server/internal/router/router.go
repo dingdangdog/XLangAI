@@ -1,9 +1,9 @@
 package router
 
 import (
-	"wlltalk/server/config"
-	"wlltalk/server/internal/authz"
-	"wlltalk/server/internal/handler"
+	"xlangai/server/config"
+	"xlangai/server/internal/authz"
+	"xlangai/server/internal/handler"
 
 	"github.com/gin-gonic/gin"
 )

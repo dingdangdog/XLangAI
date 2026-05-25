@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"wlltalk/server/config"
-	"wlltalk/server/internal/authz"
-	"wlltalk/server/internal/billing"
-	"wlltalk/server/internal/repository"
+	"xlangai/server/config"
+	"xlangai/server/internal/authz"
+	"xlangai/server/internal/billing"
+	"xlangai/server/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -40,10 +40,10 @@ func (h *BillingHandler) Catalog(c *gin.Context) {
 }
 
 type verifyBody struct {
-	Platform        string `json:"platform" binding:"required"`
-	ProductID       string `json:"product_id" binding:"required"`
-	TransactionID   string `json:"transaction_id"`
-	PurchaseToken   string `json:"purchase_token"`
+	Platform      string `json:"platform" binding:"required"`
+	ProductID     string `json:"product_id" binding:"required"`
+	TransactionID string `json:"transaction_id"`
+	PurchaseToken string `json:"purchase_token"`
 }
 
 // Verify 校验商店单据并发放权益（幂等）。
@@ -177,7 +177,7 @@ func (h *BillingHandler) verifyAndroid(c *gin.Context, ctx context.Context, uid 
 	saStr := string(jsonBytes)
 	pkg := strings.TrimSpace(h.cfg.GooglePlayPackageName)
 	if pkg == "" {
-		pkg = "com.wlltalk.client"
+		pkg = "com.xlangai.android"
 	}
 
 	switch strings.ToLower(strings.TrimSpace(prod.Kind)) {

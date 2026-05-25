@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"wlltalk/server/internal/entity"
+	"xlangai/server/internal/entity"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"wlltalk/server/internal/entity"
-	"wlltalk/server/internal/model"
+	"xlangai/server/internal/entity"
+	"xlangai/server/internal/model"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"

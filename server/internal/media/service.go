@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"wlltalk/server/config"
-	"wlltalk/server/internal/objectstore"
-	"wlltalk/server/internal/repository"
-	"wlltalk/server/internal/settings"
-	"wlltalk/server/internal/storage"
+	"xlangai/server/config"
+	"xlangai/server/internal/objectstore"
+	"xlangai/server/internal/repository"
+	"xlangai/server/internal/settings"
+	"xlangai/server/internal/storage"
 )
 
 var (

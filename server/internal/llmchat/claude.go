@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"wlltalk/server/internal/ai"
+	"xlangai/server/internal/ai"
 )
 
 func chatClaude(ctx context.Context, in ServiceInput, systemPrompt string, messages []Message) (string, *ai.ChatUsage, error) {

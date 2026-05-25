@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"wlltalk/server/config"
-	"wlltalk/server/internal/auth"
+	"xlangai/server/config"
+	"xlangai/server/internal/auth"
 
 	"github.com/gin-gonic/gin"
 )

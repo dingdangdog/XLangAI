@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"wlltalk/server/internal/entity"
+	"xlangai/server/internal/entity"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -37,18 +37,18 @@ func utcToday() time.Time {
 type UsageRecord struct {
 	UserID string
 
-	ChatTurns        int
-	LLMTokens        int
-	TranslateCalls   int
-	TranslateChars   int
-	TTSCalls         int
-	TTSChars         int
-	STTCalls         int
-	STTAudioBytes    int64
-	ServiceType      string
-	ServiceConfigID  string
-	ServiceRequests  int
-	ServiceUnits     int64
+	ChatTurns       int
+	LLMTokens       int
+	TranslateCalls  int
+	TranslateChars  int
+	TTSCalls        int
+	TTSChars        int
+	STTCalls        int
+	STTAudioBytes   int64
+	ServiceType     string
+	ServiceConfigID string
+	ServiceRequests int
+	ServiceUnits    int64
 }
 
 func (r *UsageRepo) TodayUsageCount(ctx context.Context, userID string) (int, error) {

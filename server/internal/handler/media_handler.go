@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"wlltalk/server/internal/media"
-	"wlltalk/server/internal/objectstore"
+	"xlangai/server/internal/media"
+	"xlangai/server/internal/objectstore"
 
 	"github.com/gin-gonic/gin"
 )

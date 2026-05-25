@@ -4,19 +4,19 @@ import (
 	"context"
 	"strings"
 
-	"wlltalk/server/internal/entity"
+	"xlangai/server/internal/entity"
 
 	"gorm.io/gorm"
 )
 
 type VoiceRole struct {
-	ID                 string  `json:"id"`
-	LanguageID         string  `json:"language_id"`
-	TtsServiceConfigID string  `json:"tts_service_config_id"`
-	VoiceCode          string  `json:"voice_code"`
-	Name               string  `json:"name"`
-	Gender             string  `json:"gender,omitempty"`
-	PreviewAudioURL    string  `json:"preview_audio_url,omitempty"`
+	ID                 string `json:"id"`
+	LanguageID         string `json:"language_id"`
+	TtsServiceConfigID string `json:"tts_service_config_id"`
+	VoiceCode          string `json:"voice_code"`
+	Name               string `json:"name"`
+	Gender             string `json:"gender,omitempty"`
+	PreviewAudioURL    string `json:"preview_audio_url,omitempty"`
 }
 
 type VoiceRepo struct {

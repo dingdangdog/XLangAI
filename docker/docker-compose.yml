@@ -17,7 +17,7 @@ services:
       - "${XLANGAI_SERVER_HOST_PORT:-8080}:8080"
     environment:
       # 共享基础设施
-      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/wlltalk?schema=public
+      DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/xlangai?schema=public
 
       # Nuxt runtimeConfig — manager 私有
       NUXT_MANAGER_AUTH_SECRET: change-me-in-production

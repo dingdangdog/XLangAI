@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"wlltalk/server/internal/settings"
+	"xlangai/server/internal/settings"
 
 	"github.com/gin-gonic/gin"
 )

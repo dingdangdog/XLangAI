@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"wlltalk/server/internal/ai"
+	"xlangai/server/internal/ai"
 )
 
 func translateOpenAI(ctx context.Context, in ServiceInput, text, targetLocale string) (string, error) {

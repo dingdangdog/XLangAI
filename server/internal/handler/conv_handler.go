@@ -8,8 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"wlltalk/server/internal/authz"
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/authz"
+	"xlangai/server/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )

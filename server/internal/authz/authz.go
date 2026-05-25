@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"wlltalk/server/internal/cache"
-	"wlltalk/server/internal/model"
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/cache"
+	"xlangai/server/internal/model"
+	"xlangai/server/internal/repository"
 )
 
 const (

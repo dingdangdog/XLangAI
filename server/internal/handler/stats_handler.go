@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )

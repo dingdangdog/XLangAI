@@ -80,7 +80,7 @@ func Load() *Config {
 	}
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://postgres:postgres@localhost:5432/wlltalk?sslmode=disable"
+		dbURL = "postgres://postgres:postgres@localhost:5432/xlangai?sslmode=disable"
 	}
 	dbURL = normalizeDBURL(dbURL)
 	jwtSecret := os.Getenv("JWT_SECRET")
@@ -110,7 +110,7 @@ func Load() *Config {
 	}
 	appleBundle := strings.TrimSpace(os.Getenv("XLANGAI_APPLE_BUNDLE_ID"))
 	if appleBundle == "" {
-		appleBundle = "com.wlltalk.client"
+		appleBundle = "com.xlangai.ios"
 	}
 	appleEnv := strings.ToLower(strings.TrimSpace(os.Getenv("XLANGAI_APPLE_ENV")))
 	if appleEnv == "" {
@@ -118,7 +118,7 @@ func Load() *Config {
 	}
 	gpPkg := strings.TrimSpace(os.Getenv("XLANGAI_GOOGLE_PLAY_PACKAGE"))
 	if gpPkg == "" {
-		gpPkg = "com.wlltalk.client"
+		gpPkg = "com.xlangai.android"
 	}
 	googleAuds := splitComma(os.Getenv("XLANGAI_GOOGLE_OAUTH_CLIENT_IDS"))
 	appleAuds := splitComma(os.Getenv("XLANGAI_APPLE_SIGN_IN_CLIENT_IDS"))

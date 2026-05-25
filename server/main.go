@@ -9,29 +9,29 @@ import (
 
 	"strings"
 
-	"wlltalk/server/config"
+	"xlangai/server/config"
 
-	"wlltalk/server/internal/authz"
+	"xlangai/server/internal/authz"
 
-	"wlltalk/server/internal/billing"
+	"xlangai/server/internal/billing"
 
-	"wlltalk/server/internal/cache"
+	"xlangai/server/internal/cache"
 
-	"wlltalk/server/internal/db"
+	"xlangai/server/internal/db"
 
-	"wlltalk/server/internal/handler"
+	"xlangai/server/internal/handler"
 
-	"wlltalk/server/internal/loginotp"
+	"xlangai/server/internal/loginotp"
 
-	"wlltalk/server/internal/media"
+	"xlangai/server/internal/media"
 
-	appredis "wlltalk/server/internal/redis"
+	appredis "xlangai/server/internal/redis"
 
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/repository"
 
-	"wlltalk/server/internal/router"
+	"xlangai/server/internal/router"
 
-	"wlltalk/server/internal/settings"
+	"xlangai/server/internal/settings"
 )
 
 func logDBTarget(dbURL string) {

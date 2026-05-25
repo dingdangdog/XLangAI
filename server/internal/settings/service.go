@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/repository"
 
 	"gorm.io/gorm"
 )

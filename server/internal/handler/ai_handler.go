@@ -10,16 +10,16 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"wlltalk/server/config"
-	"wlltalk/server/internal/ai"
-	"wlltalk/server/internal/authz"
-	"wlltalk/server/internal/llmchat"
-	"wlltalk/server/internal/media"
-	"wlltalk/server/internal/messagemeta"
-	"wlltalk/server/internal/model"
-	"wlltalk/server/internal/objectstore"
-	"wlltalk/server/internal/repository"
-	"wlltalk/server/internal/translate"
+	"xlangai/server/config"
+	"xlangai/server/internal/ai"
+	"xlangai/server/internal/authz"
+	"xlangai/server/internal/llmchat"
+	"xlangai/server/internal/media"
+	"xlangai/server/internal/messagemeta"
+	"xlangai/server/internal/model"
+	"xlangai/server/internal/objectstore"
+	"xlangai/server/internal/repository"
+	"xlangai/server/internal/translate"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,10 +27,10 @@ import (
 const openAIBaseURL = "https://api.openai.com"
 
 type AIHandler struct {
-	cfg    *config.Config
-	msg    *repository.MessageRepo
-	sys    *repository.SystemRepo
-	conv   *repository.ConvRepo
+	cfg          *config.Config
+	msg          *repository.MessageRepo
+	sys          *repository.SystemRepo
+	conv         *repository.ConvRepo
 	lang         *repository.LangRepo
 	llmCfg       *repository.LLMConfigRepo
 	sttCfg       *repository.STTConfigRepo
@@ -863,20 +863,22 @@ func (h *AIHandler) writeConversationError(c *gin.Context, err error) {
 			payload["detail"] = err.Error()
 		}
 		c.JSON(http.StatusServiceUnavailable, payload)
-	case errors.Is(err, errSTTNotConfigured): {
-		payload := gin.H{"error": "语音转写未配置，请在管理后台添加并启用 STT 服务配置", "code": "STT_NOT_CONFIGURED"}
-		if h.cfg.VerboseLogs {
-			payload["detail"] = err.Error()
+	case errors.Is(err, errSTTNotConfigured):
+		{
+			payload := gin.H{"error": "语音转写未配置，请在管理后台添加并启用 STT 服务配置", "code": "STT_NOT_CONFIGURED"}
+			if h.cfg.VerboseLogs {
+				payload["detail"] = err.Error()
+			}
+			c.JSON(http.StatusServiceUnavailable, payload)
 		}
-		c.JSON(http.StatusServiceUnavailable, payload)
-	}
-	case errors.Is(err, errSTTKeyMissing): {
-		payload := gin.H{"error": "语音转写未配置 API Key，请在管理后台 STT 服务配置中填写", "code": "STT_KEY_MISSING"}
-		if h.cfg.VerboseLogs {
-			payload["detail"] = err.Error()
+	case errors.Is(err, errSTTKeyMissing):
+		{
+			payload := gin.H{"error": "语音转写未配置 API Key，请在管理后台 STT 服务配置中填写", "code": "STT_KEY_MISSING"}
+			if h.cfg.VerboseLogs {
+				payload["detail"] = err.Error()
+			}
+			c.JSON(http.StatusServiceUnavailable, payload)
 		}
-		c.JSON(http.StatusServiceUnavailable, payload)
-	}
 	case errors.Is(err, errAzureSTTMissingKey):
 		payload := gin.H{"error": "Azure 语音转写未配置密钥，请在管理后台 STT 服务配置中填写 API Key", "code": "AZURE_STT_KEY_MISSING"}
 		if h.cfg.VerboseLogs {

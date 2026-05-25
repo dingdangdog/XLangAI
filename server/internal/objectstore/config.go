@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"wlltalk/server/internal/repository"
+	"xlangai/server/internal/repository"
 )
 
 const (

@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	keyLangList     = "wlltalk:languages:v1"
-	keyPrincipalFmt = "wlltalk:principal:v1:%s"
+	keyLangList     = "xlangai:languages:v1"
+	keyPrincipalFmt = "xlangai:principal:v1:%s"
 )
 
 type Cache struct {

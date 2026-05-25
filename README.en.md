@@ -159,7 +159,7 @@ servers/
 
 ### 1. Prepare PostgreSQL
 
-Create a PostgreSQL database on the host or in a separate container. The examples use `wlltalk` as the database name.
+Create a PostgreSQL database on the host or in a separate container. The examples use `xlangai` as the database name.
 
 When a Windows or macOS container connects to PostgreSQL on the host, use `host.docker.internal` in `DATABASE_URL`. The Compose file already configures `extra_hosts`.
 
@@ -168,7 +168,7 @@ When a Windows or macOS container connects to PostgreSQL on the host, use `host.
 Create `docker/.env` and at least override the database URL, JWT secrets, and first admin account:
 
 ```env
-DATABASE_URL=postgresql://postgres:your-password@host.docker.internal:5432/wlltalk?schema=public
+DATABASE_URL=postgresql://postgres:your-password@host.docker.internal:5432/xlangai?schema=public
 JWT_SECRET=replace-with-a-long-random-string
 NUXT_MANAGER_AUTH_SECRET=replace-with-another-long-random-string
 

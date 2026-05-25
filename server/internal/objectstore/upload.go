@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"wlltalk/server/internal/storage"
+	"xlangai/server/internal/storage"
 )
 
 var ErrNotConfigured = errors.New("object storage not configured")

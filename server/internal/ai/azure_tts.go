@@ -61,7 +61,7 @@ func azureSingleRequest(ctx context.Context, endpoint, key, outputFormat, ssml s
 	req.Header.Set("Ocp-Apim-Subscription-Key", key)
 	req.Header.Set("Content-Type", "application/ssml+xml")
 	req.Header.Set("X-Microsoft-OutputFormat", outputFormat)
-	req.Header.Set("User-Agent", "wlltalk-server")
+	req.Header.Set("User-Agent", "xlangai-server")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {

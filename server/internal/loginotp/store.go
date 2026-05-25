@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"wlltalk/server/internal/cache"
+	"xlangai/server/internal/cache"
 )
 
 const (
-	otpKeyFmt         = "wlltalk:login_otp:v1:%s"
-	cdKeyFmt          = "wlltalk:login_otp_cd:v1:%s"
-	registerOtpKeyFmt = "wlltalk:register_otp:v1:%s"
-	registerCdKeyFmt  = "wlltalk:register_otp_cd:v1:%s"
+	otpKeyFmt         = "xlangai:login_otp:v1:%s"
+	cdKeyFmt          = "xlangai:login_otp_cd:v1:%s"
+	registerOtpKeyFmt = "xlangai:register_otp:v1:%s"
+	registerCdKeyFmt  = "xlangai:register_otp_cd:v1:%s"
 )
 
 // Store 登录短信验证码：优先 Redis（与 cache.Cache 共用客户端），否则进程内内存（单实例开发可用）。
