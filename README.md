@@ -22,6 +22,17 @@
 </p>
 
 <p align="center">
+  <a href="https://xlangai.com">官网</a> ·
+  <a href="https://xlangai.com/servers">服务器商店</a> ·
+  <a href="https://github.com/DingDangDog/XLangAI">GitHub 源码</a> ·
+  <a href="https://xlangai.com/download">下载客户端</a>
+</p>
+
+<p align="center">
+  <sub>📱 iOS 客户端 · 一次性 $2 买断 &nbsp;|&nbsp; 🏪 官网服务器商店 &nbsp;|&nbsp; 🔧 开源服务端（官方不提供正式托管）</sub>
+</p>
+
+<p align="center">
   <a href="#功能特性">功能特性</a> ·
   <a href="#架构">架构</a> ·
   <a href="#快速开始">快速开始</a> ·
@@ -42,6 +53,14 @@
 | [`manager/`](manager/) | 运营后台：配置中心、用户与对话管理、数据备份       | Nuxt 4 · Vue 3 · Prisma 7 · PostgreSQL |
 
 > 本目录**不包含** Flutter 客户端与官网（`client`、`home` 位于 XLangAI 主仓库的其他目录）。只部署 `servers/` 即可支撑 App API 与运营后台。
+
+### 生态三角
+
+| 端 | 说明 | 入口 |
+| --- | --- | --- |
+| **客户端** | 闭源 | [xlangai.com/download](https://xlangai.com/download) |
+| **官网 · 服务器商店** | 浏览社区公开服务器，复制地址到 App | [xlangai.com/servers](https://xlangai.com/servers) |
+| **开源服务端**（本目录） | Docker 部署 API + 运营后台 | 本仓库 |
 
 ### 阅读路径
 

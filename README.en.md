@@ -23,6 +23,17 @@
 </p>
 
 <p align="center">
+  <a href="https://xlangai.com">Website</a> ·
+  <a href="https://xlangai.com/servers">Server store</a> ·
+  <a href="https://github.com/DingDangDog/XLangAI">GitHub source</a> ·
+  <a href="https://xlangai.com/download">Download client</a>
+</p>
+
+<p align="center">
+  <sub>📱 iOS client · $2 one-time purchase &nbsp;|&nbsp; 🏪 Official server store &nbsp;|&nbsp; 🔧 Open-source backend (no official production hosting)</sub>
+</p>
+
+<p align="center">
   <a href="#features">Features</a> ·
   <a href="#architecture">Architecture</a> ·
   <a href="#requirements">Requirements</a> ·
@@ -43,6 +54,14 @@
 | [`manager/`](manager/) | Admin console: configuration center, users, conversations, and backups          | Nuxt 4 · Vue 3 · Prisma 7 · PostgreSQL |
 
 > This directory does **not** include the Flutter client or the website (`client` and `home` live in other directories of the main XLangAI repository). Deploying `servers/` alone is enough to support the app API and admin console.
+
+### Ecosystem
+
+| Pillar                                   | Description                                                    | Link                                                 |
+| ---------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------- |
+| **Client**                               | Closed source                                                  | [xlangai.com/download](https://xlangai.com/download) |
+| **Website · Server store**               | Browse public community servers; copy the address into the app | [xlangai.com/servers](https://xlangai.com/servers)   |
+| **Open-source backend** (this directory) | Docker-deploy API + admin                                      | This repo                                            |
 
 ### Reading Guide
 
@@ -119,11 +138,11 @@ flowchart TB
 
 ## Requirements
 
-| Scenario                | Dependencies                                                                                        |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| Docker deployment       | Docker 24+, Docker Compose v2, PostgreSQL 15+ on host or in a container                             |
-| Local API development   | Go 1.26+, PostgreSQL, optional Redis                                                                |
-| Local admin development | Node.js 22+, pnpm 11+, PostgreSQL                                                                   |
+| Scenario                | Dependencies                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------------- |
+| Docker deployment       | Docker 24+, Docker Compose v2, PostgreSQL 15+ on host or in a container                            |
+| Local API development   | Go 1.26+, PostgreSQL, optional Redis                                                               |
+| Local admin development | Node.js 22+, pnpm 11+, PostgreSQL                                                                  |
 | Speech processing       | `ffmpeg`; included in the Docker image; install locally for STT/TTS transcoding during development |
 
 ---
@@ -176,38 +195,38 @@ Variables are grouped by responsibility. **Nuxt app config** goes through `runti
 
 ### 1. Nuxt / Nitro (Node conventions, no `NUXT_` prefix)
 
-| Variable                   | Default | Description                                      |
-| -------------------------- | ------- | ------------------------------------------------ |
-| `MANAGER_HOST_PORT`        | `3312`  | Maps to container `PORT`                       |
-| `XLANGAI_SERVER_HOST_PORT` | `8080`  | Maps to container `XLANGAI_SERVER_PORT`          |
+| Variable                   | Default | Description                             |
+| -------------------------- | ------- | --------------------------------------- |
+| `MANAGER_HOST_PORT`        | `3312`  | Maps to container `PORT`                |
+| `XLANGAI_SERVER_HOST_PORT` | `8080`  | Maps to container `XLANGAI_SERVER_PORT` |
 
 ### 2. Nuxt runtimeConfig — manager private (`NUXT_MANAGER_*`)
 
-| Variable                             | Default | Description                                                          |
-| ------------------------------------ | ------- | -------------------------------------------------------------------- |
-| `NUXT_MANAGER_DATABASE_AUTO_MIGRATE` | `true`  | Run Prisma migrations on startup                                     |
-| `NUXT_MANAGER_AUTH_SECRET`           | —       | Admin-console JWT secret (**change in production**)                  |
-| `NUXT_MANAGER_AUTO_SEED`             | `true`  | Business seed data                                                   |
-| `NUXT_MANAGER_TEST_ACCOUNT_SEED`     | `false` | Integration test account (`13800138000` / `123456`)                  |
-| `NUXT_MANAGER_ADMIN_USERNAME`        | —       | First admin login ID                                                 |
-| `NUXT_MANAGER_ADMIN_PASSWORD`        | —       | Plaintext password (≥6 characters), bcrypt-hashed before storage     |
-| `NUXT_MANAGER_ADMIN_NICKNAME`        | `Admin` | Admin display name                                                   |
-| `NUXT_MANAGER_ADMIN_SEED`            | `true`  | Set to `false` to disable admin bootstrap                            |
+| Variable                             | Default | Description                                                      |
+| ------------------------------------ | ------- | ---------------------------------------------------------------- |
+| `NUXT_MANAGER_DATABASE_AUTO_MIGRATE` | `true`  | Run Prisma migrations on startup                                 |
+| `NUXT_MANAGER_AUTH_SECRET`           | —       | Admin-console JWT secret (**change in production**)              |
+| `NUXT_MANAGER_AUTO_SEED`             | `true`  | Business seed data                                               |
+| `NUXT_MANAGER_TEST_ACCOUNT_SEED`     | `false` | Integration test account (`13800138000` / `123456`)              |
+| `NUXT_MANAGER_ADMIN_USERNAME`        | —       | First admin login ID                                             |
+| `NUXT_MANAGER_ADMIN_PASSWORD`        | —       | Plaintext password (≥6 characters), bcrypt-hashed before storage |
+| `NUXT_MANAGER_ADMIN_NICKNAME`        | `Admin` | Admin display name                                               |
+| `NUXT_MANAGER_ADMIN_SEED`            | `true`  | Set to `false` to disable admin bootstrap                        |
 
 ### 3. Nuxt runtimeConfig — public (`NUXT_PUBLIC_*`)
 
-| Variable                        | Default               | Description                         |
-| ------------------------------- | --------------------- | ----------------------------------- |
-| `NUXT_PUBLIC_OFFICIAL_HOME_URL` | `https://xlangai.com` | Official site / server store URL  |
+| Variable                        | Default               | Description                      |
+| ------------------------------- | --------------------- | -------------------------------- |
+| `NUXT_PUBLIC_OFFICIAL_HOME_URL` | `https://xlangai.com` | Official site / server store URL |
 
 ### 5. Shared infrastructure (Prisma / cross-service, no `NUXT_` prefix)
 
-| Variable            | Default                        | Description                                                          |
-| ------------------- | ------------------------------ | -------------------------------------------------------------------- |
+| Variable            | Default                        | Description                                                               |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------- |
 | `DATABASE_URL`      | —                              | PostgreSQL connection string shared by manager and Go (Prisma convention) |
-| `AUDIO_DIR`         | `/app/storage/audio`           | Shared audio directory for manager and Go                            |
-| `AVATAR_DIR`        | `/app/storage/avatars`         | User avatars (Go)                                                    |
-| `BUNDLED_AUDIO_DIR` | `/app/bootstrap-storage/audio` | Bundled preview audio (Go fallback)                                  |
+| `AUDIO_DIR`         | `/app/storage/audio`           | Shared audio directory for manager and Go                                 |
+| `AVATAR_DIR`        | `/app/storage/avatars`         | User avatars (Go)                                                         |
+| `BUNDLED_AUDIO_DIR` | `/app/bootstrap-storage/audio` | Bundled preview audio (Go fallback)                                       |
 
 ---
 
