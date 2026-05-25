@@ -41,9 +41,13 @@ func NewUserHandler(repo *repository.UserRepo, langRepo *repository.LangRepo, cf
 	return &UserHandler{repo: repo, langRepo: langRepo, cfg: cfg, az: az, otp: otp, media: mediaSvc, settings: sys}
 }
 
+func authAPIError(c *gin.Context, status int, msg, code string) {
+	c.JSON(status, gin.H{"error": msg, "code": code})
+}
+
 func (h *UserHandler) authEnabled(c *gin.Context, key string) bool {
 	if h.settings == nil || !h.settings.Bool(c.Request.Context(), key) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "login method disabled"})
+		authAPIError(c, http.StatusForbidden, "login method disabled", "LOGIN_METHOD_DISABLED")
 		return false
 	}
 	return true
@@ -98,11 +102,11 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 	u, err := h.repo.GetByPhoneOrEmail(c.Request.Context(), req.Phone, req.Email)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		authAPIError(c, http.StatusUnauthorized, "invalid credentials", "INVALID_CREDENTIALS")
 		return
 	}
 	if !h.repo.CheckPassword(u.PasswordHash, req.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		authAPIError(c, http.StatusUnauthorized, "invalid credentials", "INVALID_CREDENTIALS")
 		return
 	}
 	role := u.Role
@@ -134,17 +138,17 @@ func (h *UserHandler) SendLoginSms(c *gin.Context) {
 	}
 	phone := strings.TrimSpace(req.Phone)
 	if len(phone) < 8 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid phone"})
+		authAPIError(c, http.StatusBadRequest, "invalid phone", "INVALID_PHONE")
 		return
 	}
 	ctx := c.Request.Context()
 	if h.otp.CooldownActive(ctx, phone) {
-		c.JSON(http.StatusTooManyRequests, gin.H{"error": "please wait before resending"})
+		authAPIError(c, http.StatusTooManyRequests, "please wait before resending", "SMS_COOLDOWN")
 		return
 	}
 	_, err := h.repo.GetByPhone(ctx, phone)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "phone not registered"})
+		authAPIError(c, http.StatusNotFound, "phone not registered", "PHONE_NOT_REGISTERED")
 		return
 	}
 	code := loginotp.RandomDigits6()
@@ -174,12 +178,12 @@ func (h *UserHandler) LoginWithSms(c *gin.Context) {
 	ctx := c.Request.Context()
 	want, ok := h.otp.GetCode(ctx, phone)
 	if !ok || want != code {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired code"})
+		authAPIError(c, http.StatusUnauthorized, "invalid or expired code", "INVALID_OR_EXPIRED_CODE")
 		return
 	}
 	u, err := h.repo.GetByPhone(ctx, phone)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
+		authAPIError(c, http.StatusUnauthorized, "invalid credentials", "INVALID_CREDENTIALS")
 		return
 	}
 	h.otp.DeleteCode(ctx, phone)
@@ -209,16 +213,16 @@ func (h *UserHandler) SendRegisterSms(c *gin.Context) {
 	}
 	phone := strings.TrimSpace(req.Phone)
 	if len(phone) < 8 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid phone"})
+		authAPIError(c, http.StatusBadRequest, "invalid phone", "INVALID_PHONE")
 		return
 	}
 	ctx := c.Request.Context()
 	if h.otp.RegisterCooldownActive(ctx, phone) {
-		c.JSON(http.StatusTooManyRequests, gin.H{"error": "please wait before resending"})
+		authAPIError(c, http.StatusTooManyRequests, "please wait before resending", "SMS_COOLDOWN")
 		return
 	}
 	if _, err := h.repo.GetByPhone(ctx, phone); err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "phone already registered"})
+		authAPIError(c, http.StatusConflict, "phone already registered", "PHONE_ALREADY_REGISTERED")
 		return
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
@@ -252,11 +256,11 @@ func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 	ctx := c.Request.Context()
 	want, ok := h.otp.GetRegisterCode(ctx, phone)
 	if !ok || want != code {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired code"})
+		authAPIError(c, http.StatusUnauthorized, "invalid or expired code", "INVALID_OR_EXPIRED_CODE")
 		return
 	}
 	if _, err := h.repo.GetByPhone(ctx, phone); err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "phone already registered"})
+		authAPIError(c, http.StatusConflict, "phone already registered", "PHONE_ALREADY_REGISTERED")
 		return
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
@@ -523,15 +527,15 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		return
 	}
 	if u.PasswordHash == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "password not set"})
+		authAPIError(c, http.StatusBadRequest, "password not set", "PASSWORD_NOT_SET")
 		return
 	}
 	if !h.repo.CheckPassword(u.PasswordHash, req.OldPassword) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid current password"})
+		authAPIError(c, http.StatusUnauthorized, "invalid current password", "INVALID_CURRENT_PASSWORD")
 		return
 	}
 	if req.OldPassword == req.NewPassword {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "new password must differ from current password"})
+		authAPIError(c, http.StatusBadRequest, "new password must differ from current password", "PASSWORD_SAME_AS_OLD")
 		return
 	}
 	if err := h.repo.UpdatePassword(c.Request.Context(), uid, req.NewPassword); err != nil {
