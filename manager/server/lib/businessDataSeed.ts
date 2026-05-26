@@ -195,8 +195,8 @@ const SEED_MEMBERSHIP_TIERS = [
   {
     code: "plus",
     name: "Plus 会员",
-    dailyLimit: 0,
-    monthlyLimit: 3000,
+    dailyLimit: 100,
+    monthlyLimit: 1000,
     features: JSON.stringify({
       voice_chat: true,
       text_chat: true,
@@ -208,8 +208,8 @@ const SEED_MEMBERSHIP_TIERS = [
   {
     code: "pro",
     name: "专业版",
-    dailyLimit: 0,
-    monthlyLimit: 12000,
+    dailyLimit: 500,
+    monthlyLimit: 5000,
     features: JSON.stringify({
       voice_chat: true,
       text_chat: true,
@@ -525,18 +525,18 @@ const SEED_SYSTEM_SETTINGS: {
   description: string;
 }[] = [
     { key: "auth.password.enabled", value: "true", valueType: "bool", description: "账号密码登录" },
-    { key: "auth.password.register_enabled", value: "true", valueType: "bool", description: "账号密码注册" },
-    { key: "auth.sms.enabled", value: "true", valueType: "bool", description: "短信验证码登录" },
+    { key: "auth.password.register_enabled", value: "false", valueType: "bool", description: "账号密码注册" },
+    { key: "auth.sms.enabled", value: "true", valueType: "false", description: "短信验证码登录" },
     { key: "auth.sms.register_enabled", value: "false", valueType: "bool", description: "短信验证码注册" },
-    { key: "auth.google.enabled", value: "true", valueType: "bool", description: "Google 登录" },
-    { key: "auth.google.register_enabled", value: "true", valueType: "bool", description: "Google 首次登录自动注册" },
-    { key: "auth.apple.enabled", value: "true", valueType: "bool", description: "Apple 登录" },
-    { key: "auth.apple.register_enabled", value: "true", valueType: "bool", description: "Apple 首次登录自动注册" },
+    { key: "auth.google.enabled", value: "false", valueType: "bool", description: "Google 登录" },
+    { key: "auth.google.register_enabled", value: "false", valueType: "bool", description: "Google 首次登录自动注册" },
+    { key: "auth.apple.enabled", value: "false", valueType: "bool", description: "Apple 登录" },
+    { key: "auth.apple.register_enabled", value: "false", valueType: "bool", description: "Apple 首次登录自动注册" },
     {
       key: "media.user_recording.storage",
       value: "server",
       valueType: "string",
-      description: "用户录音：client=仅客户端 | server=服务器本地 | cloud=对象存储",
+      description: "用户录音：server=服务器本地 | cloud=对象存储",
     },
     {
       key: "media.assistant_tts.storage",

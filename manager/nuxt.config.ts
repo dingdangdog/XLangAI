@@ -23,18 +23,18 @@ export default defineNuxtConfig({
   runtimeConfig: {
     manager: {
       /** 启动时是否执行 Prisma 迁移；NUXT_MANAGER_DATABASE_AUTO_MIGRATE */
-      databaseAutoMigrate: true,
+      databaseAutoMigrate: "true",
       /** 运营后台 JWT；NUXT_MANAGER_AUTH_SECRET */
       authSecret: "",
       /** 业务种子；NUXT_MANAGER_AUTO_SEED */
-      autoSeed: true,
+      autoSeed: "true",
       /** 联调测试账号；NUXT_MANAGER_TEST_ACCOUNT_SEED */
-      testAccountSeed: false,
+      testAccountSeed: "false",
       /** 首次管理员；NUXT_MANAGER_ADMIN_* */
       adminUsername: "",
       adminPassword: "",
       adminNickname: "",
-      adminSeed: true,
+      adminSeed: "true",
     },
     public: {
       /** 官网 / 服务器商店；NUXT_PUBLIC_OFFICIAL_HOME_URL */
