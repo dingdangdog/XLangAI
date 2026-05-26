@@ -25,39 +25,50 @@ const icons = {
 </script>
 
 <template>
-  <div
-    class="pointer-events-none fixed right-4 top-4 z-[100] flex w-full max-w-sm flex-col gap-2"
-    aria-live="polite"
-  >
-    <TransitionGroup name="toast">
-      <div
-        v-for="t in toasts"
-        :key="t.id"
-        class="pointer-events-auto flex items-start gap-2 rounded-xl border px-4 py-3 text-sm shadow-lg"
-        :class="typeStyles[t.type]"
-      >
-        <component :is="icons[t.type]" class="mt-0.5 h-5 w-5 shrink-0" />
-        <span class="flex-1">{{ t.message }}</span>
-        <button
-          type="button"
-          class="shrink-0 rounded p-0.5 opacity-70 hover:opacity-100"
-          @click="dismiss(t.id)"
+  <Teleport to="body">
+    <div
+      class="pointer-events-none fixed right-4 top-4 z-[100] flex max-w-sm flex-col gap-2"
+      aria-live="polite"
+    >
+      <TransitionGroup name="toast" tag="div" class="flex flex-col gap-2">
+        <div
+          v-for="item in toasts"
+          :key="item.id"
+          class="pointer-events-auto relative flex items-start gap-2 rounded-xl border px-4 py-3 text-sm shadow-lg"
+          :class="typeStyles[item.type]"
         >
-          <XMarkIcon class="h-4 w-4" />
-        </button>
-      </div>
-    </TransitionGroup>
-  </div>
+          <component :is="icons[item.type]" class="mt-0.5 h-5 w-5 shrink-0" />
+          <span class="flex-1">{{ item.message }}</span>
+          <button
+            type="button"
+            class="relative z-10 -mr-1 shrink-0 rounded p-1 opacity-70 hover:opacity-100"
+            aria-label="关闭"
+            @click.stop="dismiss(item.id)"
+          >
+            <XMarkIcon class="h-4 w-4" />
+          </button>
+        </div>
+      </TransitionGroup>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
+.toast-move,
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.25s ease;
 }
+
 .toast-enter-from,
 .toast-leave-to {
   opacity: 0;
   transform: translateX(1rem);
+}
+
+.toast-leave-active {
+  position: absolute;
+  right: 0;
+  left: 0;
 }
 </style>

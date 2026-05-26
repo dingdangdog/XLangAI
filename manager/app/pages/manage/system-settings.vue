@@ -159,10 +159,7 @@ const boolValueOptions = [
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader
-        title="系统变量"
-        description="登录开关、媒体存储策略等 KEY-VALUE。与 LLM / 对象存储等厂商密钥表无关。"
-      >
+      <AdminPageHeader title="系统变量" description="登录开关、媒体存储策略等 KEY-VALUE。与 LLM / 对象存储等厂商密钥表无关。">
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
@@ -190,7 +187,7 @@ const boolValueOptions = [
           <AdminTd>{{ row.valueType }}</AdminTd>
           <AdminTd>{{ row.description ?? t("common.emDash") }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
-          <AdminTd align="right">
+          <AdminTd align="right" nowrap>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
@@ -201,32 +198,18 @@ const boolValueOptions = [
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
 
-    <AdminDialog
-      v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建系统变量' : '编辑系统变量'"
-    >
+    <AdminDialog v-model="dialogVisible" :title="dialogMode === 'create' ? '新建系统变量' : '编辑系统变量'">
       <AdminFormField label="Key" required>
-        <AdminInput
-          v-model="form.key"
-          :disabled="dialogMode === 'edit'"
-          placeholder="如 auth.sms.enabled"
-        />
+        <AdminInput v-model="form.key" :disabled="dialogMode === 'edit'" placeholder="如 auth.sms.enabled" />
       </AdminFormField>
       <AdminFormField label="类型">
-        <AdminSelect
-          v-model="form.valueType"
-          :options="valueTypeOptions"
-          :disabled="dialogMode === 'edit'"
-        />
+        <AdminSelect v-model="form.valueType" :options="valueTypeOptions" :disabled="dialogMode === 'edit'" />
       </AdminFormField>
       <AdminFormField v-if="form.valueType === 'bool'" label="值">
         <AdminSelect v-model="form.value" :options="boolValueOptions" />
       </AdminFormField>
       <AdminFormField v-else-if="form.key.startsWith('media.')" label="值">
-        <AdminSelect
-          v-model="form.value"
-          :options="storageOptionsForKey(form.key)"
-        />
+        <AdminSelect v-model="form.value" :options="storageOptionsForKey(form.key)" />
       </AdminFormField>
       <AdminFormField v-else label="值">
         <AdminInput v-model="form.value" />

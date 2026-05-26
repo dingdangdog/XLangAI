@@ -6,18 +6,39 @@ export interface ToastItem {
   message: string;
 }
 
-const toasts = ref<ToastItem[]>([]);
-let nextId = 1;
+const timers = new Map<number, ReturnType<typeof setTimeout>>();
 
 export function useToast() {
-  function push(type: ToastType, message: string, durationMs = 3200) {
-    const id = nextId++;
-    toasts.value = [...toasts.value, { id, type, message }];
-    if (import.meta.client) {
-      window.setTimeout(() => {
-        toasts.value = toasts.value.filter((t) => t.id !== id);
-      }, durationMs);
+  const toasts = useState<ToastItem[]>("manager-toasts", () => []);
+  const nextId = useState("manager-toast-next-id", () => 1);
+
+  function clearTimer(id: number) {
+    const timer = timers.get(id);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      timers.delete(id);
     }
+  }
+
+  function push(type: ToastType, message: string, durationMs = 3200) {
+    if (!import.meta.client) return;
+
+    const id = nextId.value++;
+    toasts.value = [...toasts.value, { id, type, message }];
+
+    clearTimer(id);
+    timers.set(
+      id,
+      window.setTimeout(() => {
+        timers.delete(id);
+        toasts.value = toasts.value.filter((t) => t.id !== id);
+      }, durationMs),
+    );
+  }
+
+  function dismiss(id: number) {
+    clearTimer(id);
+    toasts.value = toasts.value.filter((t) => t.id !== id);
   }
 
   return {
@@ -26,8 +47,6 @@ export function useToast() {
     error: (message: string) => push("error", message),
     warning: (message: string) => push("warning", message),
     info: (message: string) => push("info", message),
-    dismiss: (id: number) => {
-      toasts.value = toasts.value.filter((t) => t.id !== id);
-    },
+    dismiss,
   };
 }
