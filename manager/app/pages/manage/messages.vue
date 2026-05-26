@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 const API = "/api/admin/messages";
 const api = useAdminResourceApi(API);
 const toast = useToast();
@@ -25,7 +26,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -84,11 +85,11 @@ function openEdit(row: Record<string, unknown>) {
 
 async function submit() {
   if (!form.conversationId.trim()) {
-    toast.warning("请填写会话 ID");
+    toast.warning(t("validation.fillConversationId"));
     return;
   }
   if (!form.role.trim()) {
-    toast.warning("请选择角色");
+    toast.warning(t("validation.selectRole"));
     return;
   }
   let meta: string | null = null;
@@ -98,7 +99,7 @@ async function submit() {
       JSON.parse(rawMeta);
       meta = rawMeta;
     } catch {
-      toast.error("metadata 须为合法 JSON");
+      toast.error(t("validation.invalidJson", { field: "metadata" }));
       return;
     }
   }
@@ -116,15 +117,15 @@ async function submit() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -133,17 +134,17 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认软删除该消息？",
+    message: t("confirm.softDeleteMessage"),
     danger: true,
-    confirmLabel: "软删",
+    confirmLabel: t("common.softDelete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已标记删除");
+    toast.success(t("toast.markedDeleted"));
     await load();
   } catch (e) {
-    toast.error("操作失败");
+    toast.error(t("toast.operationFailed"));
     console.error(e);
   }
 }
@@ -154,16 +155,16 @@ const roleOptions = [
   { value: "system", label: "system" },
 ];
 
-const aiStatusLabels: Record<string, string> = {
-  success: "AI 成功",
-  quota_exceeded: "额度用尽",
-  failed: "AI 失败",
-};
+const aiStatusLabels = computed<Record<string, string>>(() => ({
+  success: t("status.aiSuccess"),
+  quota_exceeded: t("status.quotaExceeded"),
+  failed: t("status.aiFailed"),
+}));
 
 function aiStatusLabel(row: Record<string, unknown>): string {
   const raw = parseAiInteractionStatus(row);
-  if (!raw) return "—";
-  return aiStatusLabels[raw] ?? raw;
+  if (!raw) return t("common.emDash");
+  return aiStatusLabels.value[raw] ?? raw;
 }
 
 function parseAiInteractionStatus(row: Record<string, unknown>): string {
@@ -191,11 +192,11 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
         description="消息归属会话；角色一般为 user / assistant / system；删除为软删除。"
       >
         <template #actions>
-          <AdminCheckbox v-model="showDeleted" label="含已删除" />
+          <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
           <div class="w-56">
             <AdminInput v-model="filterConversationId" placeholder="按会话 ID 筛选" />
           </div>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -211,19 +212,19 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
           <AdminTh width="96px">时长 ms</AdminTh>
           <AdminTh>删除时间</AdminTh>
           <AdminTh>创建时间</AdminTh>
-          <AdminTh width="140px" align="right">操作</AdminTh>
+          <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd><AdminBadge>{{ row.role }}</AdminBadge></AdminTd>
           <AdminTd>{{ aiStatusLabel(row) }}</AdminTd>
           <AdminTd>{{ row.content }}</AdminTd>
           <AdminTd>{{ row.conversationId }}</AdminTd>
-          <AdminTd>{{ row.audioUrl ?? "—" }}</AdminTd>
-          <AdminTd>{{ row.durationMs ?? "—" }}</AdminTd>
+          <AdminTd>{{ row.audioUrl ?? t("common.emDash") }}</AdminTd>
+          <AdminTd>{{ row.durationMs ?? t("common.emDash") }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.deletedAt) }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.createdAt) }}</AdminTd>
           <AdminTd align="right">
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton
               variant="link"
               class="!text-danger-600"
@@ -243,7 +244,7 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
       :title="dialogMode === 'create' ? '新建消息' : '编辑消息'"
       width="lg"
     >
-      <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+      <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
       </AdminFormField>
       <AdminFormField label="会话 ID" required>
@@ -271,8 +272,8 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
         <AdminInput v-model="form.metadata" type="textarea" :rows="3" class="font-mono text-sm" />
       </AdminFormField>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

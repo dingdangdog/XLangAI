@@ -13,8 +13,24 @@ export default defineNuxtConfig({
     },
   },
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt"],
+  modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt", "@nuxtjs/i18n"],
   css: ["~/assets/css/themes.css", "~/assets/css/base.css"],
+  i18n: {
+    strategy: "prefix_except_default",
+    defaultLocale: "zh",
+    langDir: "locales",
+    locales: [
+      { code: "zh", name: "简体中文", language: "zh-CN", file: "zh.json" },
+      { code: "en", name: "English", language: "en-US", file: "en.json" },
+      { code: "ja", name: "日本語", language: "ja-JP", file: "ja.json" },
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "xlangai_manager_i18n_redirected",
+      redirectOn: "root",
+      fallbackLocale: "zh",
+    },
+  },
   vite: {
     optimizeDeps: {
       include: ["dayjs/plugin/*.js"],

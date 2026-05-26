@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 const API = "/api/admin/system-settings";
 const api = useAdminResourceApi(API);
 const toast = useToast();
@@ -39,7 +40,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -104,22 +105,22 @@ function payload() {
 
 async function submit() {
   if (dialogMode.value === "create" && !form.key.trim()) {
-    toast.warning("请填写 key");
+    toast.warning(t("validation.fillKey"));
     return;
   }
   saving.value = true;
   try {
     if (dialogMode.value === "create") {
       await api.create(payload());
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...payload(), key: form.key });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -130,15 +131,15 @@ async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
     message: `确认删除系统变量 ${String(row.key ?? "")}？`,
     danger: true,
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
     await load();
   } catch (e) {
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
     console.error(e);
   }
 }
@@ -163,7 +164,7 @@ const boolValueOptions = [
         description="登录开关、媒体存储策略等 KEY-VALUE。与 LLM / 对象存储等厂商密钥表无关。"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -175,9 +176,9 @@ const boolValueOptions = [
           <AdminTh>说明</AdminTh>
           <AdminTh>值</AdminTh>
           <AdminTh width="72px">类型</AdminTh>
-          <AdminTh>备注</AdminTh>
-          <AdminTh>更新时间</AdminTh>
-          <AdminTh width="140px" align="right">操作</AdminTh>
+          <AdminTh>{{ $t("common.remark") }}</AdminTh>
+          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
+          <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd nowrap><code class="text-xs">{{ row.key }}</code></AdminTd>
@@ -187,10 +188,10 @@ const boolValueOptions = [
             <span v-else>{{ row.value }}</span>
           </AdminTd>
           <AdminTd>{{ row.valueType }}</AdminTd>
-          <AdminTd>{{ row.description ?? "—" }}</AdminTd>
+          <AdminTd>{{ row.description ?? t("common.emDash") }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
           <AdminTd align="right">
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
             </AdminButton>
@@ -230,12 +231,12 @@ const boolValueOptions = [
       <AdminFormField v-else label="值">
         <AdminInput v-model="form.value" />
       </AdminFormField>
-      <AdminFormField label="备注">
+      <AdminFormField :label="$t('common.remark')">
         <AdminInput v-model="form.description" type="textarea" :rows="2" />
       </AdminFormField>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

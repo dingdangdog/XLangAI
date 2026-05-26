@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 type ServerStoreConfig = {
   enabled: boolean;
   uploadStats: boolean;
@@ -101,7 +102,7 @@ async function load() {
     const state = await $fetch<ServerStoreConfig>("/api/admin/server-store/config");
     applyState(state);
   } catch (error) {
-    toast.error("加载服务器商店配置失败");
+    toast.error(t("toast.loadServerStoreFailed"));
     console.error(error);
   } finally {
     loading.value = false;
@@ -118,7 +119,7 @@ async function save() {
     applyState(state);
     toast.success("已保存服务器商店配置");
   } catch (error) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(error);
   } finally {
     saving.value = false;

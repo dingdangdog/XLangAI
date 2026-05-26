@@ -1,28 +1,62 @@
 <script setup lang="ts">
+const { t } = useI18n();
+const localePath = useLocalePath();
+
 const { data: stats, pending } = await useFetch("/api/admin/stats");
 
 const cards = computed(() => {
   const s = stats.value;
   if (!s) return [];
   return [
-    { label: "用户", value: s.users, to: "/manage/users" },
-    { label: "语言", value: s.languages, to: "/manage/languages" },
-    { label: "LLM 配置", value: s.llmConfigs, to: "/manage/llm-service-configs" },
-    { label: "STT 配置", value: s.sttConfigs, to: "/manage/stt-service-configs" },
-    { label: "TTS 配置", value: s.ttsConfigs, to: "/manage/tts-service-configs" },
-    { label: "语音角色", value: s.voiceRoles, to: "/manage/voice-roles" },
-    { label: "提示词模板", value: s.promptTemplates, to: "/manage/prompt-templates" },
-    { label: "会员等级", value: s.tiers, to: "/manage/membership-tiers" },
-    { label: "会话", value: s.conversations, to: "/manage/conversations" },
-    { label: "消息", value: s.messages, to: "/manage/messages" },
-    { label: "服务器商店", value: "配置", to: "/manage/server-store" },
+    { label: t("pages.dashboard.users"), value: s.users, to: localePath("/manage/users") },
+    { label: t("pages.dashboard.languages"), value: s.languages, to: localePath("/manage/languages") },
+    {
+      label: t("pages.dashboard.llmConfigs"),
+      value: s.llmConfigs,
+      to: localePath("/manage/llm-service-configs"),
+    },
+    {
+      label: t("pages.dashboard.sttConfigs"),
+      value: s.sttConfigs,
+      to: localePath("/manage/stt-service-configs"),
+    },
+    {
+      label: t("pages.dashboard.ttsConfigs"),
+      value: s.ttsConfigs,
+      to: localePath("/manage/tts-service-configs"),
+    },
+    {
+      label: t("pages.dashboard.voiceRoles"),
+      value: s.voiceRoles,
+      to: localePath("/manage/voice-roles"),
+    },
+    {
+      label: t("pages.dashboard.promptTemplates"),
+      value: s.promptTemplates,
+      to: localePath("/manage/prompt-templates"),
+    },
+    { label: t("pages.dashboard.tiers"), value: s.tiers, to: localePath("/manage/membership-tiers") },
+    {
+      label: t("pages.dashboard.conversations"),
+      value: s.conversations,
+      to: localePath("/manage/conversations"),
+    },
+    { label: t("pages.dashboard.messages"), value: s.messages, to: localePath("/manage/messages") },
+    {
+      label: t("pages.dashboard.serverStore"),
+      value: t("common.config"),
+      to: localePath("/manage/server-store"),
+    },
   ];
 });
 </script>
 
 <template>
   <div class="min-h-0 flex-1 overflow-y-auto">
-    <AdminPageHeader title="数据概览" description="各业务实体数量统计，点击卡片进入管理" />
+    <AdminPageHeader
+      :title="$t('pages.dashboard.title')"
+      :description="$t('pages.dashboard.description')"
+    />
     <AdminSkeleton v-if="pending" :rows="6" />
     <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <NuxtLink

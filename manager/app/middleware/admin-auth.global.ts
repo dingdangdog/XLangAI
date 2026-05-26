@@ -1,9 +1,11 @@
-import { buildLoginRedirect, LOGIN_PATH } from "~/utils/authRedirect";
+import { useRouteBaseName } from "#i18n";
 
-/** 除 /login 外，所有页面需运营管理员登录（参考 jimily admin 中间件） */
+/** 除登录页外，所有页面需运营管理员登录 */
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (to.path === LOGIN_PATH) return;
+  const routeBaseName = useRouteBaseName();
+  if (routeBaseName(to) === "login") return;
 
+  const { buildLoginRedirect } = useAuthRedirect();
   const userStore = useUserStore();
   if (userStore.user?.isManagerAdmin) return;
 

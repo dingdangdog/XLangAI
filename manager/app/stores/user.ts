@@ -12,7 +12,9 @@ export type ManagerAuthUser = {
 export const useUserStore = defineStore("manager-user", () => {
   const user = ref<ManagerAuthUser | null>(null);
 
-  const displayName = computed(() => user.value?.nickname?.trim() || user.value?.username || "管理员");
+  const displayName = computed(
+    () => user.value?.nickname?.trim() || user.value?.username || "",
+  );
 
   function setUser(info: ManagerAuthUser | null) {
     user.value = info;

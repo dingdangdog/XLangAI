@@ -2,6 +2,8 @@
 import { computed, ref, watch } from "vue";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/vue/24/outline";
 
+const { t } = useI18n();
+
 const model = defineModel<string | number | null>({ required: true });
 
 const props = withDefaults(
@@ -64,8 +66,8 @@ const fieldClass = computed(() => {
     <button
       type="button"
       class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:bg-surface-muted hover:text-foreground"
-      :aria-label="revealed ? '隐藏' : '显示'"
-      :title="revealed ? '隐藏密钥' : '显示密钥'"
+      :aria-label="revealed ? t('security.hide') : t('security.show')"
+      :title="revealed ? t('security.hideKey') : t('security.showKey')"
       tabindex="-1"
       @click="revealed = !revealed"
     >

@@ -12,15 +12,17 @@ const options = ref<ConfirmOptions>({ message: "" });
 let resolver: ((value: boolean) => void) | null = null;
 
 export function useConfirm() {
+  const { t } = useI18n();
+
   async function confirm(opts: ConfirmOptions): Promise<boolean> {
     if (resolver) {
       resolver(false);
     }
     options.value = {
-      title: opts.title ?? "确认",
+      title: opts.title ?? t("confirm.defaultTitle"),
       message: opts.message,
-      confirmLabel: opts.confirmLabel ?? "确定",
-      cancelLabel: opts.cancelLabel ?? "取消",
+      confirmLabel: opts.confirmLabel ?? t("confirm.ok"),
+      cancelLabel: opts.cancelLabel ?? t("common.cancel"),
       danger: opts.danger ?? false,
     };
     visible.value = true;

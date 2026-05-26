@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 
 const API = "/api/admin/object-storage-configs";
 
@@ -64,7 +65,7 @@ async function load() {
 
   } catch (e) {
 
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
 
     console.error(e);
 
@@ -236,7 +237,7 @@ async function submit() {
 
   if (!form.name.trim()) {
 
-    toast.warning("请填写名称");
+    toast.warning(t("validation.fillName"));
 
     return;
 
@@ -252,7 +253,7 @@ async function submit() {
 
     } catch {
 
-      toast.error("扩展配置须为合法 JSON");
+      toast.error(t("validation.invalidJson", { field: t("fields.extJson") }));
 
       return;
 
@@ -308,13 +309,13 @@ async function submit() {
 
       await api.create(body);
 
-      toast.success("已创建");
+      toast.success(t("toast.created"));
 
     } else {
 
       await api.update(form.id, { id: form.id, ...body });
 
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
 
     }
 
@@ -324,7 +325,7 @@ async function submit() {
 
   } catch (e) {
 
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
 
     console.error(e);
 
@@ -346,7 +347,7 @@ async function removeRow(row: Record<string, unknown>) {
 
     danger: true,
 
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
 
   });
 
@@ -356,13 +357,13 @@ async function removeRow(row: Record<string, unknown>) {
 
     await api.remove(String(row.id));
 
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
 
     await load();
 
   } catch (e) {
 
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
 
     console.error(e);
 
@@ -415,7 +416,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
         description="全局仅一条 active；Go 只读启用中的那条，不按编码查找。"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
@@ -430,7 +431,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
         <template #head>
 
-          <AdminTh>名称</AdminTh>
+          <AdminTh>{{ $t("common.name") }}</AdminTh>
 
           <AdminTh width="140px">Provider</AdminTh>
 
@@ -438,13 +439,13 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
           <AdminTh>公网 URL</AdminTh>
 
-          <AdminTh width="88px">状态</AdminTh>
+          <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
 
-          <AdminTh width="72px">排序</AdminTh>
+          <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
 
-          <AdminTh>更新时间</AdminTh>
+          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
 
-          <AdminTh width="200px" align="right">操作</AdminTh>
+          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
 
         </template>
 
@@ -481,7 +482,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
             >
               启用
             </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
             </AdminButton>
@@ -507,13 +508,13 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
     >
 
-      <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+      <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
 
         <AdminInput v-model="form.id" disabled />
 
       </AdminFormField>
 
-      <AdminFormField label="名称" required>
+      <AdminFormField :label="$t('common.name')" required>
 
         <AdminInput v-model="form.name" />
 
@@ -611,19 +612,19 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
       </AdminFormField>
 
-      <AdminFormField label="状态">
+      <AdminFormField :label="$t('common.status')">
 
         <AdminSelect v-model="form.status" :options="statusOptions" />
 
       </AdminFormField>
 
-      <AdminFormField label="排序">
+      <AdminFormField :label="$t('common.sort')">
 
         <AdminInput v-model="form.sortOrder" type="number" />
 
       </AdminFormField>
 
-      <AdminFormField label="备注">
+      <AdminFormField :label="$t('common.remark')">
 
         <AdminInput v-model="form.remark" type="textarea" :rows="2" />
 
@@ -631,9 +632,9 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
       <template #footer>
 
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
 
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
 
       </template>
 

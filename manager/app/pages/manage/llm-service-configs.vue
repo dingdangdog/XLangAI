@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import {
-  serviceUsageMonthLine,
-  serviceUsageTodayLine,
-} from "~/utils/usageDisplay";
+const { t } = useI18n();
+
+const { serviceUsageMonthLine, serviceUsageTodayLine } = useUsageDisplay();
 
 const API = "/api/admin/llm-service-configs";
 const api = useAdminResourceApi(API);
@@ -62,7 +61,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -167,7 +166,7 @@ async function submit() {
     try {
       JSON.parse(configStr);
     } catch {
-      toast.error("扩展配置须为合法 JSON");
+      toast.error(t("validation.invalidJson", { field: t("fields.extJson") }));
       return;
     }
   } else {
@@ -189,15 +188,15 @@ async function submit() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -208,15 +207,15 @@ async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
     message: "确认删除该 LLM 配置？",
     danger: true,
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
     await load();
   } catch (e) {
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
     console.error(e);
   }
 }
@@ -244,7 +243,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
         description="数据表 sys_llm_service_configs。列表「今日/本月用量」为成功调用次数与 LLM Token 合计（UTC 自然日）。"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
@@ -267,16 +266,16 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh>编码</AdminTh>
-          <AdminTh>名称</AdminTh>
+          <AdminTh>{{ $t("common.name") }}</AdminTh>
           <AdminTh width="140px">协议</AdminTh>
           <AdminTh>模型</AdminTh>
           <AdminTh>API Key</AdminTh>
-          <AdminTh width="88px">状态</AdminTh>
+          <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
           <AdminTh width="120px">今日用量</AdminTh>
           <AdminTh width="120px">本月用量</AdminTh>
-          <AdminTh width="72px">排序</AdminTh>
-          <AdminTh>更新时间</AdminTh>
-          <AdminTh width="200px" align="right">操作</AdminTh>
+          <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
+          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
+          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd nowrap>{{ row.code }}</AdminTd>
@@ -302,7 +301,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
             >
               启用
             </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
             </AdminButton>
@@ -317,13 +316,13 @@ const { activateRow, activatingId } = useActivateConfigRow({
       :title="dialogMode === 'create' ? '新建 LLM 配置' : '编辑 LLM 配置'"
       width="lg"
     >
-      <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+      <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
       </AdminFormField>
       <AdminFormField label="编码" required>
         <AdminInput v-model="form.code" :disabled="dialogMode === 'edit'" placeholder="唯一标识" />
       </AdminFormField>
-      <AdminFormField label="名称" required>
+      <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
       <AdminFormField label="协议">
@@ -353,18 +352,18 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminFormField label="扩展 JSON" :hint="CONFIG_HINTS[form.protocol]">
         <AdminInput v-model="form.config" type="textarea" :rows="4" class="font-mono text-sm" />
       </AdminFormField>
-      <AdminFormField label="状态">
+      <AdminFormField :label="$t('common.status')">
         <AdminSelect v-model="form.status" :options="statusOptions" />
       </AdminFormField>
-      <AdminFormField label="排序">
+      <AdminFormField :label="$t('common.sort')">
         <AdminInput v-model="form.sortOrder" type="number" />
       </AdminFormField>
-      <AdminFormField label="备注">
+      <AdminFormField :label="$t('common.remark')">
         <AdminInput v-model="form.remark" type="textarea" :rows="2" />
       </AdminFormField>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

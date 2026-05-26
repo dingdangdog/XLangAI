@@ -30,7 +30,7 @@
 </p>
 
 <p align="center">
-  <sub>📱 iOS client · $2 one-time purchase &nbsp;|&nbsp; 🏪 Official server store &nbsp;|&nbsp; 🔧 Open-source backend (no official production hosting)</sub>
+  <sub>📱 iOS client &nbsp;|&nbsp; 🏪 Official server store &nbsp;|&nbsp; 🔧 Open-source backend (This Repository)</sub>
 </p>
 
 <p align="center">

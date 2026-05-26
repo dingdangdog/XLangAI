@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import {
-  serviceUsageMonthLine,
-  serviceUsageTodayLine,
-} from "~/utils/usageDisplay";
+const { t } = useI18n();
+
+const { serviceUsageMonthLine, serviceUsageTodayLine } = useUsageDisplay();
 
 const API = "/api/admin/tts-service-configs";
 const api = useAdminResourceApi(API);
@@ -77,7 +76,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -195,7 +194,7 @@ function voiceHint(): string {
 
 async function submitForm() {
   if (!form.code.trim() || !form.name.trim()) {
-    toast.warning("请填写编码与名称");
+    toast.warning(t("validation.fillCodeAndName"));
     return;
   }
   if (regionRequired() && !form.region.trim()) {
@@ -207,7 +206,7 @@ async function submitForm() {
     try {
       JSON.parse(configStr);
     } catch {
-      toast.error("扩展配置须为合法 JSON");
+      toast.error(t("validation.invalidJson", { field: t("fields.extJson") }));
       return;
     }
   } else {
@@ -230,15 +229,15 @@ async function submitForm() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -249,15 +248,15 @@ async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
     message: "确认删除该 TTS 配置？语音角色若仍引用该 ID 可能导致合成失败。",
     danger: true,
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
     await load();
   } catch (e) {
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
     console.error(e);
   }
 }
@@ -285,7 +284,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
         description="支持全球主流语音合成厂商。列表「今日/本月用量」为成功合成次数与输出文本字符数（UTC 自然日）。"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
@@ -301,23 +300,23 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh>编码</AdminTh>
-          <AdminTh>名称</AdminTh>
+          <AdminTh>{{ $t("common.name") }}</AdminTh>
           <AdminTh width="160px">Provider</AdminTh>
           <AdminTh width="96px">区域</AdminTh>
           <AdminTh>模型</AdminTh>
           <AdminTh>API Key</AdminTh>
-          <AdminTh width="80px">状态</AdminTh>
+          <AdminTh width="80px">{{ $t("common.status") }}</AdminTh>
           <AdminTh width="120px">今日用量</AdminTh>
           <AdminTh width="120px">本月用量</AdminTh>
-          <AdminTh width="64px">排序</AdminTh>
-          <AdminTh>更新时间</AdminTh>
-          <AdminTh width="200px" align="right">操作</AdminTh>
+          <AdminTh width="64px">{{ $t("common.sort") }}</AdminTh>
+          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
+          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd nowrap>{{ row.code }}</AdminTd>
           <AdminTd>{{ row.name }}</AdminTd>
           <AdminTd>{{ row.provider }}</AdminTd>
-          <AdminTd>{{ row.region ?? "—" }}</AdminTd>
+          <AdminTd>{{ row.region ?? t("common.emDash") }}</AdminTd>
           <AdminTd>{{ row.modelCode }}</AdminTd>
           <AdminTd><AdminMaskedKey :value="row.apiKey as string | null" /></AdminTd>
           <AdminTd><AdminBadge>{{ row.status }}</AdminBadge></AdminTd>
@@ -338,7 +337,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
             >
               启用
             </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
             </AdminButton>
@@ -353,7 +352,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
       :title="dialogMode === 'create' ? '新建 TTS 配置' : '编辑 TTS 配置'"
       width="lg"
     >
-      <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+      <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
       </AdminFormField>
       <AdminFormField label="编码" required>
@@ -363,7 +362,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
           placeholder="唯一，如 tencent_zh_female"
         />
       </AdminFormField>
-      <AdminFormField label="名称" required>
+      <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
       <AdminFormField label="Provider" required>
@@ -387,18 +386,18 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminFormField label="音色说明">
         <p class="text-sm text-gray-500">{{ voiceHint() }}</p>
       </AdminFormField>
-      <AdminFormField label="状态">
+      <AdminFormField :label="$t('common.status')">
         <AdminSelect v-model="form.status" :options="statusOptions" />
       </AdminFormField>
-      <AdminFormField label="排序">
+      <AdminFormField :label="$t('common.sort')">
         <AdminInput v-model="form.sortOrder" type="number" />
       </AdminFormField>
-      <AdminFormField label="备注">
+      <AdminFormField :label="$t('common.remark')">
         <AdminInput v-model="form.remark" type="textarea" :rows="2" />
       </AdminFormField>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submitForm">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submitForm">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

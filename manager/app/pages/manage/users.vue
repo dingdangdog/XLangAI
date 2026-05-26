@@ -1,9 +1,8 @@
 <script setup lang="ts">
+const { t } = useI18n();
 import UserUsagePanel from "~/components/admin/UserUsagePanel.vue";
-import {
-  userUsageDetailLine,
-  userUsagePrimaryLine,
-} from "~/utils/usageDisplay";
+
+const { userUsageDetailLine, userUsagePrimaryLine } = useUsageDisplay();
 
 const API = "/api/admin/users";
 const api = useAdminResourceApi(API);
@@ -24,11 +23,11 @@ const tierOptions = ref<Opt[]>([]);
 const langOptions = ref<Opt[]>([]);
 const optionsLoading = ref(false);
 
-const STATUS_LABELS: Record<string, string> = {
-  active: "正常",
-  inactive: "已禁用",
-  banned: "已封禁",
-};
+const STATUS_LABELS = computed<Record<string, string>>(() => ({
+  active: t("status.active"),
+  inactive: t("status.inactive"),
+  banned: t("status.banned"),
+}));
 
 const STATUS_BADGE: Record<string, "success" | "warning" | "danger" | "muted"> = {
   active: "success",
@@ -38,7 +37,7 @@ const STATUS_BADGE: Record<string, "success" | "warning" | "danger" | "muted"> =
 
 function statusLabel(status: unknown): string {
   const s = String(status ?? "active");
-  return STATUS_LABELS[s] ?? s;
+  return STATUS_LABELS.value[s] ?? s;
 }
 
 function statusBadgeVariant(status: unknown): "success" | "warning" | "danger" | "muted" {
@@ -66,7 +65,7 @@ async function loadRefs() {
       label: `${r.code} · ${r.name}`,
     }));
   } catch (e) {
-    toast.error("加载下拉数据失败");
+    toast.error(t("toast.loadRefsFailed"));
     console.error(e);
   } finally {
     optionsLoading.value = false;
@@ -85,7 +84,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -113,14 +112,22 @@ function tierSubline(row: Record<string, unknown>): string {
   // if (code) parts.push(code);
   const daily = row.tierDailyLimit;
   const monthly = row.tierMonthlyLimit;
-  if (daily != null && Number(daily) > 0) parts.push(`日限额 ${daily}`);
-  if (monthly != null && Number(monthly) > 0) parts.push(`月限额 ${monthly}`);
+  if (daily != null && Number(daily) > 0) {
+    parts.push(t("usage.dailyLimit", { value: daily }));
+  }
+  if (monthly != null && Number(monthly) > 0) {
+    parts.push(t("usage.monthlyLimit", { value: monthly }));
+  }
   if (row.subscriptionExpiresAt) {
-    parts.push(`订阅至 ${formatDate(row.subscriptionExpiresAt)}`);
+    parts.push(
+      t("usage.subscriptionUntil", { date: formatDate(row.subscriptionExpiresAt) }),
+    );
   }
   const bal = row.tokenBalance;
-  if (bal != null && String(bal) !== "0") parts.push(`Token 余额 ${bal}`);
-  return parts.join(" · ") || "—";
+  if (bal != null && String(bal) !== "0") {
+    parts.push(t("usage.tokenBalance", { value: bal }));
+  }
+  return parts.join(t("usage.separator")) || t("common.emDash");
 }
 
 const usageDialogVisible = ref(false);
@@ -202,16 +209,16 @@ async function submit() {
   const phone = form.phone.trim();
   const email = form.email.trim();
   if (!phone && !email) {
-    toast.error("须填写手机或邮箱其一");
+    toast.error(t("validation.phoneOrEmail"));
     return;
   }
   if (dialogMode.value === "create") {
     if (!form.password || form.password.length < 6) {
-      toast.error("新建用户须设置至少 6 位密码");
+      toast.error(t("validation.newUserPassword"));
       return;
     }
   } else if (form.password && form.password.length < 6) {
-    toast.error("新密码至少 6 位");
+    toast.error(t("validation.passwordMinEdit"));
     return;
   }
 
@@ -220,7 +227,7 @@ async function submit() {
     try {
       JSON.parse(settingsStr);
     } catch {
-      toast.error("settings 须为合法 JSON");
+      toast.error(t("validation.invalidJson", { field: "settings" }));
       return;
     }
   } else {
@@ -246,15 +253,15 @@ async function submit() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建，用户可使用手机/邮箱 + 密码登录");
+      toast.success(t("toast.userCreated"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success(form.password ? "已保存（含新密码）" : "已保存");
+      toast.success(form.password ? t("toast.savedWithPassword") : t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -265,7 +272,10 @@ async function setUserStatus(row: Record<string, unknown>, status: string, actio
   const id = String(row.id);
   if (row.deletedAt) return;
   const ok = await confirm({
-    message: `确认将用户设为「${STATUS_LABELS[status] ?? status}」？${status !== "active" ? "该用户将无法再登录 App。" : ""}`,
+    message: t("confirm.setUserStatus", {
+      status: STATUS_LABELS.value[status] ?? status,
+      extra: status !== "active" ? t("confirm.cannotLoginAfter") : "",
+    }),
     danger: status !== "active",
     confirmLabel: actionLabel,
   });
@@ -273,10 +283,10 @@ async function setUserStatus(row: Record<string, unknown>, status: string, actio
   statusBusyId.value = id;
   try {
     await api.update(id, { status });
-    toast.success(`已${actionLabel}`);
+    toast.success(t("toast.statusSet", { action: actionLabel }));
     await load();
   } catch (e) {
-    toast.error("操作失败");
+    toast.error(t("toast.operationFailed"));
     console.error(e);
   } finally {
     statusBusyId.value = null;
@@ -285,34 +295,34 @@ async function setUserStatus(row: Record<string, unknown>, status: string, actio
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认软删除该用户？删除后无法登录，可在「含已删除」中查看。",
+    message: t("confirm.softDeleteUser"),
     danger: true,
-    confirmLabel: "软删",
+    confirmLabel: t("common.softDelete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已标记删除");
+    toast.success(t("toast.markedDeleted"));
     await load();
   } catch (e) {
-    toast.error("操作失败");
+    toast.error(t("toast.operationFailed"));
     console.error(e);
   }
 }
 
-const statusOptions = [
-  { value: "active", label: "正常（可登录）" },
-  { value: "inactive", label: "已禁用（不可登录）" },
-  { value: "banned", label: "已封禁（不可登录）" },
-];
+const statusOptions = computed(() => [
+  { value: "active", label: t("status.activeLogin") },
+  { value: "inactive", label: t("status.inactiveLogin") },
+  { value: "banned", label: t("status.bannedLogin") },
+]);
 
 const tierSelectOptions = computed(() => [
-  { value: "", label: "（可选）" },
-  ...tierOptions.value.map((t) => ({ value: t.id, label: t.label })),
+  { value: "", label: t("common.optional") },
+  ...tierOptions.value.map((tier) => ({ value: tier.id, label: tier.label })),
 ]);
 
 const langSelectOptions = computed(() => [
-  { value: "", label: "（可选）" },
+  { value: "", label: t("common.optional") },
   ...langOptions.value.map((l) => ({ value: l.id, label: l.label })),
 ]);
 </script>
@@ -320,11 +330,13 @@ const langSelectOptions = computed(() => [
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader title="用户账号"
-        description="账号与会员等级、今日/本月用量（对话轮次、LLM Token、TTS/翻译/STT）；可在此新建账号、重置密码、管理按日用量记录，以及禁用或封禁账号。">
+      <AdminPageHeader
+        :title="$t('pages.users.title')"
+        :description="$t('pages.users.description')"
+      >
         <template #actions>
-          <AdminCheckbox v-model="showDeleted" label="含已删除" />
-          <AdminButton variant="primary" @click="openCreate">新建账号</AdminButton>
+          <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
+          <AdminButton variant="primary" @click="openCreate">{{ $t("pages.users.createAccount") }}</AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -332,24 +344,24 @@ const langSelectOptions = computed(() => [
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>手机</AdminTh>
-          <AdminTh>邮箱</AdminTh>
-          <AdminTh>昵称</AdminTh>
-          <AdminTh width="72px">密码</AdminTh>
-          <AdminTh width="160px">会员</AdminTh>
-          <AdminTh width="140px">今日用量</AdminTh>
-          <AdminTh width="140px">本月用量</AdminTh>
-          <AdminTh width="96px">状态</AdminTh>
-          <AdminTh>最近登录</AdminTh>
-          <AdminTh width="260px" align="right">操作</AdminTh>
+          <AdminTh>{{ $t("fields.phone") }}</AdminTh>
+          <AdminTh>{{ $t("fields.email") }}</AdminTh>
+          <AdminTh>{{ $t("fields.nickname") }}</AdminTh>
+          <AdminTh width="72px">{{ $t("fields.password") }}</AdminTh>
+          <AdminTh width="160px">{{ $t("fields.tier") }}</AdminTh>
+          <AdminTh width="140px">{{ $t("fields.todayUsageCol") }}</AdminTh>
+          <AdminTh width="140px">{{ $t("fields.monthUsageCol") }}</AdminTh>
+          <AdminTh width="96px">{{ $t("common.status") }}</AdminTh>
+          <AdminTh>{{ $t("fields.lastLogin") }}</AdminTh>
+          <AdminTh width="260px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
-          <AdminTd>{{ row.phone ?? "—" }}</AdminTd>
-          <AdminTd>{{ row.email ?? "—" }}</AdminTd>
-          <AdminTd>{{ row.nickname ?? "—" }}</AdminTd>
+          <AdminTd>{{ row.phone ?? t("common.emDash") }}</AdminTd>
+          <AdminTd>{{ row.email ?? t("common.emDash") }}</AdminTd>
+          <AdminTd>{{ row.nickname ?? t("common.emDash") }}</AdminTd>
           <AdminTd>
             <AdminBadge :variant="row.hasPassword ? 'success' : 'muted'">
-              {{ row.hasPassword ? "已设" : "无" }}
+              {{ row.hasPassword ? $t("common.set") : $t("common.unset") }}
             </AdminBadge>
           </AdminTd>
           <AdminTd>
@@ -359,7 +371,7 @@ const langSelectOptions = computed(() => [
               </AdminBadge>
               <span class="text-xs text-muted leading-snug">{{ tierSubline(row) }}</span>
             </div>
-            <span v-else class="text-sm text-muted">未分配</span>
+            <span v-else class="text-sm text-muted">{{ $t("common.notAssigned") }}</span>
           </AdminTd>
           <AdminTd class="text-sm tabular-nums">
             <div>{{ userUsagePrimaryLine(row, "today") }}</div>
@@ -380,24 +392,24 @@ const langSelectOptions = computed(() => [
           </AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.lastLoginAt) }}</AdminTd>
           <AdminTd align="right">
-            <AdminButton variant="link" @click="openUsage(row)">用量</AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openUsage(row)">{{ $t("common.usage") }}</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <template v-if="!row.deletedAt">
               <AdminButton v-if="row.status !== 'inactive'" variant="link" :disabled="statusBusyId === String(row.id)"
-                @click="setUserStatus(row, 'inactive', '禁用')">
-                禁用
+                @click="setUserStatus(row, 'inactive', t('pages.users.disable'))">
+                {{ $t("pages.users.disable") }}
               </AdminButton>
               <AdminButton v-if="row.status !== 'banned'" variant="link" class="!text-danger-600"
-                :disabled="statusBusyId === String(row.id)" @click="setUserStatus(row, 'banned', '封禁')">
-                封禁
+                :disabled="statusBusyId === String(row.id)" @click="setUserStatus(row, 'banned', t('pages.users.ban'))">
+                {{ $t("pages.users.ban") }}
               </AdminButton>
               <AdminButton v-if="row.status !== 'active'" variant="link" :disabled="statusBusyId === String(row.id)"
-                @click="setUserStatus(row, 'active', '解禁')">
-                解禁
+                @click="setUserStatus(row, 'active', t('pages.users.unban'))">
+                {{ $t("pages.users.unban") }}
               </AdminButton>
             </template>
             <AdminButton variant="link" class="!text-danger-600" :disabled="!!row.deletedAt" @click="removeRow(row)">
-              软删
+              {{ $t("common.softDelete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -405,54 +417,78 @@ const langSelectOptions = computed(() => [
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
 
-    <AdminDialog v-model="dialogVisible" :title="dialogMode === 'create' ? '新建账号' : '编辑账号'" width="lg">
+    <AdminDialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'create' ? $t('pages.users.createDialog') : $t('pages.users.editDialog')"
+      width="lg"
+    >
       <AdminSkeleton v-if="optionsLoading" :rows="5" />
       <template v-else>
-        <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+        <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="form.id" disabled />
         </AdminFormField>
-        <AdminFormField label="手机" hint="手机与邮箱至少填一项">
+        <AdminFormField :label="$t('fields.phone')" :hint="$t('pages.users.phoneEmailHint')">
           <AdminInput v-model="form.phone" />
         </AdminFormField>
-        <AdminFormField label="邮箱">
+        <AdminFormField :label="$t('fields.email')">
           <AdminInput v-model="form.email" type="email" />
         </AdminFormField>
-        <AdminFormField label="昵称">
+        <AdminFormField :label="$t('fields.nickname')">
           <AdminInput v-model="form.nickname" />
         </AdminFormField>
-        <AdminFormField :label="dialogMode === 'create' ? '登录密码' : '重置密码'" :hint="dialogMode === 'create'
-            ? '至少 6 位，用于 App 密码登录'
-            : '留空则不修改；填写则覆盖为新密码'
-          ">
-          <AdminInput v-model="form.password" type="password" autocomplete="new-password"
-            :placeholder="dialogMode === 'create' ? '必填' : '留空不修改'" />
+        <AdminFormField
+          :label="dialogMode === 'create' ? $t('fields.loginPassword') : $t('fields.resetPassword')"
+          :hint="
+            dialogMode === 'create'
+              ? $t('pages.users.passwordHintCreate')
+              : $t('pages.users.passwordHintEdit')
+          "
+        >
+          <AdminInput
+            v-model="form.password"
+            type="password"
+            autocomplete="new-password"
+            :placeholder="
+              dialogMode === 'create'
+                ? $t('pages.users.passwordPlaceholderCreate')
+                : $t('pages.users.passwordPlaceholderEdit')
+            "
+          />
         </AdminFormField>
-        <AdminFormField label="头像 URL">
+        <AdminFormField :label="$t('fields.avatarUrl')">
           <AdminInput v-model="form.avatarUrl" />
         </AdminFormField>
-        <AdminFormField label="会员等级">
+        <AdminFormField :label="$t('fields.tierLevel')">
           <AdminSelect v-model="form.tierId" :options="tierSelectOptions" />
         </AdminFormField>
-        <AdminFormField label="母语" hint="用于客户端语音转文字双语辅助识别；与练习目标语言无关">
+        <AdminFormField :label="$t('fields.nativeLanguage')" :hint="$t('pages.users.nativeLanguageHint')">
           <AdminSelect v-model="form.languageId" :options="langSelectOptions" />
         </AdminFormField>
         <AdminFormField label="settings">
           <AdminInput v-model="form.settings" type="textarea" :rows="4" class="font-mono text-sm" />
         </AdminFormField>
-        <AdminFormField label="账号状态">
+        <AdminFormField :label="$t('fields.accountStatus')">
           <AdminSelect v-model="form.status" :options="statusOptions" />
         </AdminFormField>
-        <AdminFormField label="备注">
+        <AdminFormField :label="$t('common.remark')">
           <AdminInput v-model="form.remark" type="textarea" :rows="2" />
         </AdminFormField>
       </template>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
 
-    <AdminDialog v-model="usageDialogVisible" :title="usageUser ? `用量明细 · ${usageUser.label}` : '用量明细'" width="lg">
+    <AdminDialog
+      v-model="usageDialogVisible"
+      :title="
+        usageUser
+          ? $t('pages.users.usageDialogWithUser', { label: usageUser.label })
+          : $t('pages.users.usageDialog')
+      "
+      width="lg"
+    >
       <UserUsagePanel v-if="usageUser" :user-id="usageUser.id" :user-label="usageUser.label" @changed="load" />
     </AdminDialog>
   </AdminListPage>

@@ -10,7 +10,7 @@
   <img alt="go" src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" />
   <img alt="nuxt" src="https://img.shields.io/badge/Nuxt-4-00DC82?logo=nuxt.js&logoColor=white" />
   <img alt="postgresql" src="https://img.shields.io/badge/PostgreSQL-15+-4169E1?logo=postgresql&logoColor=white" />
-  <img alt="docker" src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" />
+  <img alt="docker" src="https://img.shields.io/docker/pulls/dingdangdog/xlangai.svg" />
 </p>
 
 <p align="center">
@@ -29,7 +29,7 @@
 </p>
 
 <p align="center">
-  <sub>📱 iOS 客户端 · 一次性 $2 买断 &nbsp;|&nbsp; 🏪 官网服务器商店 &nbsp;|&nbsp; 🔧 开源服务端（官方不提供正式托管）</sub>
+  <sub>📱 iOS 客户端 &nbsp;|&nbsp; 🏪 官网服务器商店 &nbsp;|&nbsp; 🔧 开源服务端（本仓库）</sub>
 </p>
 
 <p align="center">

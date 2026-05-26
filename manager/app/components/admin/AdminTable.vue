@@ -25,7 +25,7 @@ defineProps<{
       </tbody>
     </table>
     <div v-if="!$slots.default && !loading" class="py-12 text-center text-sm text-muted">
-      暂无数据
+      {{ $t("table.noData") }}
     </div>
   </div>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 const API = "/api/admin/conversations";
 const api = useAdminResourceApi(API);
 const toast = useToast();
@@ -54,7 +55,7 @@ async function loadRefs() {
       label: `${r.code} · ${r.name}`,
     }));
   } catch (e) {
-    toast.error("加载下拉数据失败");
+    toast.error(t("toast.loadRefsFailed"));
     console.error(e);
   } finally {
     optionsLoading.value = false;
@@ -74,7 +75,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -135,11 +136,11 @@ function openEdit(row: Record<string, unknown>) {
 
 async function submit() {
   if (!form.userId.trim()) {
-    toast.warning("请填写用户 ID");
+    toast.warning(t("validation.fillUserId"));
     return;
   }
   if (!form.languageId.trim()) {
-    toast.warning("请选择语言");
+    toast.warning(t("validation.selectTargetLanguage"));
     return;
   }
   const body = {
@@ -156,15 +157,15 @@ async function submit() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -173,17 +174,17 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认软删除该会话？",
+    message: t("confirm.softDeleteConversation"),
     danger: true,
-    confirmLabel: "软删",
+    confirmLabel: t("common.softDelete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已标记删除");
+    toast.success(t("toast.markedDeleted"));
     await load();
   } catch (e) {
-    toast.error("操作失败");
+    toast.error(t("toast.operationFailed"));
     console.error(e);
   }
 }
@@ -213,11 +214,11 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
         description="会话绑定用户与语言，可选语音角色、LLM 配置与提示词模板；删除为软删除。"
       >
         <template #actions>
-          <AdminCheckbox v-model="showDeleted" label="含已删除" />
+          <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
           <div class="w-56">
             <AdminInput v-model="filterUserId" placeholder="按用户 ID 筛选" />
           </div>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -229,21 +230,21 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
           <AdminTh>用户 ID</AdminTh>
           <AdminTh>语言 ID</AdminTh>
           <AdminTh>语音角色</AdminTh>
-          <AdminTh width="88px">状态</AdminTh>
+          <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
           <AdminTh>删除时间</AdminTh>
-          <AdminTh>更新时间</AdminTh>
-          <AdminTh width="140px" align="right">操作</AdminTh>
+          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
+          <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd>{{ row.title }}</AdminTd>
           <AdminTd>{{ row.userId }}</AdminTd>
           <AdminTd>{{ row.languageId }}</AdminTd>
-          <AdminTd>{{ row.voiceRoleId ?? "—" }}</AdminTd>
+          <AdminTd>{{ row.voiceRoleId ?? t("common.emDash") }}</AdminTd>
           <AdminTd><AdminBadge>{{ row.status }}</AdminBadge></AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.deletedAt) }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
           <AdminTd align="right">
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton
               variant="link"
               class="!text-danger-600"
@@ -265,7 +266,7 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
     >
       <AdminSkeleton v-if="optionsLoading" :rows="6" />
       <template v-else>
-        <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+        <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="form.id" disabled />
         </AdminFormField>
         <AdminFormField label="用户 ID" required>
@@ -286,16 +287,16 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
         <AdminFormField label="标题">
           <AdminInput v-model="form.title" />
         </AdminFormField>
-        <AdminFormField label="状态">
+        <AdminFormField :label="$t('common.status')">
           <AdminSelect v-model="form.status" :options="conversationStatusOptions" />
         </AdminFormField>
-        <AdminFormField label="备注">
+        <AdminFormField :label="$t('common.remark')">
           <AdminInput v-model="form.remark" type="textarea" :rows="2" />
         </AdminFormField>
       </template>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

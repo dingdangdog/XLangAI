@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 import { stripVoiceRoleVirtualFields } from "~/utils/voiceRoleUi";
 
 const API = "/api/admin/voice-roles";
@@ -26,7 +27,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -60,7 +61,7 @@ async function loadOptions() {
         provider: String(r.provider ?? ""),
       }));
   } catch (e) {
-    toast.error("加载下拉选项失败");
+    toast.error(t("toast.loadOptionsFailed"));
     console.error(e);
   } finally {
     optionsLoading.value = false;
@@ -187,7 +188,7 @@ function buildPayload(): Record<string, unknown> {
 
 async function submitVoice() {
   if (!voiceForm.languageId) {
-    toast.warning("请选择语言");
+    toast.warning(t("validation.selectTargetLanguage"));
     return;
   }
   if (!voiceForm.ttsServiceConfigId) {
@@ -207,18 +208,18 @@ async function submitVoice() {
   try {
     if (dialogMode.value === "create") {
       await $fetch("/api/admin/voice-roles", { method: "POST", body: payload });
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await $fetch(`/api/admin/voice-roles/${voiceForm.id}`, {
         method: "PUT",
         body: { id: voiceForm.id, ...payload },
       });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -229,15 +230,15 @@ async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
     message: "确认删除该语音角色？",
     danger: true,
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
   });
   if (!ok) return;
   try {
     await $fetch(`/api/admin/voice-roles/${row.id as string}`, { method: "DELETE" });
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
     await load();
   } catch (e) {
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
     console.error(e);
   }
 }
@@ -345,7 +346,7 @@ async function generatePreview(row: Record<string, unknown>) {
     <template #header>
       <AdminPageHeader title="语音角色">
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
@@ -358,7 +359,7 @@ async function generatePreview(row: Record<string, unknown>) {
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh v-for="col in tableColumns" :key="col.prop">{{ col.label }}</AdminTh>
-          <AdminTh width="200px" align="right">操作</AdminTh>
+          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd v-for="col in tableColumns" :key="col.prop">
@@ -386,7 +387,7 @@ async function generatePreview(row: Record<string, unknown>) {
             <AdminButton variant="link" :loading="previewGeneratingId === String(row.id)" @click="generatePreview(row)">
               生成试听
             </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
             </AdminButton>
@@ -418,13 +419,13 @@ async function generatePreview(row: Record<string, unknown>) {
         <AdminFormField label="性别">
           <AdminSelect v-model="voiceForm.gender" :options="genderOptions" placeholder="可选" />
         </AdminFormField>
-        <AdminFormField label="排序">
+        <AdminFormField :label="$t('common.sort')">
           <AdminInput v-model="voiceForm.sortOrder" type="number" />
         </AdminFormField>
-        <AdminFormField label="状态">
+        <AdminFormField :label="$t('common.status')">
           <AdminSelect v-model="voiceForm.status" :options="statusOptions" />
         </AdminFormField>
-        <AdminFormField label="备注">
+        <AdminFormField :label="$t('common.remark')">
           <AdminInput v-model="voiceForm.remark" type="textarea" :rows="2" />
         </AdminFormField>
         <AdminFormField label="扩展 config" hint="可选 JSON 字符串">
@@ -432,8 +433,8 @@ async function generatePreview(row: Record<string, unknown>) {
         </AdminFormField>
       </template>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submitVoice">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submitVoice">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

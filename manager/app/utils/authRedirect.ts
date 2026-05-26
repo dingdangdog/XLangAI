@@ -1,4 +1,3 @@
-const LOGIN_PATH = "/login";
 const DEFAULT_AUTH_REDIRECT = "/";
 
 function normalizeCallbackUrl(value: unknown): string | null {
@@ -26,29 +25,31 @@ function normalizeCallbackUrl(value: unknown): string | null {
   return null;
 }
 
-export function resolveAuthRedirect(value: unknown, fallback = DEFAULT_AUTH_REDIRECT): string {
+function isLoginPath(path: string, loginPath: string): boolean {
+  return path === loginPath || path.startsWith(`${loginPath}?`);
+}
+
+export function resolveAuthRedirect(
+  value: unknown,
+  loginPath: string,
+  fallback = DEFAULT_AUTH_REDIRECT,
+): string {
   const callbackUrl = normalizeCallbackUrl(value);
   if (!callbackUrl) return fallback;
-  if (callbackUrl === LOGIN_PATH || callbackUrl.startsWith(`${LOGIN_PATH}?`)) {
-    return fallback;
-  }
+  if (isLoginPath(callbackUrl, loginPath)) return fallback;
   return callbackUrl;
 }
 
-export function buildLoginRedirect(callbackUrl?: unknown) {
+export function buildLoginRedirect(loginPath: string, callbackUrl?: unknown) {
   const safeCallbackUrl = normalizeCallbackUrl(callbackUrl);
-  if (
-    !safeCallbackUrl ||
-    safeCallbackUrl === LOGIN_PATH ||
-    safeCallbackUrl.startsWith(`${LOGIN_PATH}?`)
-  ) {
-    return { path: LOGIN_PATH };
+  if (!safeCallbackUrl || isLoginPath(safeCallbackUrl, loginPath)) {
+    return loginPath;
   }
 
   return {
-    path: LOGIN_PATH,
+    path: loginPath,
     query: { callbackUrl: safeCallbackUrl },
   };
 }
 
-export { DEFAULT_AUTH_REDIRECT, LOGIN_PATH };
+export { DEFAULT_AUTH_REDIRECT };

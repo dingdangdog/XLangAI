@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n();
+
 const API = "/api/admin/conversations-backup";
 const toast = useToast();
 
@@ -21,7 +23,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -35,19 +37,22 @@ watch([page, pageSize, filterBatch], () => void load(), { immediate: true });
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="mb-4 flex shrink-0 justify-end">
       <div class="w-56">
-        <AdminInput v-model="filterBatch" placeholder="按 backupBatch 筛选" />
+        <AdminInput
+          v-model="filterBatch"
+          :placeholder="$t('common.filterByBackupBatch')"
+        />
       </div>
     </div>
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>原会话 ID</AdminTh>
-          <AdminTh>标题</AdminTh>
-          <AdminTh>用户 ID</AdminTh>
-          <AdminTh>语言 ID</AdminTh>
-          <AdminTh width="88px">状态</AdminTh>
-          <AdminTh>批次</AdminTh>
-          <AdminTh>备份时间</AdminTh>
+          <AdminTh>{{ $t("fields.originalConversationId") }}</AdminTh>
+          <AdminTh>{{ $t("fields.title") }}</AdminTh>
+          <AdminTh>{{ $t("fields.userId") }}</AdminTh>
+          <AdminTh>{{ $t("fields.languageId") }}</AdminTh>
+          <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
+          <AdminTh>{{ $t("fields.batch") }}</AdminTh>
+          <AdminTh>{{ $t("fields.backupTime") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id) + String(row.backupBatch)">
           <AdminTd>{{ row.id }}</AdminTd>

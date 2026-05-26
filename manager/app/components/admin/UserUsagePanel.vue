@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { formatAudioBytes } from "~/utils/usageDisplay";
-
 const props = defineProps<{
   userId: string;
   userLabel?: string;
 }>();
+
+const { t } = useI18n();
+const { usageCountCharsLine, formatAudioBytes } = useUsageDisplay();
 
 const API = "/api/admin/user-usage";
 const api = useAdminResourceApi(API);
@@ -29,7 +30,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载用量失败");
+    toast.error(t("toast.loadUsageFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -87,7 +88,7 @@ function openEdit(row: Record<string, unknown>) {
 
 async function submit() {
   if (!form.date) {
-    toast.warning("请选择日期");
+    toast.warning(t("validation.selectDate"));
     return;
   }
   const body = {
@@ -100,16 +101,16 @@ async function submit() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
     emit("changed");
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -118,18 +119,18 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该用量记录？",
+    message: t("confirm.deleteUsageRecord"),
     danger: true,
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
     await load();
     emit("changed");
   } catch (e) {
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
     console.error(e);
   }
 }
@@ -141,42 +142,49 @@ const emit = defineEmits<{ changed: [] }>();
   <div>
     <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
       <p class="text-sm text-muted">
-        用户
+        {{ $t("usage.userLabel") }}
         <span class="font-medium text-foreground">{{ userLabel || userId }}</span>
-        · 按 UTC 自然日聚合：对话轮次、LLM Token、翻译/TTS 次数与字符、STT 音频量
+        · {{ $t("usage.detailIntro") }}
       </p>
-      <AdminButton variant="primary" size="sm" @click="openCreate">新建记录</AdminButton>
+      <AdminButton variant="primary" size="sm" @click="openCreate">
+        {{ $t("pages.userUsage.createRecord") }}
+      </AdminButton>
     </div>
 
     <AdminTable :loading="loading">
       <template #head>
-        <AdminTh width="120px">日期</AdminTh>
-        <AdminTh width="80px">调用</AdminTh>
-        <AdminTh width="80px">Token</AdminTh>
-        <AdminTh width="100px">翻译</AdminTh>
-        <AdminTh width="100px">TTS</AdminTh>
-        <AdminTh width="100px">STT</AdminTh>
-        <AdminTh>更新时间</AdminTh>
-        <AdminTh width="140px" align="right">操作</AdminTh>
+        <AdminTh width="120px">{{ $t("fields.date") }}</AdminTh>
+        <AdminTh width="80px">{{ $t("fields.calls") }}</AdminTh>
+        <AdminTh width="80px">{{ $t("fields.token") }}</AdminTh>
+        <AdminTh width="100px">{{ $t("fields.translate") }}</AdminTh>
+        <AdminTh width="100px">{{ $t("fields.tts") }}</AdminTh>
+        <AdminTh width="100px">{{ $t("fields.stt") }}</AdminTh>
+        <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
+        <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
       </template>
       <AdminTr v-for="row in list" :key="String(row.id)">
         <AdminTd>{{ formatDate(row.date) }}</AdminTd>
         <AdminTd>{{ row.usageCount }}</AdminTd>
         <AdminTd>{{ row.tokenCount }}</AdminTd>
         <AdminTd class="text-xs">
-          {{ row.translateCount ?? 0 }} 次 · {{ row.translateChars ?? 0 }} 字
+          {{ usageCountCharsLine(row.translateCount, row.translateChars) }}
         </AdminTd>
         <AdminTd class="text-xs">
-          {{ row.ttsCount ?? 0 }} 次 · {{ row.ttsChars ?? 0 }} 字
+          {{ usageCountCharsLine(row.ttsCount, row.ttsChars) }}
         </AdminTd>
         <AdminTd class="text-xs">
-          {{ row.sttCount ?? 0 }} 次 · {{ formatAudioBytes(String(row.sttAudioBytes ?? 0)) }}
+          {{
+            $t("usage.sttLine", {
+              count: Number(row.sttCount ?? 0),
+              size: formatAudioBytes(String(row.sttAudioBytes ?? 0)),
+            })
+          }}
         </AdminTd>
         <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
         <AdminTd align="right">
-          <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+          <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
           <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-            删除
+            {{ $t("common.delete") }}
           </AdminButton>
         </AdminTd>
       </AdminTr>
@@ -185,12 +193,16 @@ const emit = defineEmits<{ changed: [] }>();
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建用量记录' : '编辑用量记录'"
+      :title="
+        dialogMode === 'create'
+          ? $t('pages.userUsage.createDialog')
+          : $t('pages.userUsage.editDialog')
+      "
     >
-      <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+      <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
       </AdminFormField>
-      <AdminFormField label="日期" required>
+      <AdminFormField :label="$t('fields.date')" required>
         <AdminInput
           v-model="form.date"
           type="text"
@@ -198,15 +210,17 @@ const emit = defineEmits<{ changed: [] }>();
           :disabled="dialogMode === 'edit'"
         />
       </AdminFormField>
-      <AdminFormField label="调用次数">
+      <AdminFormField :label="$t('fields.usageCount')">
         <AdminInput v-model="form.usageCount" type="number" />
       </AdminFormField>
-      <AdminFormField label="Token">
+      <AdminFormField :label="$t('fields.token')">
         <AdminInput v-model="form.tokenCount" type="number" />
       </AdminFormField>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">
+          {{ $t("common.save") }}
+        </AdminButton>
       </template>
     </AdminDialog>
   </div>

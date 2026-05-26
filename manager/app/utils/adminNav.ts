@@ -17,48 +17,48 @@ import {
 
 export interface AdminNavItem {
   to: string;
-  label: string;
+  labelKey: string;
   icon: Component;
 }
 
 export interface AdminNavGroup {
-  title: string;
+  titleKey: string;
   items: AdminNavItem[];
 }
 
 export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
-    title: "概览",
-    items: [{ to: "/", label: "数据概览", icon: ChartBarIcon }],
+    titleKey: "nav.groups.overview",
+    items: [{ to: "/", labelKey: "nav.items.dashboard", icon: ChartBarIcon }],
   },
   {
-    title: "业务管理",
+    titleKey: "nav.groups.business",
     items: [
-      { to: "/manage/users", label: "用户", icon: UsersIcon },
-      { to: "/manage/conversations", label: "会话", icon: ChatBubbleLeftIcon },
-      { to: "/manage/messages", label: "消息", icon: ChatBubbleLeftIcon },
-      { to: "/manage/membership-tiers", label: "会员管理", icon: UserGroupIcon },
-      { to: "/manage/languages", label: "语言管理", icon: GlobeAltIcon },
-      { to: "/manage/prompt-templates", label: "系统提示词", icon: DocumentTextIcon },
+      { to: "/manage/users", labelKey: "nav.items.users", icon: UsersIcon },
+      { to: "/manage/conversations", labelKey: "nav.items.conversations", icon: ChatBubbleLeftIcon },
+      { to: "/manage/messages", labelKey: "nav.items.messages", icon: ChatBubbleLeftIcon },
+      { to: "/manage/membership-tiers", labelKey: "nav.items.membershipTiers", icon: UserGroupIcon },
+      { to: "/manage/languages", labelKey: "nav.items.languages", icon: GlobeAltIcon },
+      { to: "/manage/prompt-templates", labelKey: "nav.items.promptTemplates", icon: DocumentTextIcon },
     ],
   },
   {
-    title: "AI 与语音",
+    titleKey: "nav.groups.aiVoice",
     items: [
-      { to: "/manage/llm-service-configs", label: "LLM 服务配置", icon: CpuChipIcon },
-      { to: "/manage/stt-service-configs", label: "STT 服务配置", icon: ServerIcon },
-      { to: "/manage/tts-service-configs", label: "TTS 服务配置", icon: MicrophoneIcon },
-      { to: "/manage/voice-roles", label: "TTS 语音角色", icon: SparklesIcon },
-      { to: "/manage/translate-service-configs", label: "翻译服务配置", icon: GlobeAltIcon },
-      { to: "/manage/object-storage-configs", label: "对象存储 / 图床", icon: CloudArrowUpIcon },
+      { to: "/manage/llm-service-configs", labelKey: "nav.items.llmConfigs", icon: CpuChipIcon },
+      { to: "/manage/stt-service-configs", labelKey: "nav.items.sttConfigs", icon: ServerIcon },
+      { to: "/manage/tts-service-configs", labelKey: "nav.items.ttsConfigs", icon: MicrophoneIcon },
+      { to: "/manage/voice-roles", labelKey: "nav.items.voiceRoles", icon: SparklesIcon },
+      { to: "/manage/translate-service-configs", labelKey: "nav.items.translateConfigs", icon: GlobeAltIcon },
+      { to: "/manage/object-storage-configs", labelKey: "nav.items.objectStorage", icon: CloudArrowUpIcon },
     ],
   },
   {
-    title: "系统管理",
+    titleKey: "nav.groups.system",
     items: [
-      { to: "/manage/server-store", label: "服务器商店", icon: ServerIcon },
-      { to: "/manage/system-settings", label: "系统变量", icon: Cog6ToothIcon },
-      { to: "/manage/backups", label: "备份归档", icon: ArchiveBoxIcon },
+      { to: "/manage/server-store", labelKey: "nav.items.serverStore", icon: ServerIcon },
+      { to: "/manage/system-settings", labelKey: "nav.items.systemSettings", icon: Cog6ToothIcon },
+      { to: "/manage/backups", labelKey: "nav.items.backups", icon: ArchiveBoxIcon },
     ],
   },
 ];
@@ -70,3 +70,21 @@ export const BACKUP_LEGACY_PATHS = [
   "/manage/messages-backup",
   "/manage/user-usage-backup",
 ] as const;
+
+export function useAdminNav() {
+  const { t } = useI18n();
+
+  const groups = computed(() =>
+    ADMIN_NAV_GROUPS.map((group) => ({
+      title: t(group.titleKey),
+      titleKey: group.titleKey,
+      items: group.items.map((item) => ({
+        to: item.to,
+        label: t(item.labelKey),
+        icon: item.icon,
+      })),
+    })),
+  );
+
+  return { groups };
+}

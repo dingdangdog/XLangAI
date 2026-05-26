@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
-import { resolveAuthRedirect } from "~/utils/authRedirect";
 
 definePageMeta({
   layout: "blank",
   middleware: ["guest"],
 });
 
+const { t } = useI18n();
+const localePath = useLocalePath();
+const localeHead = useLocaleHead({ seo: true });
+const { resolveAuthRedirect } = useAuthRedirect();
+const { localizeAuthError } = useAuthApiError();
 const route = useRoute();
 const themeStore = useThemeStore();
 const toast = useToast();
@@ -20,17 +24,24 @@ const form = reactive({
 const loading = ref(false);
 const errors = reactive<{ username?: string; password?: string }>({});
 
+useHead(() => ({
+  title: t("pages.login.title"),
+  htmlAttrs: localeHead.value.htmlAttrs,
+  link: localeHead.value.link,
+  meta: localeHead.value.meta,
+}));
+
 function validate() {
   errors.username = undefined;
   errors.password = undefined;
 
   if (!form.username.trim()) {
-    errors.username = "请输入手机号或邮箱";
+    errors.username = t("validation.usernameRequired");
   }
   if (!form.password) {
-    errors.password = "请输入密码";
+    errors.password = t("validation.passwordRequired");
   } else if (form.password.length < 6) {
-    errors.password = "密码至少 6 位";
+    errors.password = t("validation.passwordMin");
   }
 
   return !errors.username && !errors.password;
@@ -50,21 +61,10 @@ async function submit() {
       credentials: "include",
     });
     userStore.setUser(user);
-    toast.success("登录成功");
-    await navigateTo(resolveAuthRedirect(route.query.callbackUrl));
+    toast.success(t("toast.loginSuccess"));
+    await navigateTo(localePath(resolveAuthRedirect(route.query.callbackUrl)));
   } catch (e: unknown) {
-    const err = e as {
-      data?: { message?: string; statusMessage?: string };
-      message?: string;
-      statusMessage?: string;
-    };
-    toast.error(
-      err.data?.message ||
-        err.data?.statusMessage ||
-        err.message ||
-        err.statusMessage ||
-        "登录失败",
-    );
+    toast.error(localizeAuthError(e));
   } finally {
     loading.value = false;
   }
@@ -76,35 +76,36 @@ async function submit() {
     <div class="w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-lg">
       <div class="mb-8 text-center">
         <img src="/favicon.ico" alt="" class="mx-auto mb-4 h-14 w-14 rounded-full" />
-        <h1 class="text-2xl font-bold text-foreground">小浪AI 运营后台</h1>
-        <p class="mt-2 text-sm text-muted">请使用管理员账号登录</p>
+        <h1 class="text-2xl font-bold text-foreground">{{ $t("pages.login.title") }}</h1>
+        <p class="mt-2 text-sm text-muted">{{ $t("pages.login.subtitle") }}</p>
       </div>
 
       <form class="space-y-5" @submit.prevent="submit">
-        <AdminFormField label="账号" :error="errors.username" required>
+        <AdminFormField :label="$t('fields.account')" :error="errors.username" required>
           <AdminInput
             v-model="form.username"
             autocomplete="username"
-            placeholder="手机号或邮箱"
+            :placeholder="$t('pages.login.usernamePlaceholder')"
           />
         </AdminFormField>
 
-        <AdminFormField label="密码" :error="errors.password" required>
+        <AdminFormField :label="$t('fields.password')" :error="errors.password" required>
           <AdminInput
             v-model="form.password"
             type="password"
             autocomplete="current-password"
-            placeholder="请输入密码"
+            :placeholder="$t('pages.login.passwordPlaceholder')"
             revealable
           />
         </AdminFormField>
 
         <AdminButton type="submit" variant="primary" class="w-full" :loading="loading">
-          登录
+          {{ $t("pages.login.submit") }}
         </AdminButton>
       </form>
 
-      <div class="mt-6 flex items-center justify-center">
+      <div class="mt-6 flex flex-col items-center gap-3">
+        <AdminLanguageSwitcher class="max-w-xs" />
         <button
           type="button"
           class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:bg-surface-muted hover:text-foreground"
@@ -112,7 +113,7 @@ async function submit() {
         >
           <SunIcon v-if="themeStore.isDark" class="h-5 w-5" />
           <MoonIcon v-else class="h-5 w-5" />
-          <span>{{ themeStore.isDark ? "浅色模式" : "深色模式" }}</span>
+          <span>{{ themeStore.isDark ? $t("common.lightMode") : $t("common.darkMode") }}</span>
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n();
 const API = "/api/admin/prompt-templates";
 const api = useAdminResourceApi(API);
 const toast = useToast();
@@ -28,7 +29,7 @@ async function loadLangs() {
         name: String(r.name ?? ""),
       }));
   } catch (e) {
-    toast.error("加载语言列表失败");
+    toast.error(t("toast.loadLanguagesFailed"));
     console.error(e);
   } finally {
     optionsLoading.value = false;
@@ -42,7 +43,7 @@ async function load() {
     list.value = res.items;
     total.value = res.total;
   } catch (e) {
-    toast.error("加载失败");
+    toast.error(t("toast.loadFailed"));
     console.error(e);
   } finally {
     loading.value = false;
@@ -103,11 +104,11 @@ function openEdit(row: Record<string, unknown>) {
 
 async function submit() {
   if (!form.code.trim() || !form.name.trim()) {
-    toast.warning("请填写模板编码与名称");
+    toast.warning(t("validation.fillTemplateCodeAndName"));
     return;
   }
   if (!form.content.trim()) {
-    toast.warning("请填写模板内容");
+    toast.warning(t("validation.fillTemplateContent"));
     return;
   }
   let variables: string | null = null;
@@ -117,7 +118,7 @@ async function submit() {
       JSON.parse(rawVars);
       variables = rawVars;
     } catch {
-      toast.error("variables 须为合法 JSON（如数组）");
+      toast.error(t("validation.invalidJson", { field: "variables" }));
       return;
     }
   }
@@ -135,15 +136,15 @@ async function submit() {
   try {
     if (dialogMode.value === "create") {
       await api.create(body);
-      toast.success("已创建");
+      toast.success(t("toast.created"));
     } else {
       await api.update(form.id, { id: form.id, ...body });
-      toast.success("已保存");
+      toast.success(t("toast.saved"));
     }
     dialogVisible.value = false;
     await load();
   } catch (e) {
-    toast.error("保存失败");
+    toast.error(t("toast.saveFailed"));
     console.error(e);
   } finally {
     saving.value = false;
@@ -152,17 +153,17 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该提示词模板？",
+    message: t("confirm.deletePrompt"),
     danger: true,
-    confirmLabel: "删除",
+    confirmLabel: t("common.delete"),
   });
   if (!ok) return;
   try {
     await api.remove(String(row.id));
-    toast.success("已删除");
+    toast.success(t("toast.deleted"));
     await load();
   } catch (e) {
-    toast.error("删除失败");
+    toast.error(t("toast.deleteFailed"));
     console.error(e);
   }
 }
@@ -193,7 +194,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
         description="系统提示词等业务模板；code 唯一，供服务端按编码取用。"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">新建</AdminButton>
+          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -202,17 +203,17 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh>编码</AdminTh>
-          <AdminTh>名称</AdminTh>
+          <AdminTh>{{ $t("common.name") }}</AdminTh>
           <AdminTh>语言 ID</AdminTh>
-          <AdminTh width="88px">状态</AdminTh>
-          <AdminTh width="72px">排序</AdminTh>
-          <AdminTh>更新时间</AdminTh>
-          <AdminTh width="200px" align="right">操作</AdminTh>
+          <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
+          <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
+          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
+          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd nowrap>{{ row.code }}</AdminTd>
           <AdminTd>{{ row.name }}</AdminTd>
-          <AdminTd>{{ row.languageId ?? "—" }}</AdminTd>
+          <AdminTd>{{ row.languageId ?? t("common.emDash") }}</AdminTd>
           <AdminTd><AdminBadge>{{ row.status }}</AdminBadge></AdminTd>
           <AdminTd>{{ row.sortOrder }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
@@ -225,7 +226,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
             >
               启用
             </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">编辑</AdminButton>
+            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
               删除
             </AdminButton>
@@ -242,13 +243,13 @@ const { activateRow, activatingId } = useActivateConfigRow({
     >
       <AdminSkeleton v-if="optionsLoading" :rows="4" />
       <template v-else>
-        <AdminFormField v-if="dialogMode === 'edit'" label="ID">
+        <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="form.id" disabled />
         </AdminFormField>
         <AdminFormField label="编码" required>
           <AdminInput v-model="form.code" :disabled="dialogMode === 'edit'" />
         </AdminFormField>
-        <AdminFormField label="名称" required>
+        <AdminFormField :label="$t('common.name')" required>
           <AdminInput v-model="form.name" />
         </AdminFormField>
         <AdminFormField label="语言">
@@ -265,19 +266,19 @@ const { activateRow, activatingId } = useActivateConfigRow({
             class="font-mono text-sm"
           />
         </AdminFormField>
-        <AdminFormField label="状态">
+        <AdminFormField :label="$t('common.status')">
           <AdminSelect v-model="form.status" :options="statusOptions" />
         </AdminFormField>
-        <AdminFormField label="排序">
+        <AdminFormField :label="$t('common.sort')">
           <AdminInput v-model="form.sortOrder" type="number" />
         </AdminFormField>
-        <AdminFormField label="备注">
+        <AdminFormField :label="$t('common.remark')">
           <AdminInput v-model="form.remark" type="textarea" :rows="2" />
         </AdminFormField>
       </template>
       <template #footer>
-        <AdminButton @click="dialogVisible = false">取消</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submit">保存</AdminButton>
+        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="saving" @click="submit">{{ $t("common.save") }}</AdminButton>
       </template>
     </AdminDialog>
   </AdminListPage>

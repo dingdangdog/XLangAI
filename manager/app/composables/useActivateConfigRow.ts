@@ -14,13 +14,14 @@ export function useActivateConfigRow(options: {
   exclusivity: ActivateExclusivity;
   reload: () => Promise<void>;
 }) {
+  const { t } = useI18n();
   const toast = useToast();
   const { confirm, setLoading } = useConfirm();
   const activatingId = ref<string | null>(null);
 
   async function activateRow(row: Record<string, unknown>) {
     if (String(row.status) === "active") {
-      toast.info("当前已是启用状态");
+      toast.info(t("activate.alreadyActive"));
       return;
     }
     const id = String(row.id ?? "");
@@ -33,22 +34,19 @@ export function useActivateConfigRow(options: {
         (r) => String(r.status) === "active" && String(r.id) !== id,
       );
       if (others.length > 0) {
-        const names = others.map(rowLabel).join("、");
-        message =
-          `确认启用「${label}」？\n\n` +
-          `当前已启用：${names}\n` +
-          `启用后，上述项将自动设为 inactive（全局仅保留一条 active）。`;
+        const names = others.map(rowLabel).join(t("usage.separator"));
+        message = t("activate.singleActiveMessage", { label, names });
       } else {
-        message = `确认启用「${label}」？`;
+        message = t("activate.simpleMessage", { label });
       }
     } else {
-      message = `确认启用「${label}」？`;
+      message = t("activate.simpleMessage", { label });
     }
 
     const ok = await confirm({
-      title: "启用配置",
+      title: t("activate.title"),
       message,
-      confirmLabel: "启用",
+      confirmLabel: t("common.enable"),
     });
     if (!ok) return;
 
@@ -56,10 +54,10 @@ export function useActivateConfigRow(options: {
     setLoading(true);
     try {
       await options.api.update(id, { id, status: "active" });
-      toast.success(`已启用：${label}`);
+      toast.success(t("activate.success", { label }));
       await options.reload();
     } catch (e) {
-      toast.error("启用失败");
+      toast.error(t("activate.failed"));
       console.error(e);
     } finally {
       activatingId.value = null;

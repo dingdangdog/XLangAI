@@ -26,7 +26,48 @@ function toDate(value: unknown): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/** 日期时间：本地时区，如 2026-05-13 11:32:25 */
+function intlLocale(code: string): string {
+  if (code === "zh") return "zh-CN";
+  if (code === "ja") return "ja-JP";
+  return "en-US";
+}
+
+export function useFormatDateTime() {
+  const { locale, t } = useI18n();
+  const dateTimeLocale = computed(() => intlLocale(locale.value));
+
+  function formatDateTime(value: unknown): string {
+    const d = toDate(value);
+    if (!d) {
+      return value == null || value === "" ? t("common.emDash") : String(value);
+    }
+    return new Intl.DateTimeFormat(dateTimeLocale.value, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(d);
+  }
+
+  function formatDate(value: unknown): string {
+    const d = toDate(value);
+    if (!d) {
+      return value == null || value === "" ? t("common.emDash") : String(value);
+    }
+    return new Intl.DateTimeFormat(dateTimeLocale.value, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  }
+
+  return { formatDateTime, formatDate };
+}
+
+/** @deprecated 请使用 useFormatDateTime() */
 export function formatDateTime(value: unknown): string {
   const d = toDate(value);
   if (!d) return value == null || value === "" ? "—" : String(value);
@@ -41,7 +82,7 @@ export function formatDateTime(value: unknown): string {
   }).format(d);
 }
 
-/** 仅日期：如 2026-05-13 */
+/** @deprecated 请使用 useFormatDateTime() */
 export function formatDate(value: unknown): string {
   const d = toDate(value);
   if (!d) return value == null || value === "" ? "—" : String(value);
