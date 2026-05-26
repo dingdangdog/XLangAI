@@ -155,9 +155,9 @@ onMounted(() => {
 
     <div
       v-else
-      class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:items-stretch xl:overflow-hidden"
+      class="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden xl:flex-row"
     >
-      <AdminPanel class="flex min-h-0 min-w-0 flex-1 flex-col">
+      <AdminPanel class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div
           class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border p-4 md:px-5 md:py-4"
         >
@@ -186,8 +186,8 @@ onMounted(() => {
         </AdminTable>
       </AdminPanel>
 
-      <AdminPanel class="flex w-full shrink-0 flex-col overflow-y-auto xl:w-[420px]">
-        <div class="p-4 md:p-5">
+      <AdminPanel class="flex max-h-full min-h-0 shrink-0 flex-col xl:w-[420px] xl:self-start">
+        <div class="overflow-y-auto p-4 md:p-5">
           <h2 class="text-base font-semibold text-foreground">
             {{ $t("pages.dataBackup.exportTitle") }}
           </h2>
