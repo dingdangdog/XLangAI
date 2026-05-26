@@ -25,7 +25,7 @@ func Test_ttsLoudnessOutputArgs(t *testing.T) {
 
 func TestTTSLoudnessOptions_resolved_defaults(t *testing.T) {
 	i, tp, lra := (*TTSLoudnessOptions)(nil).resolved()
-	if i != TTSLoudnessDefaultI || tp != TTSLoudnessDefaultTP || lra != TTSLoudnessDefaultLRA {
+	if i != -14.0 || tp != -1.0 || lra != 8.0 {
 		t.Fatalf("defaults: I=%g TP=%g LRA=%g", i, tp, lra)
 	}
 }

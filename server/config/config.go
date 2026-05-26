@@ -52,7 +52,7 @@ type Config struct {
 	FFmpegPath string
 	// TTSLoudnessNorm：为 true 时在保存助手 TTS 前用 ffmpeg loudnorm 归一化响度（XLANGAI_TTS_LOUDNESS_NORM，默认开启）。
 	TTSLoudnessNorm bool
-	// TTSTargetLUFS：loudnorm 目标综合响度 LUFS（XLANGAI_TTS_TARGET_LUFS，默认 -16）。
+	// TTSTargetLUFS：loudnorm 目标综合响度 LUFS（XLANGAI_TTS_TARGET_LUFS，默认 -14，手机外放更清晰）。
 	TTSTargetLUFS float64
 	// Apple / Google 内购校验（可选；未配置时 /billing/verify 对应平台返回 503）
 	AppleIssuerID                string
@@ -183,11 +183,11 @@ func parseTTSLoudnessNorm() bool {
 func parseTTSTargetLUFS() float64 {
 	v := strings.TrimSpace(os.Getenv("XLANGAI_TTS_TARGET_LUFS"))
 	if v == "" {
-		return -16
+		return -14
 	}
 	f, err := strconv.ParseFloat(v, 64)
 	if err != nil {
-		return -16
+		return -14
 	}
 	return f
 }

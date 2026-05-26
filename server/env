@@ -2,3 +2,6 @@ PORT=8080
 DATABASE_URL=postgresql://postgres:123456@localhost:5432/xlangai?sslmode=disable
 JWT_SECRET=your-secret-key-change-in-production
 XLANGAI_DEV_FULL_ACCESS=true
+# TTS/STT 响度与转码依赖 ffmpeg（Windows 示例路径，请按本机安装位置修改）
+# XLANGAI_FFMPEG_PATH=D:\Program Files\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe
+# XLANGAI_TTS_TARGET_LUFS=-14

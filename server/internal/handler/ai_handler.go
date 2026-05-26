@@ -580,8 +580,18 @@ func (h *AIHandler) synthesizeReply(c *gin.Context, userID string, conv *model.C
 			if normMime != "" {
 				result.MimeType = normMime
 			}
-		} else if normErr != nil && h.cfg.VerboseLogs && !errors.Is(normErr, ai.ErrFFmpegNotFound) {
-			log.Printf("[tts] loudness normalize skipped: %v", normErr)
+		} else {
+			boost, boostMime, boostErr := ai.BoostTTSVolumeFallback(c.Request.Context(), h.cfg.FFmpegPath, result.Audio, result.MimeType)
+			if boostErr == nil && len(boost) > 0 {
+				result.Audio = boost
+				if boostMime != "" {
+					result.MimeType = boostMime
+				}
+			} else if errors.Is(normErr, ai.ErrFFmpegNotFound) || errors.Is(boostErr, ai.ErrFFmpegNotFound) {
+				log.Printf("[tts] WARNING: ffmpeg not found — TTS audio is not loudness-normalized. Install ffmpeg or set XLANGAI_FFMPEG_PATH")
+			} else if h.cfg.VerboseLogs && normErr != nil {
+				log.Printf("[tts] loudness normalize skipped: %v", normErr)
+			}
 		}
 	}
 	if h.usage != nil && userID != "" {
