@@ -10,7 +10,7 @@ import (
 
 func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler) *gin.Engine {
 	r := gin.Default()
-	r.Use(gin.Recovery(), handler.HTTPErrorLogMiddleware(), gin.Logger())
+	r.Use(handler.HTTPErrorLogMiddleware())
 
 	// Public
 	r.GET("/api/v1/languages", lh.List)

@@ -227,6 +227,7 @@ func (h *AIHandler) Chat(c *gin.Context) {
 	if err != nil {
 		if resp != nil {
 			if skipped, _ := resp["ai_skipped"].(bool); skipped {
+				log.Printf("[llm] user_id=%s conv_id=%s: %v", userID, conv.ID, err)
 				c.JSON(http.StatusOK, resp)
 				return
 			}
@@ -347,6 +348,7 @@ func (h *AIHandler) VoiceChat(c *gin.Context) {
 	if err != nil {
 		if resp != nil {
 			if skipped, _ := resp["ai_skipped"].(bool); skipped {
+				log.Printf("[llm] user_id=%s conv_id=%s: %v", userID, conv.ID, err)
 				resp["transcript"] = text
 				c.JSON(http.StatusOK, resp)
 				return
