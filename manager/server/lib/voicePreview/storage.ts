@@ -1,11 +1,14 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import prisma from "../prisma";
 import { getAudioDir } from "../../utils/audioDir";
 
-const AI_AUDIO_PREFIX = "aiaudio";
+/** 试听音频在对象存储桶内的目录前缀（与 R2/OSS 文件夹 demoaudio 一致）。 */
+const DEMO_AUDIO_PREFIX = "demoaudio";
+/** 历史试听音频曾使用 aiaudio 前缀，删除时兼容清理。 */
+const LEGACY_DEMO_AUDIO_PREFIX = "aiaudio";
 
 function audioDir(): string {
   return getAudioDir();
@@ -38,6 +41,91 @@ function safeAudioFilename(preferredBaseName: string | undefined, ext: string): 
   return `${base || randomUUID()}${normExt}`;
 }
 
+function keyFromPublicUrl(publicBaseUrl: string, objectUrl: string): string {
+  const base = publicBaseUrl.trim().replace(/\/$/, "");
+  const url = objectUrl.trim();
+  if (!base || !url) return "";
+  const prefixes = [`${base}/`];
+  if (!base.startsWith("http://") && !base.startsWith("https://")) {
+    prefixes.push(`https://${base}/`, `http://${base}/`);
+  }
+  for (const prefix of prefixes) {
+    if (url.startsWith(prefix)) {
+      return url.slice(prefix.length);
+    }
+  }
+  return "";
+}
+
+function resolveCloudObjectKeys(args: {
+  previewAudioUrl?: string | null;
+  localFilename?: string | null;
+  publicBaseUrl?: string | null;
+}): string[] {
+  const keys = new Set<string>();
+  const local = (args.localFilename ?? "").trim();
+  const url = (args.previewAudioUrl ?? "").trim();
+  const publicBase = (args.publicBaseUrl ?? "").trim();
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    const fromUrl = keyFromPublicUrl(publicBase, url);
+    if (fromUrl) keys.add(fromUrl);
+  }
+
+  if (local) {
+    keys.add(`${DEMO_AUDIO_PREFIX}/${local}`);
+    keys.add(`${LEGACY_DEMO_AUDIO_PREFIX}/${local}`);
+  }
+
+  return [...keys];
+}
+
+async function deleteLocalCopy(localFilename: string): Promise<boolean> {
+  const name = localFilename.trim();
+  if (!name || /[/\\]/.test(name)) return false;
+  try {
+    await unlink(join(audioDir(), name));
+    return true;
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return false;
+    throw e;
+  }
+}
+
+async function deleteCloudObjects(keys: string[]): Promise<void> {
+  if (!keys.length) return;
+
+  const cfg = await getActiveObjectStorage();
+  if (!cfg) return;
+
+  const provider = (cfg.provider ?? "").trim().toLowerCase();
+  if (provider !== "cloudflare_r2" && provider !== "aliyun_oss") return;
+
+  const endpoint = (cfg.baseUrl ?? "").trim().replace(/\/$/, "");
+  const accessKey = (cfg.apiKey ?? "").trim();
+  const secretKey = (cfg.secretKey ?? "").trim();
+  const bucket = (cfg.bucket ?? "").trim();
+  if (!endpoint || !accessKey || !secretKey || !bucket) return;
+
+  const client = new S3Client({
+    region: (cfg.region ?? "auto").trim() || "auto",
+    endpoint,
+    credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
+    forcePathStyle: true,
+  });
+
+  await Promise.all(
+    keys.map(async (key) => {
+      try {
+        await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+      } catch (e) {
+        console.warn(`[voicePreview] failed to delete cloud object ${key}:`, e);
+      }
+    }),
+  );
+}
+
 async function writeLocalCopy(
   data: Buffer,
   ext: string,
@@ -63,7 +151,7 @@ async function uploadCloud(
   const provider = (cfg.provider ?? "").trim().toLowerCase();
   const normExt = ext.startsWith(".") ? ext : `.${ext}`;
   const localFilename = await writeLocalCopy(data, normExt, preferredBaseName);
-  const key = `${AI_AUDIO_PREFIX}/${localFilename}`;
+  const key = `${DEMO_AUDIO_PREFIX}/${localFilename}`;
 
   if (provider === "local") {
     const base = (cfg.baseUrl ?? cfg.publicBaseUrl ?? "").replace(/\/$/, "");
@@ -125,4 +213,36 @@ export async function saveAssistantPreviewAudio(
     previewAudioUrl: `/api/v1/audio/${localFilename}`,
     previewLocalFilename: localFilename,
   };
+}
+
+export type DeleteAssistantPreviewAudioArgs = {
+  previewAudioUrl?: string | null;
+  previewLocalFilename?: string | null;
+};
+
+/** 删除试听音频：本地 AUDIO_DIR 备份与云端对象（若已配置）同步清理。 */
+export async function deleteAssistantPreviewAudio(
+  args: DeleteAssistantPreviewAudioArgs,
+): Promise<{ localDeleted: boolean; cloudKeys: string[] }> {
+  const localFilename = (args.previewLocalFilename ?? "").trim();
+  const previewAudioUrl = (args.previewAudioUrl ?? "").trim();
+  const mode = await getAssistantTtsStorageMode();
+
+  let localDeleted = false;
+  if (localFilename) {
+    localDeleted = await deleteLocalCopy(localFilename);
+  }
+
+  let cloudKeys: string[] = [];
+  if (mode === "cloud") {
+    const cfg = await getActiveObjectStorage();
+    cloudKeys = resolveCloudObjectKeys({
+      previewAudioUrl,
+      localFilename,
+      publicBaseUrl: cfg?.publicBaseUrl,
+    });
+    await deleteCloudObjects(cloudKeys);
+  }
+
+  return { localDeleted, cloudKeys };
 }

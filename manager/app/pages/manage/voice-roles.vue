@@ -272,6 +272,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 });
 
 const previewGeneratingId = ref<string | null>(null);
+const previewDeletingId = ref<string | null>(null);
 const previewAudioEl = ref<HTMLAudioElement | null>(null);
 
 function previewPlayUrl(row: Record<string, unknown>): string | null {
@@ -341,6 +342,29 @@ async function generatePreview(row: Record<string, unknown>) {
     previewGeneratingId.value = null;
   }
 }
+
+async function deletePreview(row: Record<string, unknown>) {
+  const id = String(row.id ?? "");
+  if (!id || !row.previewAudioUrl) return;
+  const ok = await confirm({
+    message: t("confirm.deleteVoiceRolePreview"),
+    danger: true,
+    confirmLabel: t("common.deletePreview"),
+  });
+  if (!ok) return;
+  stopPreviewPlayback();
+  previewDeletingId.value = id;
+  try {
+    await $fetch(`/api/admin/voice-roles/${id}/delete-preview`, { method: "POST" });
+    toast.success(t("toast.previewDeleted"));
+    await load();
+  } catch (e) {
+    toast.error(t("toast.previewDeleteFailed"));
+    console.error(e);
+  } finally {
+    previewDeletingId.value = null;
+  }
+}
 </script>
 
 <template>
@@ -361,7 +385,7 @@ async function generatePreview(row: Record<string, unknown>) {
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh v-for="col in tableColumns" :key="col.prop">{{ col.label }}</AdminTh>
-          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
+          <AdminTh width="260px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd v-for="col in tableColumns" :key="col.prop">
@@ -388,6 +412,15 @@ async function generatePreview(row: Record<string, unknown>) {
             </AdminButton>
             <AdminButton variant="link" :loading="previewGeneratingId === String(row.id)" @click="generatePreview(row)">
               {{ $t("common.generatePreview") }}
+            </AdminButton>
+            <AdminButton
+              variant="link"
+              class="!text-danger-600"
+              :disabled="!row.previewAudioUrl"
+              :loading="previewDeletingId === String(row.id)"
+              @click="deletePreview(row)"
+            >
+              {{ $t("common.deletePreview") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
