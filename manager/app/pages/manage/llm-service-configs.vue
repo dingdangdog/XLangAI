@@ -164,7 +164,7 @@ function isOpenAICompatible(protocol: string): boolean {
 
 async function submit() {
   if (!form.name.trim() || !form.modelCode.trim()) {
-    toast.warning("请填写名称与模型 code");
+    toast.warning(t("validation.fillNameAndModel"));
     return;
   }
   let configStr = (form.config ?? "").trim();
@@ -214,7 +214,7 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该 LLM 配置？",
+    message: t("confirm.deleteLlmConfig"),
     danger: true,
     confirmLabel: t("common.delete"),
   });
@@ -248,25 +248,20 @@ const { activateRow, activatingId } = useActivateConfigRow({
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="LLM 服务配置"
-        description="Go 按 id 或 sort_order 最小的 active 记录选用，不按编码查找；新建时编码自动生成。"
+        :title="$t('pages.llmConfigs.title')"
+        :description="$t('pages.llmConfigs.description')"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
-      <AdminAlert title="协议说明">
+      <AdminAlert :title="$t('pages.llmConfigs.protocolAlertTitle')">
         <ul class="list-disc pl-5 text-sm space-y-1">
-          <li>
-            <strong>OpenAI 兼容类</strong>（openai、azure_openai、ollama、deepseek 等）：Base URL 填根地址（勿带
-            /v1）；API Key 须在后台填写。
-          </li>
-          <li><strong>claude</strong>：默认 <code>https://api.anthropic.com</code>；config 可设
-            <code>anthropic_version</code>、<code>max_tokens</code>。</li>
-          <li><strong>gemini</strong>：默认 Google Generative Language API；model 如
-            <code>gemini-1.5-flash</code>。</li>
-          <li>语音转写（STT）使用独立的 STT 服务配置，不会复用 LLM 配置或环境变量。</li>
+          <li>{{ $t("pages.llmConfigs.protocolAlertOpenai") }}</li>
+          <li>{{ $t("pages.llmConfigs.protocolAlertClaude") }}</li>
+          <li>{{ $t("pages.llmConfigs.protocolAlertGemini") }}</li>
+          <li>{{ $t("pages.llmConfigs.protocolAlertSttNote") }}</li>
         </ul>
       </AdminAlert>
     </template>
@@ -274,14 +269,14 @@ const { activateRow, activatingId } = useActivateConfigRow({
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>编码</AdminTh>
+          <AdminTh>{{ $t("common.code") }}</AdminTh>
           <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh width="140px">协议</AdminTh>
-          <AdminTh>模型</AdminTh>
-          <AdminTh>API Key</AdminTh>
+          <AdminTh width="140px">{{ $t("fields.protocol") }}</AdminTh>
+          <AdminTh>{{ $t("common.model") }}</AdminTh>
+          <AdminTh>{{ $t("fields.apiKey") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
-          <AdminTh width="120px">今日用量</AdminTh>
-          <AdminTh width="120px">本月用量</AdminTh>
+          <AdminTh width="120px">{{ $t("common.todayUsage") }}</AdminTh>
+          <AdminTh width="120px">{{ $t("common.monthUsage") }}</AdminTh>
           <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
           <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
@@ -308,11 +303,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
               :loading="activatingId === String(row.id)"
               @click="activateRow(row)"
             >
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -322,7 +317,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建 LLM 配置' : '编辑 LLM 配置'"
+      :title="dialogMode === 'create' ? $t('pages.llmConfigs.createDialog') : $t('pages.llmConfigs.editDialog')"
       width="lg"
     >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
@@ -331,31 +326,31 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
-      <AdminFormField label="协议">
+      <AdminFormField :label="$t('fields.protocol')">
         <AdminSelect v-model="form.protocol" :options="protocolOptions" />
       </AdminFormField>
       <AdminFormField
-        label="Base URL"
+        :label="$t('fields.baseUrl')"
         :hint="
           isOpenAICompatible(form.protocol)
-            ? 'OpenAI 兼容：根地址（不要带 /v1）'
+            ? $t('pages.llmConfigs.baseUrlHintOpenai')
             : form.protocol === 'claude'
-              ? '默认 https://api.anthropic.com'
-              : '默认 Google Generative Language API'
+              ? $t('pages.llmConfigs.baseUrlHintClaude')
+              : $t('pages.llmConfigs.baseUrlHintGemini')
         "
       >
-        <AdminInput v-model="form.baseUrl" placeholder="可选" />
+        <AdminInput v-model="form.baseUrl" :placeholder="$t('pages.llmConfigs.optionalPlaceholder')" />
       </AdminFormField>
       <AdminFormField
-        label="API Key"
-        hint="必填"
+        :label="$t('fields.apiKey')"
+        :hint="$t('pages.translateConfigs.apiKeyRequired')"
       >
         <AdminInput v-model="form.apiKey" type="password" />
       </AdminFormField>
-      <AdminFormField label="模型 code" required>
-        <AdminInput v-model="form.modelCode" placeholder="如 gpt-4o-mini、claude-3-5-sonnet-20241022" />
+      <AdminFormField :label="$t('fields.modelCode')" required>
+        <AdminInput v-model="form.modelCode" :placeholder="$t('pages.llmConfigs.modelPlaceholder')" />
       </AdminFormField>
-      <AdminFormField label="扩展 JSON" :hint="CONFIG_HINTS[form.protocol]">
+      <AdminFormField :label="$t('fields.extJson')" :hint="CONFIG_HINTS[form.protocol]">
         <AdminInput v-model="form.config" type="textarea" :rows="4" class="font-mono text-sm" />
       </AdminFormField>
       <AdminFormField :label="$t('common.status')">

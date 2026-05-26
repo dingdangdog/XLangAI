@@ -6,8 +6,8 @@ const toast = useToast();
 const { confirm } = useConfirm();
 
 const PROTOCOLS = [
-  { value: "openai", label: "OpenAI 兼容（Whisper 等）" },
-  { value: "azure_speech_rest", label: "Azure 语音（REST 短音频）" },
+  { value: "openai", labelKey: "pages.sttConfigs.protocolOpenai" },
+  { value: "azure_speech_rest", labelKey: "pages.sttConfigs.protocolAzure" },
 ] as const;
 const NVIDIA_INTEGRATE_HOST = "integrate.api.nvidia.com";
 
@@ -111,7 +111,7 @@ async function submit() {
     return;
   }
   if (form.protocol === "openai" && !form.modelCode.trim()) {
-    toast.warning("OpenAI 兼容协议须填写模型 code（如 whisper-1）");
+    toast.warning(t("validation.sttModelRequired"));
     return;
   }
   if (form.protocol === "azure_speech_rest" && !form.modelCode.trim()) {
@@ -119,9 +119,7 @@ async function submit() {
   }
   const bu = form.baseUrl.trim().toLowerCase();
   if (form.protocol === "openai" && bu.includes(NVIDIA_INTEGRATE_HOST)) {
-    toast.error(
-      "STT 不能使用 NVIDIA integrate 网关地址：该地址不提供 OpenAI 兼容的 /v1/audio/transcriptions。请填写实际提供语音转写 API 的根地址。",
-    );
+    toast.error(t("pages.sttConfigs.nvidiaWarning"));
     return;
   }
   let configStr = (form.config ?? "").trim();
@@ -171,7 +169,7 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该 STT 配置？",
+    message: t("confirm.deleteSttConfig"),
     danger: true,
     confirmLabel: t("common.delete"),
   });
@@ -191,7 +189,9 @@ const statusOptions = [
   { value: "inactive", label: "inactive" },
 ];
 
-const protocolOptions = PROTOCOLS.map((p) => ({ value: p.value, label: p.label }));
+const protocolOptions = computed(() =>
+  PROTOCOLS.map((p) => ({ value: p.value, label: t(p.labelKey) })),
+);
 
 const { activateRow, activatingId } = useActivateConfigRow({
   api,
@@ -205,28 +205,28 @@ const { activateRow, activatingId } = useActivateConfigRow({
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="STT 服务配置"
-        description="Go 读取 sort_order 最小的 active 记录，不按编码查找；新建时编码自动生成。OpenAI 兼容须实现 POST /v1/audio/transcriptions；Azure 使用认知服务短音频 REST，服务端需安装 ffmpeg。"
+        :title="$t('pages.sttConfigs.title')"
+        :description="$t('pages.sttConfigs.description')"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
-      <AdminAlert title="配置说明">
-        OpenAI 兼容：Base URL 填根地址（不要带 /v1）。勿填
-        <code>{{ NVIDIA_INTEGRATE_HOST }}</code>。Azure：在扩展 JSON 中配置 region（及可选 locale），API Key 须在后台填写。
+      <AdminAlert :title="$t('pages.sttConfigs.configAlertTitle')">
+        {{ $t("pages.sttConfigs.configAlert") }}
+        <code>{{ NVIDIA_INTEGRATE_HOST }}</code>
       </AdminAlert>
     </template>
 
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>编码</AdminTh>
+          <AdminTh>{{ $t("common.code") }}</AdminTh>
           <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh width="100px">协议</AdminTh>
-          <AdminTh>模型</AdminTh>
-          <AdminTh>API Key</AdminTh>
+          <AdminTh width="100px">{{ $t("fields.protocol") }}</AdminTh>
+          <AdminTh>{{ $t("common.model") }}</AdminTh>
+          <AdminTh>{{ $t("fields.apiKey") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
           <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
@@ -248,11 +248,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
               :loading="activatingId === String(row.id)"
               @click="activateRow(row)"
             >
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -262,17 +262,15 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建 STT 配置' : '编辑 STT 配置'"
+      :title="dialogMode === 'create' ? $t('pages.sttConfigs.createDialog') : $t('pages.sttConfigs.editDialog')"
       width="lg"
     >
-      <AdminAlert title="语音转写 STT">
+      <AdminAlert :title="$t('pages.sttConfigs.dialogAlertTitle')">
         <template v-if="form.protocol === 'openai'">
-          Base URL 填<strong>根地址</strong>（服务端会请求 /v1/audio/transcriptions），末尾不要带 /v1。未填 Base URL
-          时，Go 端默认使用 https://api.openai.com。
+          {{ $t("pages.sttConfigs.dialogAlertOpenai") }}
         </template>
         <template v-else>
-          Azure 短音频识别：API Key 填 Speech 资源密钥；扩展 JSON 至少包含 "region":"eastasia"（与资源一致）。可选
-          locale（如 zh-CN），不填则按会话目标语言映射。模型 code 可填 -。
+          {{ $t("pages.sttConfigs.dialogAlertAzure") }}
         </template>
       </AdminAlert>
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
@@ -281,30 +279,32 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
-      <AdminFormField label="协议">
+      <AdminFormField :label="$t('fields.protocol')">
         <AdminSelect v-model="form.protocol" :options="protocolOptions" />
       </AdminFormField>
-      <AdminFormField v-if="form.protocol === 'openai'" label="Base URL">
+      <AdminFormField v-if="form.protocol === 'openai'" :label="$t('fields.baseUrl')">
         <AdminInput
           v-model="form.baseUrl"
-          placeholder="https://api.openai.com 或其它提供转写 REST 的根地址"
+          :placeholder="$t('pages.sttConfigs.baseUrlPlaceholder')"
         />
       </AdminFormField>
-      <AdminFormField label="API Key">
+      <AdminFormField :label="$t('fields.apiKey')">
         <AdminInput v-model="form.apiKey" type="password" />
       </AdminFormField>
       <AdminFormField
-        :label="form.protocol === 'azure_speech_rest' ? '模型 code（可 -）' : '模型 code'"
+        :label="form.protocol === 'azure_speech_rest' ? $t('pages.sttConfigs.modelAzure') : $t('pages.sttConfigs.modelOpenai')"
         :required="form.protocol === 'openai'"
       >
         <AdminInput
           v-model="form.modelCode"
           :placeholder="
-            form.protocol === 'azure_speech_rest' ? 'Azure 可填 -' : '如 whisper-1（按厂商文档填写）'
+            form.protocol === 'azure_speech_rest'
+              ? $t('pages.sttConfigs.modelPlaceholderAzure')
+              : $t('pages.sttConfigs.modelPlaceholderOpenai')
           "
         />
       </AdminFormField>
-      <AdminFormField label="扩展 JSON">
+      <AdminFormField :label="$t('fields.extJson')">
         <AdminInput v-model="form.config" type="textarea" :rows="4" class="font-mono text-sm" />
       </AdminFormField>
       <AdminFormField :label="$t('common.status')">

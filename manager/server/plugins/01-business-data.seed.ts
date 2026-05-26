@@ -6,14 +6,14 @@ import {
 } from "../lib/managerAdminSeed";
 
 /**
- * 启动时顺序执行（在 00-db-migrate 之后）：
- * 1. MANAGER_ADMIN_* 配置时初始化运营管理员（与 MANAGER_AUTO_SEED 无关）；
- * 2. MANAGER_AUTO_SEED !== "false" 时跑业务种子；
- * 3. MANAGER_TEST_ACCOUNT_SEED !== "false" 时再跑测试账号。
+ * Startup order (after 00-db-migrate):
+ * 1. MANAGER_ADMIN_* → bootstrap manager admin (independent of MANAGER_AUTO_SEED);
+ * 2. MANAGER_AUTO_SEED !== "false" → business seed;
+ * 3. MANAGER_TEST_ACCOUNT_SEED !== "false" → test account.
  */
 export default defineNitroPlugin(async () => {
   if (!process.env.DATABASE_URL?.trim()) {
-    console.warn("[data-seed] 跳过：未设置 DATABASE_URL");
+    console.warn("[data-seed] skip: DATABASE_URL not set");
     return;
   }
 
@@ -22,7 +22,7 @@ export default defineNitroPlugin(async () => {
     try {
       await ensureManagerAdminUser(prisma, adminCfg);
     } catch (e) {
-      console.error("[data-seed] 运营管理员初始化失败（不影响服务启动）:", e);
+      console.error("[data-seed] manager admin seed failed (non-fatal):", e);
     }
   }
   const managerCfg = useRuntimeConfig().manager;
@@ -33,7 +33,7 @@ export default defineNitroPlugin(async () => {
     try {
       await runBusinessDataSeed(prisma);
     } catch (e) {
-      console.error("[data-seed] 业务数据初始化失败（不影响服务启动）:", e);
+      console.error("[data-seed] business seed failed (non-fatal):", e);
     }
   }
 
@@ -42,6 +42,6 @@ export default defineNitroPlugin(async () => {
   try {
     await ensureTestSeedUser(prisma);
   } catch (e) {
-    console.error("[data-seed] 测试账号初始化失败（不影响服务启动）:", e);
+    console.error("[data-seed] test account seed failed (non-fatal):", e);
   }
 });

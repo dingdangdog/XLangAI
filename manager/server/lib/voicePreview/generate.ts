@@ -27,17 +27,17 @@ export async function generateVoiceRolePreview(
 ): Promise<GeneratePreviewResult> {
   const role = await prisma.voiceRole.findUnique({ where: { id: voiceRoleId } });
   if (!role) {
-    throw new Error("语音角色不存在");
+    throw new Error("Voice role not found");
   }
   if (!role.ttsServiceConfigId?.trim() || !role.voiceCode.trim()) {
-    throw new Error("语音角色未绑定 TTS 配置或音色代码");
+    throw new Error("Voice role has no TTS config or voice code");
   }
 
   const tts = await prisma.ttsServiceConfig.findUnique({
     where: { id: role.ttsServiceConfigId },
   });
   if (!tts) {
-    throw new Error("TTS 服务配置不存在");
+    throw new Error("TTS service config not found");
   }
 
   let langCode = "";

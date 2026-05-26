@@ -47,6 +47,7 @@
     "deleteObjectStorage": "このオブジェクトストレージ設定を削除しますか？",
     "deleteSttConfig": "この STT 設定を削除しますか？",
     "deleteTranslateConfig": "この翻訳設定を削除しますか？",
+    "deleteLlmConfig": "この LLM 設定を削除しますか？",
     "deleteSystemSetting": "システム変数 {key} を削除しますか？",
     "softDeleteMessage": "このメッセージを論理削除しますか？",
     "softDeleteConversation": "この会話を論理削除しますか？",
@@ -102,6 +103,7 @@
     "actions": "操作",
     "optional": "（任意）",
     "optionalParen": "（未選択）",
+    "required": "必須",
     "notAssigned": "未割当",
     "emDash": "—",
     "config": "設定",
@@ -269,7 +271,13 @@
     "originalCreatedAt": "元作成日時",
     "linkedLlm": "関連 LLM",
     "secret": "秘密鍵",
-    "modelOrLink": "モデル / 関連"
+    "modelOrLink": "モデル / 関連",
+    "sttText": "STT テキスト",
+    "metadataJson": "metadata JSON",
+    "voiceDescription": "音色説明",
+    "linkedLlmShort": "関連 LLM",
+    "endpointBaseUrl": "Endpoint / Base URL",
+    "bucket": "Bucket"
   },
   "usage": {
     "primaryLine": "{count} 回 · {tokens} tok",
@@ -321,7 +329,8 @@
     "sttModelRequired": "OpenAI 互換では model code 必須（例 whisper-1）",
     "selectLlmConfig": "関連 LLM 設定を選択",
     "fillModelOrLinkLlm": "model code を入力するか LLM を関連付け",
-    "previewNotGenerated": "試聴未生成。「試聴生成」を先に実行"
+    "previewNotGenerated": "試聴未生成。「試聴生成」を先に実行",
+    "fillNameAndModel": "名称とモデル code を入力"
   },
   "pages": {
     "login": {
@@ -378,6 +387,7 @@
     },
     "voiceRoles": {
       "title": "音声ロール",
+      "usageAlertTitle": "使い方",
       "usageAlert": "試聴は管理画面で生成：言語の試聴文 → 試聴生成 → media.assistant_tts.storage。Go API は preview_audio_url を返す。",
       "createDialog": "新規音声ロール",
       "editDialog": "音声ロール編集",
@@ -438,6 +448,7 @@
       "title": "サーバーストア",
       "description": "公開情報を公式ストアと同期",
       "syncAlert": "公開メタと任意統計のみ。ユーザー・会話・メッセージ・鍵は含まない。公開時ハートビート。",
+      "syncAlertTitle": "同期説明",
       "enableOnOfficial": "公式ストアに掲載",
       "allowOfficialDisplay": "公式サイトに表示を許可",
       "uploadStats": "統計をアップロード",
@@ -514,7 +525,19 @@
     },
     "llmConfigs": {
       "title": "LLM サービス設定",
-      "description": "OpenAI 互換・Claude・Gemini 等。利用量は成功リクエストと出力 Token（UTC 日）"
+      "description": "OpenAI 互換・Claude・Gemini 等。利用量は成功リクエストと出力 Token（UTC 日）",
+      "createDialog": "新規 LLM 設定",
+      "editDialog": "LLM 設定編集",
+      "protocolAlertTitle": "プロトコル説明",
+      "protocolAlertOpenai": "OpenAI 互換（openai, azure_openai, ollama, deepseek 等）：ルート Base URL（/v1 なし）；API Key は管理画面で必須",
+      "protocolAlertClaude": "claude：既定 https://api.anthropic.com；config で anthropic_version, max_tokens",
+      "protocolAlertGemini": "gemini：既定 Google Generative Language API；model 例 gemini-1.5-flash",
+      "protocolAlertSttNote": "音声認識（STT）は独立 STT 設定を使用。LLM 設定は再利用しない",
+      "baseUrlHintOpenai": "OpenAI 互換：ルート URL（/v1 なし）",
+      "baseUrlHintClaude": "既定 https://api.anthropic.com",
+      "baseUrlHintGemini": "既定 Google Generative Language API",
+      "optionalPlaceholder": "任意",
+      "modelPlaceholder": "例 gpt-4o-mini, claude-3-5-sonnet-20241022"
     },
     "ttsConfigs": {
       "title": "TTS サービス設定",
@@ -526,7 +549,12 @@
       "codePlaceholder": "一意、例 tencent_zh_female",
       "baseUrlHint": "任意カスタムエンドポイント",
       "modelHint": "ベンダーにより必須",
-      "voiceHint": "音声ロールで voice_code を設定"
+      "voiceHint": "音声ロールで voice_code を設定",
+      "voiceDescription": "音色説明",
+      "regionRequired": "必須",
+      "regionOptional": "任意",
+      "defaultApiKeyHint": "ベンダー API 鍵（必須）",
+      "defaultVoiceHint": "音声ロールで voice_code を設定"
     },
     "sttConfigs": {
       "title": "STT サービス設定",
@@ -541,7 +569,12 @@
       "modelOpenai": "モデル code",
       "modelPlaceholderAzure": "Azure: - 可",
       "modelPlaceholderOpenai": "例 whisper-1",
-      "nvidiaWarning": "NVIDIA integrate は OpenAI 互換 STT 非対応。実 STT API のルート URL を使用"
+      "nvidiaWarning": "NVIDIA integrate は OpenAI 互換 STT 非対応。実 STT API のルート URL を使用",
+      "configAlertTitle": "設定説明",
+      "dialogAlertOpenai": "Base URL はルート（サーバーが /v1/audio/transcriptions を呼ぶ）。末尾に /v1 を付けない。未入力時 Go 既定 https://api.openai.com",
+      "dialogAlertAzure": "Azure 短音声：API Key は Speech リソース鍵；JSON に \"region\":\"eastasia\" 必須。locale 任意。model code は - 可",
+      "protocolOpenai": "OpenAI 互換（Whisper 等）",
+      "protocolAzure": "Azure 音声（REST 短音声）"
     },
     "translateConfigs": {
       "title": "翻訳サービス設定",
@@ -564,7 +597,8 @@
       "customEndpointHint": "任意ベンダーエンドポイント",
       "statusActive": "active（他を無効化）",
       "subscriptionKey": "サブスクリプションキー",
-      "secretKey": "シークレットキー"
+      "secretKey": "シークレットキー",
+      "protocolAlertDetails": "openai（LLM 翻訳）：有効な OpenAI 互換 LLM 設定を関連して Base URL / API Key / モデルを再利用、または個別設定。\nazure_translator：config に region；API Key にサブスクリプションキー。\ndeepl：Auth Key；use_free_api 任意。\ngoogle_translate：Google API Key。\nbaidu_translate：App ID + シークレット。\ntencent_translate：SecretId + SecretKey；region は JSON。\naliyun_translate：AccessKey ID + Secret；region は JSON。"
     },
     "objectStorage": {
       "title": "オブジェクトストレージ",
@@ -572,7 +606,11 @@
       "configAnomaly": "active が {count} 件。1件のみ",
       "configAnomalyTitle": "設定警告",
       "createDialog": "新規オブジェクトストレージ",
-      "editDialog": "オブジェクトストレージ編集"
+      "editDialog": "オブジェクトストレージ編集",
+      "providerLocal": "ローカルディレクトリ（サーバーディスク）",
+      "providerR2": "Cloudflare R2（S3 互換）",
+      "providerQiniu": "七牛クラウドオブジェクトストレージ",
+      "providerAliyunOss": "阿里云 OSS"
     }
   }
 }

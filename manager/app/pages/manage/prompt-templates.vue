@@ -174,7 +174,7 @@ const statusOptions = [
 ];
 
 const langSelectOptions = computed(() => [
-  { value: "", label: "不绑定则全局" },
+  { value: "", label: t("pages.promptTemplates.langUnbound") },
   ...langOptions.value.map((l) => ({ value: l.id, label: `${l.code} · ${l.name}` })),
 ]);
 
@@ -190,8 +190,8 @@ const { activateRow, activatingId } = useActivateConfigRow({
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="提示词模板"
-        description="系统提示词等业务模板；code 唯一，供服务端按编码取用。"
+        :title="$t('pages.promptTemplates.title')"
+        :description="$t('pages.promptTemplates.description')"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
@@ -202,9 +202,9 @@ const { activateRow, activatingId } = useActivateConfigRow({
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>编码</AdminTh>
+          <AdminTh>{{ $t("common.code") }}</AdminTh>
           <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh>语言 ID</AdminTh>
+          <AdminTh>{{ $t("fields.languageId") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
           <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
@@ -224,11 +224,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
               :loading="activatingId === String(row.id)"
               @click="activateRow(row)"
             >
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -238,7 +238,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建模板' : '编辑模板'"
+      :title="dialogMode === 'create' ? $t('pages.promptTemplates.createDialog') : $t('pages.promptTemplates.editDialog')"
       width="lg"
     >
       <AdminSkeleton v-if="optionsLoading" :rows="4" />
@@ -246,19 +246,19 @@ const { activateRow, activatingId } = useActivateConfigRow({
         <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="form.id" disabled />
         </AdminFormField>
-        <AdminFormField label="编码" required>
+        <AdminFormField :label="$t('common.code')" required>
           <AdminInput v-model="form.code" :disabled="dialogMode === 'edit'" />
         </AdminFormField>
         <AdminFormField :label="$t('common.name')" required>
           <AdminInput v-model="form.name" />
         </AdminFormField>
-        <AdminFormField label="语言">
+        <AdminFormField :label="$t('fields.language')">
           <AdminSelect v-model="form.languageId" :options="langSelectOptions" />
         </AdminFormField>
-        <AdminFormField label="内容" required>
+        <AdminFormField :label="$t('fields.content')" required>
           <AdminInput v-model="form.content" type="textarea" :rows="8" class="font-mono text-sm" />
         </AdminFormField>
-        <AdminFormField label="variables" hint='JSON，如 ["name"] 或留空'>
+        <AdminFormField label="variables" :hint="$t('pages.promptTemplates.variablesHint')">
           <AdminInput
             v-model="form.variables"
             type="textarea"

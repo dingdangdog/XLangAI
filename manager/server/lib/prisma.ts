@@ -10,7 +10,7 @@ const prismaClientSingleton = () => {
   }).$extends(withAccelerate());
 };
 
-/** Nitro 注入的 `prisma` 实例类型（含 Accelerate 扩展），种子函数参数应使用本类型而非裸 `PrismaClient` */
+/** Nitro-injected prisma instance type (incl. Accelerate); use for seed helpers instead of bare PrismaClient */
 export type AppPrismaClient = ReturnType<typeof prismaClientSingleton>;
 
 declare const globalThis: {

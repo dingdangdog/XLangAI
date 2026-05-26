@@ -58,7 +58,7 @@ async function uploadCloud(
 ): Promise<{ url: string; localFilename: string }> {
   const cfg = await getActiveObjectStorage();
   if (!cfg) {
-    throw new Error("media.assistant_tts.storage=cloud 但未配置 active 对象存储");
+    throw new Error("media.assistant_tts.storage=cloud but no active object storage config");
   }
   const provider = (cfg.provider ?? "").trim().toLowerCase();
   const normExt = ext.startsWith(".") ? ext : `.${ext}`;
@@ -78,7 +78,7 @@ async function uploadCloud(
     const bucket = (cfg.bucket ?? "").trim();
     const publicBase = (cfg.publicBaseUrl ?? "").trim().replace(/\/$/, "");
     if (!endpoint || !accessKey || !secretKey || !bucket || !publicBase) {
-      throw new Error("对象存储配置不完整（endpoint/keys/bucket/public_base_url）");
+      throw new Error("Object storage config incomplete (endpoint/keys/bucket/public_base_url)");
     }
     const client = new S3Client({
       region: (cfg.region ?? "auto").trim() || "auto",
@@ -97,10 +97,10 @@ async function uploadCloud(
     return { url: `${publicBase}/${key}`, localFilename };
   }
 
-  throw new Error(`管理端试听暂不支持对象存储 provider「${provider}」`);
+  throw new Error(`Manager preview does not support object storage provider "${provider}"`);
 }
 
-/** 按 media.assistant_tts.storage 保存；cloud 时额外写服务器本地副本（AUDIO_DIR）。 */
+/** Saves per media.assistant_tts.storage; cloud mode also writes a local copy under AUDIO_DIR. */
 export async function saveAssistantPreviewAudio(
   data: Buffer,
   ext: string,

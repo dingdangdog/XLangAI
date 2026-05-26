@@ -1,31 +1,9 @@
 <script setup lang="ts">
-const { t } = useI18n();
+const { t, te } = useI18n();
 const API = "/api/admin/system-settings";
 const api = useAdminResourceApi(API);
 const toast = useToast();
 const { confirm } = useConfirm();
-
-const KEY_LABELS: Record<string, string> = {
-  "auth.password.enabled": "账号密码登录",
-  "auth.password.register_enabled": "账号密码注册",
-  "auth.sms.enabled": "短信验证码登录",
-  "auth.sms.register_enabled": "短信验证码注册",
-  "auth.google.enabled": "Google 登录",
-  "auth.google.register_enabled": "Google 自动注册",
-  "auth.apple.enabled": "Apple 登录",
-  "auth.apple.register_enabled": "Apple 自动注册",
-  "media.user_recording.storage": "用户录音存储",
-  "media.assistant_tts.storage": "AI 回复音频存储",
-  "media.avatar.storage": "头像存储",
-  "official_server_store.config": "官网服务器商店配置",
-};
-
-const STORAGE_OPTIONS = [
-  { value: "client", label: "仅客户端" },
-  { value: "server", label: "服务器本地" },
-  { value: "cloud", label: "云端对象存储" },
-];
-const STORAGE_OPTIONS_NO_CLIENT = STORAGE_OPTIONS.filter((o) => o.value !== "client");
 
 const page = ref(1);
 const pageSize = ref(50);
@@ -62,13 +40,24 @@ const form = reactive({
 });
 
 function labelForKey(k: string) {
-  return KEY_LABELS[k] ?? k;
+  const i18nKey = `pages.systemSettings.keys.${k}`;
+  return te(i18nKey) ? t(i18nKey) : k;
 }
 
 function storageOptionsForKey(k: string) {
-  if (k === "media.user_recording.storage") return STORAGE_OPTIONS;
-  return STORAGE_OPTIONS_NO_CLIENT;
+  if (k === "media.user_recording.storage") return storageOptionsAll.value;
+  return storageOptionsNoClient.value;
 }
+
+const storageOptionsAll = computed(() => [
+  { value: "client", label: t("pages.systemSettings.storageClient") },
+  { value: "server", label: t("pages.systemSettings.storageServer") },
+  { value: "cloud", label: t("pages.systemSettings.storageCloud") },
+]);
+
+const storageOptionsNoClient = computed(() =>
+  storageOptionsAll.value.filter((o) => o.value !== "client"),
+);
 
 function resetForm() {
   form.id = "";
@@ -129,7 +118,7 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: `确认删除系统变量 ${String(row.key ?? "")}？`,
+    message: t("confirm.deleteSystemSetting", { key: String(row.key ?? "") }),
     danger: true,
     confirmLabel: t("common.delete"),
   });
@@ -150,16 +139,19 @@ const valueTypeOptions = [
   { value: "json", label: "json" },
 ];
 
-const boolValueOptions = [
-  { value: "true", label: "true（开启）" },
-  { value: "false", label: "false（关闭）" },
-];
+const boolValueOptions = computed(() => [
+  { value: "true", label: t("status.trueOn") },
+  { value: "false", label: t("status.falseOff") },
+]);
 </script>
 
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader title="系统变量" description="登录开关、媒体存储策略等 KEY-VALUE。与 LLM / 对象存储等厂商密钥表无关。">
+      <AdminPageHeader
+        :title="$t('pages.systemSettings.title')"
+        :description="$t('pages.systemSettings.description')"
+      >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
@@ -170,9 +162,9 @@ const boolValueOptions = [
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh>Key</AdminTh>
-          <AdminTh>说明</AdminTh>
-          <AdminTh>值</AdminTh>
-          <AdminTh width="72px">类型</AdminTh>
+          <AdminTh>{{ $t("common.description") }}</AdminTh>
+          <AdminTh>{{ $t("common.value") }}</AdminTh>
+          <AdminTh width="72px">{{ $t("common.type") }}</AdminTh>
           <AdminTh>{{ $t("common.remark") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
           <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
@@ -181,7 +173,9 @@ const boolValueOptions = [
           <AdminTd nowrap><code class="text-xs">{{ row.key }}</code></AdminTd>
           <AdminTd>{{ labelForKey(String(row.key ?? '')) }}</AdminTd>
           <AdminTd>
-            <span v-if="row.valueType === 'bool'">{{ row.value === 'true' ? '开启' : '关闭' }}</span>
+            <span v-if="row.valueType === 'bool'">
+              {{ row.value === 'true' ? $t('status.on') : $t('status.off') }}
+            </span>
             <span v-else>{{ row.value }}</span>
           </AdminTd>
           <AdminTd>{{ row.valueType }}</AdminTd>
@@ -190,7 +184,7 @@ const boolValueOptions = [
           <AdminTd align="right" nowrap>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -198,20 +192,27 @@ const boolValueOptions = [
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
 
-    <AdminDialog v-model="dialogVisible" :title="dialogMode === 'create' ? '新建系统变量' : '编辑系统变量'">
+    <AdminDialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'create' ? $t('pages.systemSettings.createDialog') : $t('pages.systemSettings.editDialog')"
+    >
       <AdminFormField label="Key" required>
-        <AdminInput v-model="form.key" :disabled="dialogMode === 'edit'" placeholder="如 auth.sms.enabled" />
+        <AdminInput
+          v-model="form.key"
+          :disabled="dialogMode === 'edit'"
+          :placeholder="$t('pages.systemSettings.keyPlaceholder')"
+        />
       </AdminFormField>
-      <AdminFormField label="类型">
+      <AdminFormField :label="$t('common.type')">
         <AdminSelect v-model="form.valueType" :options="valueTypeOptions" :disabled="dialogMode === 'edit'" />
       </AdminFormField>
-      <AdminFormField v-if="form.valueType === 'bool'" label="值">
+      <AdminFormField v-if="form.valueType === 'bool'" :label="$t('common.value')">
         <AdminSelect v-model="form.value" :options="boolValueOptions" />
       </AdminFormField>
-      <AdminFormField v-else-if="form.key.startsWith('media.')" label="值">
+      <AdminFormField v-else-if="form.key.startsWith('media.')" :label="$t('common.value')">
         <AdminSelect v-model="form.value" :options="storageOptionsForKey(form.key)" />
       </AdminFormField>
-      <AdminFormField v-else label="值">
+      <AdminFormField v-else :label="$t('common.value')">
         <AdminInput v-model="form.value" />
       </AdminFormField>
       <AdminFormField :label="$t('common.remark')">

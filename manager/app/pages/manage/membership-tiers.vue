@@ -153,7 +153,10 @@ const { activateRow, activatingId } = useActivateConfigRow({
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader title="会员等级" description="定义套餐与用量上限；features 为 JSON 扩展字段。">
+      <AdminPageHeader
+        :title="$t('pages.membershipTiers.title')"
+        :description="$t('pages.membershipTiers.description')"
+      >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
@@ -163,10 +166,10 @@ const { activateRow, activatingId } = useActivateConfigRow({
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh width="100px">编码</AdminTh>
+          <AdminTh width="100px">{{ $t("common.code") }}</AdminTh>
           <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh width="88px">日限额</AdminTh>
-          <AdminTh width="88px">月限额</AdminTh>
+          <AdminTh width="88px">{{ $t("fields.dailyLimit") }}</AdminTh>
+          <AdminTh width="88px">{{ $t("fields.monthlyLimit") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
           <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
@@ -185,11 +188,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
           <AdminTd align="right" class="whitespace-nowrap">
             <AdminButton v-if="String(row.status) !== 'active'" variant="link"
               :loading="activatingId === String(row.id)" @click="activateRow(row)">
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -197,23 +200,39 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
 
-    <AdminDialog v-model="dialogVisible" :title="dialogMode === 'create' ? '新建会员等级' : '编辑会员等级'" width="lg">
+    <AdminDialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'create' ? $t('pages.membershipTiers.createDialog') : $t('pages.membershipTiers.editDialog')"
+      width="lg"
+    >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
       </AdminFormField>
-      <AdminFormField label="编码" required>
-        <AdminInput v-model="form.code" :disabled="dialogMode === 'edit'" placeholder="如 free、pro" />
+      <AdminFormField :label="$t('common.code')" required>
+        <AdminInput
+          v-model="form.code"
+          :disabled="dialogMode === 'edit'"
+          :placeholder="$t('pages.membershipTiers.codePlaceholder')"
+        />
       </AdminFormField>
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
-      <AdminFormField label="日限额" hint="留空表示不限制">
-        <AdminInput v-model="form.dailyLimit" type="number" placeholder="空为不限制" />
+      <AdminFormField :label="$t('fields.dailyLimit')" :hint="$t('pages.membershipTiers.dailyLimitHint')">
+        <AdminInput
+          v-model="form.dailyLimit"
+          type="number"
+          :placeholder="$t('pages.membershipTiers.dailyLimitPlaceholder')"
+        />
       </AdminFormField>
-      <AdminFormField label="月限额" hint="留空表示不限制">
-        <AdminInput v-model="form.monthlyLimit" type="number" placeholder="空为不限制" />
+      <AdminFormField :label="$t('fields.monthlyLimit')" :hint="$t('pages.membershipTiers.dailyLimitHint')">
+        <AdminInput
+          v-model="form.monthlyLimit"
+          type="number"
+          :placeholder="$t('pages.membershipTiers.dailyLimitPlaceholder')"
+        />
       </AdminFormField>
-      <AdminFormField label="权益 JSON">
+      <AdminFormField :label="$t('fields.featuresJson')">
         <AdminInput v-model="form.features" type="textarea" :rows="4" class="font-mono text-sm" />
       </AdminFormField>
       <AdminFormField :label="$t('common.status')">

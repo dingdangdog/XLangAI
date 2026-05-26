@@ -12,15 +12,10 @@ const { confirm } = useConfirm();
 
 
 const PROVIDERS = [
-
-  { value: "local", label: "本地目录（服务器磁盘）" },
-
-  { value: "cloudflare_r2", label: "Cloudflare R2（S3 兼容）" },
-
-  { value: "qiniu", label: "七牛云对象存储" },
-
-  { value: "aliyun_oss", label: "阿里云 OSS" },
-
+  { value: "local", labelKey: "pages.objectStorage.providerLocal" },
+  { value: "cloudflare_r2", labelKey: "pages.objectStorage.providerR2" },
+  { value: "qiniu", labelKey: "pages.objectStorage.providerQiniu" },
+  { value: "aliyun_oss", labelKey: "pages.objectStorage.providerAliyunOss" },
 ] as const;
 
 
@@ -343,7 +338,7 @@ async function removeRow(row: Record<string, unknown>) {
 
   const ok = await confirm({
 
-    message: "确认删除该对象存储配置？",
+    message: t("confirm.deleteObjectStorage"),
 
     danger: true,
 
@@ -383,7 +378,9 @@ const statusOptions = [
 
 
 
-const providerOptions = PROVIDERS.map((p) => ({ value: p.value, label: p.label }));
+const providerOptions = computed(() =>
+  PROVIDERS.map((p) => ({ value: p.value, label: t(p.labelKey) })),
+);
 
 
 
@@ -412,16 +409,16 @@ const { activateRow, activatingId } = useActivateConfigRow({
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="对象存储 / 图床"
-        description="全局仅一条 active；Go 只读启用中的那条，不按编码查找。"
+        :title="$t('pages.objectStorage.title')"
+        :description="$t('pages.objectStorage.description')"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
-      <AdminAlert v-if="activeCount > 1" title="配置异常" variant="warning">
-        当前列表中有 {{ activeCount }} 条 active 记录，应仅保留一条。
+      <AdminAlert v-if="activeCount > 1" :title="$t('pages.objectStorage.configAnomalyTitle')" variant="warning">
+        {{ $t("pages.objectStorage.configAnomaly", { count: activeCount }) }}
       </AdminAlert>
     </template>
 
@@ -433,11 +430,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
           <AdminTh>{{ $t("common.name") }}</AdminTh>
 
-          <AdminTh width="140px">Provider</AdminTh>
+          <AdminTh width="140px">{{ $t("common.provider") }}</AdminTh>
 
-          <AdminTh>Bucket</AdminTh>
+          <AdminTh>{{ $t("fields.bucket") }}</AdminTh>
 
-          <AdminTh>公网 URL</AdminTh>
+          <AdminTh>{{ $t("fields.publicUrl") }}</AdminTh>
 
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
 
@@ -480,11 +477,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
               :loading="activatingId === String(row.id)"
               @click="activateRow(row)"
             >
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
 
@@ -502,7 +499,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
       v-model="dialogVisible"
 
-      :title="dialogMode === 'create' ? '新建对象存储配置' : '编辑对象存储配置'"
+      :title="dialogMode === 'create' ? $t('pages.objectStorage.createDialog') : $t('pages.objectStorage.editDialog')"
 
       width="lg"
 
@@ -520,7 +517,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
       </AdminFormField>
 
-      <AdminFormField label="Provider">
+      <AdminFormField :label="$t('common.provider')">
 
         <AdminSelect v-model="form.provider" :options="providerOptions" />
 
@@ -530,31 +527,31 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
       <template v-if="isR2">
 
-        <AdminFormField label="访问密钥 ID" required>
+        <AdminFormField :label="$t('fields.accessKeyId')" required>
 
           <AdminInput v-model="form.apiKey" type="password" autocomplete="off" />
 
         </AdminFormField>
 
-        <AdminFormField label="机密访问密钥" required>
+        <AdminFormField :label="$t('fields.secretAccessKey')" required>
 
           <AdminInput v-model="form.secretKey" type="password" autocomplete="off" />
 
         </AdminFormField>
 
-        <AdminFormField label="S3 API 终结点" required>
+        <AdminFormField :label="$t('fields.s3Endpoint')" required>
 
           <AdminInput v-model="form.baseUrl" />
 
         </AdminFormField>
 
-        <AdminFormField label="存储桶名称" required>
+        <AdminFormField :label="$t('fields.bucketName')" required>
 
           <AdminInput v-model="form.bucket" />
 
         </AdminFormField>
 
-        <AdminFormField label="公共访问 URL" required>
+        <AdminFormField :label="$t('fields.publicAccessUrl')" required>
 
           <AdminInput v-model="form.publicBaseUrl" />
 
@@ -566,13 +563,13 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
       <template v-else>
 
-        <AdminFormField label="Endpoint / Base URL">
+        <AdminFormField :label="$t('fields.endpointBaseUrl')">
 
           <AdminInput v-model="form.baseUrl" />
 
         </AdminFormField>
 
-        <AdminFormField label="公网访问域名">
+        <AdminFormField :label="$t('fields.publicDomain')">
 
           <AdminInput v-model="form.publicBaseUrl" />
 
@@ -590,13 +587,13 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
         </AdminFormField>
 
-        <AdminFormField label="Bucket">
+        <AdminFormField :label="$t('fields.bucket')">
 
           <AdminInput v-model="form.bucket" />
 
         </AdminFormField>
 
-        <AdminFormField label="Region">
+        <AdminFormField :label="$t('common.region')">
 
           <AdminInput v-model="form.region" />
 
@@ -606,7 +603,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
 
 
-      <AdminFormField label="扩展 JSON">
+      <AdminFormField :label="$t('fields.extJson')">
 
         <AdminInput v-model="form.config" type="textarea" :rows="3" class="font-mono text-sm" />
 

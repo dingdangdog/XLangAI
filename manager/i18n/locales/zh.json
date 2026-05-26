@@ -47,6 +47,7 @@
     "deleteObjectStorage": "确认删除该对象存储配置？",
     "deleteSttConfig": "确认删除该 STT 配置？",
     "deleteTranslateConfig": "确认删除该翻译配置？",
+    "deleteLlmConfig": "确认删除该 LLM 配置？",
     "deleteSystemSetting": "确认删除系统变量 {key}？",
     "softDeleteMessage": "确认软删除该消息？",
     "softDeleteConversation": "确认软删除该会话？",
@@ -102,6 +103,7 @@
     "actions": "操作",
     "optional": "（可选）",
     "optionalParen": "（不选）",
+    "required": "必填",
     "notAssigned": "未分配",
     "emDash": "—",
     "config": "配置",
@@ -269,7 +271,13 @@
     "originalCreatedAt": "原创建时间",
     "linkedLlm": "关联 LLM",
     "secret": "密钥",
-    "modelOrLink": "模型 / 关联"
+    "modelOrLink": "模型 / 关联",
+    "sttText": "STT 文本",
+    "metadataJson": "metadata JSON",
+    "voiceDescription": "音色说明",
+    "linkedLlmShort": "关联 LLM",
+    "endpointBaseUrl": "Endpoint / Base URL",
+    "bucket": "Bucket"
   },
   "usage": {
     "primaryLine": "{count} 次 · {tokens} tok",
@@ -321,7 +329,8 @@
     "sttModelRequired": "OpenAI 兼容协议须填写模型 code（如 whisper-1）",
     "selectLlmConfig": "请选择要关联的 LLM 配置",
     "fillModelOrLinkLlm": "请填写模型 code，或改为关联已有 LLM 配置",
-    "previewNotGenerated": "尚未生成试听，请先点击「生成试听」"
+    "previewNotGenerated": "尚未生成试听，请先点击「生成试听」",
+    "fillNameAndModel": "请填写名称与模型 code"
   },
   "pages": {
     "login": {
@@ -378,6 +387,7 @@
     },
     "voiceRoles": {
       "title": "语音角色",
+      "usageAlertTitle": "使用说明",
       "usageAlert": "试听在本管理端生成：语言页配置试听文案模板 → 本页「生成试听」→ 按 media.assistant_tts.storage 写库与存储。Go API 只把 preview_audio_url 返回给客户端播放。",
       "createDialog": "新建语音角色",
       "editDialog": "编辑语音角色",
@@ -438,6 +448,7 @@
       "title": "服务器商店",
       "description": "维护本服务器公开信息，并同步到官网服务器商店。",
       "syncAlert": "上传到官网的是本服务器公开资料和可选统计数据，不包含用户资料、会话内容、消息内容或密钥。开启公开后，后台会定时向官网发送心跳，用于判断服务器是否活跃。",
+      "syncAlertTitle": "同步说明",
       "enableOnOfficial": "开放到官网服务器商店",
       "allowOfficialDisplay": "允许官网展示本服务器",
       "uploadStats": "上传统计数据",
@@ -514,7 +525,19 @@
     },
     "llmConfigs": {
       "title": "LLM 服务配置",
-      "description": "支持 OpenAI 兼容与 Claude、Gemini 等协议。列表「今日/本月用量」为成功请求次数与输出 Token（UTC 自然日）。"
+      "description": "支持 OpenAI 兼容与 Claude、Gemini 等协议。列表「今日/本月用量」为成功请求次数与输出 Token（UTC 自然日）。",
+      "createDialog": "新建 LLM 配置",
+      "editDialog": "编辑 LLM 配置",
+      "protocolAlertTitle": "协议说明",
+      "protocolAlertOpenai": "OpenAI 兼容类（openai、azure_openai、ollama、deepseek 等）：Base URL 填根地址（勿带 /v1）；API Key 须在后台填写。",
+      "protocolAlertClaude": "claude：默认 https://api.anthropic.com；config 可设 anthropic_version、max_tokens。",
+      "protocolAlertGemini": "gemini：默认 Google Generative Language API；model 如 gemini-1.5-flash。",
+      "protocolAlertSttNote": "语音转写（STT）使用独立的 STT 服务配置，不会复用 LLM 配置或环境变量。",
+      "baseUrlHintOpenai": "OpenAI 兼容：根地址（不要带 /v1）",
+      "baseUrlHintClaude": "默认 https://api.anthropic.com",
+      "baseUrlHintGemini": "默认 Google Generative Language API",
+      "optionalPlaceholder": "可选",
+      "modelPlaceholder": "如 gpt-4o-mini、claude-3-5-sonnet-20241022"
     },
     "ttsConfigs": {
       "title": "TTS 服务配置",
@@ -526,7 +549,12 @@
       "codePlaceholder": "唯一，如 tencent_zh_female",
       "baseUrlHint": "可选；IBM / MiniMax / ElevenLabs 自定义端点",
       "modelHint": "部分厂商必填，见协议说明",
-      "voiceHint": "在「语音角色」中配置 voice_code"
+      "voiceHint": "在「语音角色」中配置 voice_code",
+      "voiceDescription": "音色说明",
+      "regionRequired": "必填",
+      "regionOptional": "可选",
+      "defaultApiKeyHint": "厂商 API 密钥（必填）",
+      "defaultVoiceHint": "在「语音角色」中配置 voice_code"
     },
     "sttConfigs": {
       "title": "STT 服务配置",
@@ -541,7 +569,12 @@
       "modelOpenai": "模型 code",
       "modelPlaceholderAzure": "Azure 可填 -",
       "modelPlaceholderOpenai": "如 whisper-1（按厂商文档填写）",
-      "nvidiaWarning": "STT 不能使用 NVIDIA integrate 网关地址：该地址不提供 OpenAI 兼容的 /v1/audio/transcriptions。请填写实际提供语音转写 API 的根地址。"
+      "nvidiaWarning": "STT 不能使用 NVIDIA integrate 网关地址：该地址不提供 OpenAI 兼容的 /v1/audio/transcriptions。请填写实际提供语音转写 API 的根地址。",
+      "configAlertTitle": "配置说明",
+      "dialogAlertOpenai": "Base URL 填根地址（服务端会请求 /v1/audio/transcriptions），末尾不要带 /v1。未填 Base URL 时，Go 端默认使用 https://api.openai.com。",
+      "dialogAlertAzure": "Azure 短音频识别：API Key 填 Speech 资源密钥；扩展 JSON 至少包含 \"region\":\"eastasia\"（与资源一致）。可选 locale（如 zh-CN），不填则按会话目标语言映射。模型 code 可填 -。",
+      "protocolOpenai": "OpenAI 兼容（Whisper 等）",
+      "protocolAzure": "Azure 语音（REST 短音频）"
     },
     "translateConfigs": {
       "title": "翻译服务配置",
@@ -564,7 +597,8 @@
       "customEndpointHint": "可选；厂商自定义端点",
       "statusActive": "active（启用，将自动停用其它配置）",
       "subscriptionKey": "订阅密钥",
-      "secretKey": "密钥（Secret Key）"
+      "secretKey": "密钥（Secret Key）",
+      "protocolAlertDetails": "openai（LLM 翻译）：可关联「LLM 服务配置」中已启用的 OpenAI 兼容项，复用 Base URL / API Key / 模型；也可单独自定义。\nazure_translator：config 中配置 region；订阅密钥填在 API Key。\ndeepl：Auth Key；use_free_api 可选。\ngoogle_translate：Google API Key。\nbaidu_translate：App ID + 密钥（双字段）。\ntencent_translate：SecretId + SecretKey；region 写在扩展 JSON。\naliyun_translate：AccessKey ID + AccessKey Secret；region 写在扩展 JSON。"
     },
     "objectStorage": {
       "title": "对象存储 / 图床",
@@ -572,7 +606,11 @@
       "configAnomaly": "当前列表中有 {count} 条 active 记录，应仅保留一条。",
       "configAnomalyTitle": "配置异常",
       "createDialog": "新建对象存储配置",
-      "editDialog": "编辑对象存储配置"
+      "editDialog": "编辑对象存储配置",
+      "providerLocal": "本地目录（服务器磁盘）",
+      "providerR2": "Cloudflare R2（S3 兼容）",
+      "providerQiniu": "七牛云对象存储",
+      "providerAliyunOss": "阿里云 OSS"
     }
   }
 }

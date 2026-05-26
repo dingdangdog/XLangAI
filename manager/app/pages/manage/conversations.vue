@@ -95,7 +95,7 @@ const form = reactive({
   voiceRoleId: "",
   llmConfigId: "",
   promptId: "",
-  title: "新对话",
+  title: "",
   status: "active",
   remark: "",
 });
@@ -107,7 +107,7 @@ function resetForm() {
   form.voiceRoleId = "";
   form.llmConfigId = "";
   form.promptId = "";
-  form.title = "新对话";
+  form.title = t("pages.conversations.defaultTitle");
   form.status = "active";
   form.remark = "";
 }
@@ -127,7 +127,7 @@ function openEdit(row: Record<string, unknown>) {
   form.voiceRoleId = String(row.voiceRoleId ?? "");
   form.llmConfigId = String(row.llmConfigId ?? "");
   form.promptId = String(row.promptId ?? "");
-  form.title = String(row.title ?? "新对话");
+  form.title = String(row.title ?? t("pages.conversations.defaultTitle"));
   form.status = String(row.status ?? "active");
   form.remark = String(row.remark ?? "");
   dialogVisible.value = true;
@@ -149,7 +149,7 @@ async function submit() {
     voiceRoleId: form.voiceRoleId.trim() || null,
     llmConfigId: form.llmConfigId.trim() || null,
     promptId: form.promptId.trim() || null,
-    title: form.title.trim() || "新对话",
+    title: form.title.trim() || t("pages.conversations.defaultTitle"),
     status: form.status,
     remark: form.remark.trim() || null,
   };
@@ -196,7 +196,7 @@ const conversationStatusOptions = [
 ];
 
 const optionalSelect = (opts: Opt[]) => [
-  { value: "", label: "（可选）" },
+  { value: "", label: t("common.optional") },
   ...opts.map((o) => ({ value: o.id, label: o.label })),
 ];
 
@@ -210,13 +210,13 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="会话"
-        description="会话绑定用户与语言，可选语音角色、LLM 配置与提示词模板；删除为软删除。"
+        :title="$t('pages.conversations.title')"
+        :description="$t('pages.conversations.description')"
       >
         <template #actions>
           <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
           <div class="w-56">
-            <AdminInput v-model="filterUserId" placeholder="按用户 ID 筛选" />
+            <AdminInput v-model="filterUserId" :placeholder="$t('pages.conversations.filterUserId')" />
           </div>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
@@ -226,12 +226,12 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>标题</AdminTh>
-          <AdminTh>用户 ID</AdminTh>
-          <AdminTh>语言 ID</AdminTh>
-          <AdminTh>语音角色</AdminTh>
+          <AdminTh>{{ $t("fields.title") }}</AdminTh>
+          <AdminTh>{{ $t("fields.userId") }}</AdminTh>
+          <AdminTh>{{ $t("fields.languageId") }}</AdminTh>
+          <AdminTh>{{ $t("fields.voiceRole") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
-          <AdminTh>删除时间</AdminTh>
+          <AdminTh>{{ $t("common.deletedAt") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
           <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
@@ -251,7 +251,7 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
               :disabled="!!row.deletedAt"
               @click="removeRow(row)"
             >
-              软删
+              {{ $t("common.softDelete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -261,7 +261,7 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建会话' : '编辑会话'"
+      :title="dialogMode === 'create' ? $t('pages.conversations.createDialog') : $t('pages.conversations.editDialog')"
       width="lg"
     >
       <AdminSkeleton v-if="optionsLoading" :rows="6" />
@@ -269,22 +269,26 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
         <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="form.id" disabled />
         </AdminFormField>
-        <AdminFormField label="用户 ID" required>
+        <AdminFormField :label="$t('fields.userId')" required>
           <AdminInput v-model="form.userId" placeholder="UUID" />
         </AdminFormField>
-        <AdminFormField label="语言" required>
-          <AdminSelect v-model="form.languageId" :options="langSelectOptions" placeholder="选择语言" />
+        <AdminFormField :label="$t('fields.language')" required>
+          <AdminSelect
+            v-model="form.languageId"
+            :options="langSelectOptions"
+            :placeholder="$t('pages.conversations.selectLanguage')"
+          />
         </AdminFormField>
-        <AdminFormField label="语音角色">
+        <AdminFormField :label="$t('fields.voiceRole')">
           <AdminSelect v-model="form.voiceRoleId" :options="voiceSelectOptions" />
         </AdminFormField>
-        <AdminFormField label="LLM 配置">
+        <AdminFormField :label="$t('fields.llmConfig')">
           <AdminSelect v-model="form.llmConfigId" :options="aiSelectOptions" />
         </AdminFormField>
-        <AdminFormField label="提示词模板">
+        <AdminFormField :label="$t('fields.promptTemplate')">
           <AdminSelect v-model="form.promptId" :options="promptSelectOptions" />
         </AdminFormField>
-        <AdminFormField label="标题">
+        <AdminFormField :label="$t('fields.title')">
           <AdminInput v-model="form.title" />
         </AdminFormField>
         <AdminFormField :label="$t('common.status')">

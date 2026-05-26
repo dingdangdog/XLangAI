@@ -43,7 +43,7 @@ async function azureTts(
 ): Promise<Buffer> {
   const r = region.trim().toLowerCase();
   if (!key || !r) {
-    throw new Error("Azure TTS 缺少 API Key 或 region");
+    throw new Error("Azure TTS missing API key or region");
   }
   const endpoint = `https://${r}.tts.speech.microsoft.com/cognitiveservices/v1`;
   const fmt = outputFormat.trim() || "audio-16khz-128kbitrate-mono-mp3";
@@ -74,7 +74,7 @@ async function openaiTts(
   text: string,
 ): Promise<Buffer> {
   if (!apiKey) {
-    throw new Error("OpenAI TTS 缺少 API Key");
+    throw new Error("OpenAI TTS missing API key");
   }
   const root = (baseUrl.trim() || "https://api.openai.com").replace(/\/$/, "");
   const res = await fetch(`${root}/v1/audio/speech`, {
@@ -96,7 +96,7 @@ async function openaiTts(
   return Buffer.from(await res.arrayBuffer());
 }
 
-/** 管理端试听合成：当前支持 azure_speech_rest、openai_rest（与默认种子一致）。 */
+/** Manager preview synthesis: azure_speech_rest, openai_rest (matches default seed). */
 export async function synthesizePreviewAudio(
   tts: TtsRow,
   text: string,
@@ -105,7 +105,7 @@ export async function synthesizePreviewAudio(
   const ex = parseJsonConfig(tts.config);
   const voice = tts.voiceCode.trim();
   if (!voice) {
-    throw new Error("音色代码为空");
+    throw new Error("Voice code is empty");
   }
 
   if (provider === "azure_speech_rest") {
@@ -127,6 +127,6 @@ export async function synthesizePreviewAudio(
   }
 
   throw new Error(
-    `管理端试听暂不支持 provider「${provider}」，请改用 azure_speech_rest 或 openai_rest，或在 Go 对话链路中验证该厂商`,
+    `Manager preview does not support provider "${provider}"; use azure_speech_rest or openai_rest, or test via Go conversation pipeline`,
   );
 }

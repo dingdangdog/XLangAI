@@ -157,39 +157,11 @@ function regionRequired(): boolean {
 }
 
 function apiKeyHint(): string {
-  const m: Record<string, string> = {
-    openai_rest: "OpenAI API Key（必填）",
-    azure_speech_rest: "Azure 订阅密钥（必填）",
-    google_cloud_tts: "Google API Key（必填）",
-    gemini_tts: "Google API Key（必填）",
-    aws_polly: "SecretAccessKey（必填）；AccessKeyId 放 config.secret_id",
-    elevenlabs: "xi-api-key（必填）",
-    deepgram: "Deepgram API Key（必填）",
-    ibm_watson: "IBM apikey（必填）",
-    tencent_tts: "SecretKey（必填）；SecretId 放 config.secret_id",
-    aliyun_nls: "NLS Token（必填）；app_key 放 config",
-    baidu_tts: "access_token（必填）",
-    xunfei: "api_key（必填）；app_id、api_secret 放 config",
-    minimax: "API Key（必填）",
-    volcengine: "access_token（必填）；app_id 放 config",
-    playht: "API Key（必填）；user_id 放 config",
-  };
-  return m[form.provider] ?? "厂商 API 密钥（必填）";
+  return t("pages.ttsConfigs.defaultApiKeyHint");
 }
 
 function voiceHint(): string {
-  const m: Record<string, string> = {
-    azure_speech_rest: "Azure 音色 ShortName（语音角色 voice_code）",
-    tencent_tts: "VoiceType 数字，如 1001",
-    openai_rest: "alloy / nova 等",
-    elevenlabs: "ElevenLabs voice_id",
-    aws_polly: "Joanna 等 VoiceId",
-    google_cloud_tts: "en-US-Neural2-A",
-    gemini_tts: "Kore 等",
-    xunfei: "xiaoyan 等发音人",
-    volcengine: "BV001_streaming 等",
-  };
-  return m[form.provider] ?? "在「语音角色」中配置 voice_code";
+  return t("pages.ttsConfigs.defaultVoiceHint");
 }
 
 /** 库表 code 唯一；Go 按 id 查 TTS 配置，不按 code 查。新建时自动生成。 */
@@ -204,7 +176,7 @@ async function submitForm() {
     return;
   }
   if (regionRequired() && !form.region.trim()) {
-    toast.warning("该 Provider 须填写区域");
+    toast.warning(t("validation.regionRequired"));
     return;
   }
   let configStr = (form.config ?? "").trim();
@@ -255,7 +227,7 @@ async function submitForm() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该 TTS 配置？语音角色若仍引用该 ID 可能导致合成失败。",
+    message: t("confirm.deleteTtsConfig"),
     danger: true,
     confirmLabel: t("common.delete"),
   });
@@ -289,34 +261,31 @@ const { activateRow, activatingId } = useActivateConfigRow({
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="TTS 服务配置"
-        description="Go 按 id 选用 TTS 配置，不按编码查找；新建时编码自动生成。列表「今日/本月用量」为成功合成次数与输出文本字符数（UTC 自然日）。"
+        :title="$t('pages.ttsConfigs.title')"
+        :description="$t('pages.ttsConfigs.description')"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
-      <AdminAlert title="已接入 Provider（15）">
-        <p class="text-sm">
-          北美/全球：OpenAI、Azure、Google Cloud、Gemini、AWS Polly、ElevenLabs、Deepgram、IBM Watson、PlayHT。
-          中国：腾讯云、阿里云、百度、讯飞、MiniMax、火山引擎。新增厂商只需在后台新建配置并绑定语音角色。
-        </p>
+      <AdminAlert :title="$t('pages.ttsConfigs.providersCount')">
+        <p class="text-sm">{{ $t("pages.ttsConfigs.providersAlert") }}</p>
       </AdminAlert>
     </template>
 
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh>编码</AdminTh>
+          <AdminTh>{{ $t("common.code") }}</AdminTh>
           <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh width="160px">Provider</AdminTh>
-          <AdminTh width="96px">区域</AdminTh>
-          <AdminTh>模型</AdminTh>
-          <AdminTh>API Key</AdminTh>
+          <AdminTh width="160px">{{ $t("common.provider") }}</AdminTh>
+          <AdminTh width="96px">{{ $t("common.region") }}</AdminTh>
+          <AdminTh>{{ $t("common.model") }}</AdminTh>
+          <AdminTh>{{ $t("fields.apiKey") }}</AdminTh>
           <AdminTh width="80px">{{ $t("common.status") }}</AdminTh>
-          <AdminTh width="120px">今日用量</AdminTh>
-          <AdminTh width="120px">本月用量</AdminTh>
+          <AdminTh width="120px">{{ $t("common.todayUsage") }}</AdminTh>
+          <AdminTh width="120px">{{ $t("common.monthUsage") }}</AdminTh>
           <AdminTh width="64px">{{ $t("common.sort") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
           <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
@@ -344,11 +313,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
               :loading="activatingId === String(row.id)"
               @click="activateRow(row)"
             >
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -358,7 +327,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建 TTS 配置' : '编辑 TTS 配置'"
+      :title="dialogMode === 'create' ? $t('pages.ttsConfigs.createDialog') : $t('pages.ttsConfigs.editDialog')"
       width="lg"
     >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
@@ -367,25 +336,28 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
-      <AdminFormField label="Provider" required>
+      <AdminFormField :label="$t('common.provider')" required>
         <AdminSelect v-model="form.provider" :options="providerOptions" />
       </AdminFormField>
-      <AdminFormField label="Base URL" hint="可选；IBM / MiniMax / ElevenLabs 自定义端点">
+      <AdminFormField :label="$t('fields.baseUrl')" :hint="$t('pages.ttsConfigs.baseUrlHint')">
         <AdminInput v-model="form.baseUrl" />
       </AdminFormField>
-      <AdminFormField label="API Key / 密钥" :hint="apiKeyHint()">
+      <AdminFormField :label="$t('fields.apiKeySecret')" :hint="apiKeyHint()">
         <AdminInput v-model="form.apiKey" type="password" />
       </AdminFormField>
-      <AdminFormField label="区域" :hint="regionRequired() ? '必填' : '可选'">
+      <AdminFormField
+        :label="$t('common.region')"
+        :hint="regionRequired() ? $t('pages.ttsConfigs.regionRequired') : $t('pages.ttsConfigs.regionOptional')"
+      >
         <AdminInput v-model="form.region" placeholder="eastus / ap-guangzhou / us-east-1" />
       </AdminFormField>
-      <AdminFormField label="模型 code" hint="部分厂商必填，见协议说明">
+      <AdminFormField :label="$t('fields.modelCode')" :hint="$t('pages.ttsConfigs.modelHint')">
         <AdminInput v-model="form.modelCode" />
       </AdminFormField>
-      <AdminFormField label="扩展 JSON" :hint="CONFIG_HINTS[form.provider]">
+      <AdminFormField :label="$t('fields.extJson')" :hint="CONFIG_HINTS[form.provider]">
         <AdminInput v-model="form.config" type="textarea" :rows="4" class="font-mono text-sm" />
       </AdminFormField>
-      <AdminFormField label="音色说明">
+      <AdminFormField :label="$t('pages.ttsConfigs.voiceDescription')">
         <p class="text-sm text-gray-500">{{ voiceHint() }}</p>
       </AdminFormField>
       <AdminFormField :label="$t('common.status')">

@@ -188,13 +188,16 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="消息"
-        description="消息归属会话；角色一般为 user / assistant / system；删除为软删除。"
+        :title="$t('pages.messages.title')"
+        :description="$t('pages.messages.description')"
       >
         <template #actions>
           <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
           <div class="w-56">
-            <AdminInput v-model="filterConversationId" placeholder="按会话 ID 筛选" />
+            <AdminInput
+              v-model="filterConversationId"
+              :placeholder="$t('pages.messages.filterConversationId')"
+            />
           </div>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
@@ -204,14 +207,14 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
     <AdminPanel>
       <AdminTable :loading="loading">
         <template #head>
-          <AdminTh width="88px">角色</AdminTh>
-          <AdminTh width="96px">AI 状态</AdminTh>
-          <AdminTh>内容</AdminTh>
-          <AdminTh>会话 ID</AdminTh>
-          <AdminTh>音频</AdminTh>
-          <AdminTh width="96px">时长 ms</AdminTh>
-          <AdminTh>删除时间</AdminTh>
-          <AdminTh>创建时间</AdminTh>
+          <AdminTh width="88px">{{ $t("fields.role") }}</AdminTh>
+          <AdminTh width="96px">{{ $t("fields.aiStatus") }}</AdminTh>
+          <AdminTh>{{ $t("fields.content") }}</AdminTh>
+          <AdminTh>{{ $t("fields.conversationId") }}</AdminTh>
+          <AdminTh>{{ $t("fields.audio") }}</AdminTh>
+          <AdminTh width="96px">{{ $t("fields.durationMs") }}</AdminTh>
+          <AdminTh>{{ $t("common.deletedAt") }}</AdminTh>
+          <AdminTh>{{ $t("common.createdAt") }}</AdminTh>
           <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
@@ -231,7 +234,7 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
               :disabled="!!row.deletedAt"
               @click="removeRow(row)"
             >
-              软删
+              {{ $t("common.softDelete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -241,34 +244,34 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建消息' : '编辑消息'"
+      :title="dialogMode === 'create' ? $t('pages.messages.createDialog') : $t('pages.messages.editDialog')"
       width="lg"
     >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
       </AdminFormField>
-      <AdminFormField label="会话 ID" required>
+      <AdminFormField :label="$t('fields.conversationId')" required>
         <AdminInput v-model="form.conversationId" :disabled="dialogMode === 'edit'" />
       </AdminFormField>
-      <AdminFormField label="角色" required>
+      <AdminFormField :label="$t('fields.role')" required>
         <AdminSelect v-model="form.role" :options="roleOptions" />
       </AdminFormField>
-      <AdminFormField label="正文" required>
+      <AdminFormField :label="$t('fields.body')" required>
         <AdminInput v-model="form.content" type="textarea" :rows="6" />
       </AdminFormField>
-      <AdminFormField label="音频 URL">
+      <AdminFormField :label="$t('fields.audioUrl')">
         <AdminInput v-model="form.audioUrl" />
       </AdminFormField>
-      <AdminFormField label="原始音频 URL">
+      <AdminFormField :label="$t('fields.originalAudioUrl')">
         <AdminInput v-model="form.originalAudioUrl" />
       </AdminFormField>
-      <AdminFormField label="STT 文本">
+      <AdminFormField :label="$t('fields.sttText')">
         <AdminInput v-model="form.sttText" type="textarea" :rows="2" />
       </AdminFormField>
-      <AdminFormField label="时长 ms">
+      <AdminFormField :label="$t('fields.durationMs')">
         <AdminInput v-model="form.durationMs" type="number" />
       </AdminFormField>
-      <AdminFormField label="metadata JSON">
+      <AdminFormField :label="$t('fields.metadataJson')">
         <AdminInput v-model="form.metadata" type="textarea" :rows="3" class="font-mono text-sm" />
       </AdminFormField>
       <template #footer>

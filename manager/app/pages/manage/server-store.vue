@@ -52,23 +52,23 @@ const form = reactive<ServerStoreConfig>({
   stats: null,
 });
 
-const statLabels: Record<string, string> = {
-  users: "用户总数",
-  activeUsers: "活跃用户",
-  languages: "语言",
-  voiceRoles: "语音角色",
-  conversations: "会话",
-  messages: "消息",
-  llmConfigs: "LLM 配置",
-  sttConfigs: "STT 配置",
-  ttsConfigs: "TTS 配置",
-  translateConfigs: "翻译配置",
+const statLabelKeys: Record<string, string> = {
+  users: "pages.serverStore.statUsers",
+  activeUsers: "pages.serverStore.statActiveUsers",
+  languages: "pages.serverStore.statLanguages",
+  voiceRoles: "pages.serverStore.statVoiceRoles",
+  conversations: "pages.serverStore.statConversations",
+  messages: "pages.serverStore.statMessages",
+  llmConfigs: "pages.serverStore.statLlmConfigs",
+  sttConfigs: "pages.serverStore.statSttConfigs",
+  ttsConfigs: "pages.serverStore.statTtsConfigs",
+  translateConfigs: "pages.serverStore.statTranslateConfigs",
 };
 
 const stats = computed(() => {
   if (!form.stats) return [];
   return Object.entries(form.stats).map(([key, value]) => ({
-    label: statLabels[key] ?? key,
+    label: statLabelKeys[key] ? t(statLabelKeys[key]) : key,
     value,
   }));
 });
@@ -117,7 +117,7 @@ async function save() {
       body: payload(),
     });
     applyState(state);
-    toast.success("已保存服务器商店配置");
+    toast.success(t("toast.serverStoreSaved"));
   } catch (error) {
     toast.error(t("toast.saveFailed"));
     console.error(error);
@@ -134,9 +134,9 @@ async function publish() {
       body: payload(),
     });
     applyState(state);
-    toast.success("已上传到官网服务器商店");
+    toast.success(t("toast.uploadedToOfficial"));
   } catch (error) {
-    toast.error("上传失败，请检查服务器地址、官网地址和网络连通性");
+    toast.error(t("toast.uploadFailed"));
     console.error(error);
   } finally {
     publishing.value = false;
@@ -150,9 +150,9 @@ async function heartbeat() {
       method: "POST",
     });
     applyState(state);
-    toast.success("心跳已发送");
+    toast.success(t("toast.heartbeatSent"));
   } catch (error) {
-    toast.error("心跳发送失败");
+    toast.error(t("toast.heartbeatFailed"));
     console.error(error);
   } finally {
     heartbeating.value = false;
@@ -168,8 +168,8 @@ onMounted(() => {
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="服务器商店"
-        description="维护本服务器公开信息，并同步到官网服务器商店。"
+        :title="$t('pages.serverStore.title')"
+        :description="$t('pages.serverStore.description')"
       >
         <template #actions>
           <a
@@ -178,7 +178,7 @@ onMounted(() => {
             rel="noopener noreferrer"
             class="inline-flex items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted"
           >
-            打开官网商店
+            {{ $t("common.openOfficialStore") }}
           </a>
         </template>
       </AdminPageHeader>
@@ -189,70 +189,69 @@ onMounted(() => {
     <div v-else class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
       <AdminPanel>
         <div class="p-4 md:p-5">
-        <AdminAlert title="同步说明">
-          上传到官网的是本服务器公开资料和可选统计数据，不包含用户资料、会话内容、消息内容或密钥。
-          开启公开后，后台会定时向官网发送心跳，用于判断服务器是否活跃。
+        <AdminAlert :title="$t('pages.serverStore.syncAlertTitle')">
+          {{ $t("pages.serverStore.syncAlert") }}
         </AdminAlert>
 
         <div class="grid gap-4 md:grid-cols-2">
-          <AdminFormField label="开放到官网服务器商店">
-            <AdminCheckbox v-model="form.enabled" label="允许官网展示本服务器" />
+          <AdminFormField :label="$t('pages.serverStore.enableOnOfficial')">
+            <AdminCheckbox v-model="form.enabled" :label="$t('pages.serverStore.allowOfficialDisplay')" />
           </AdminFormField>
-          <AdminFormField label="上传统计数据">
-            <AdminCheckbox v-model="form.uploadStats" label="上传聚合统计数量" />
+          <AdminFormField :label="$t('pages.serverStore.uploadStats')">
+            <AdminCheckbox v-model="form.uploadStats" :label="$t('pages.serverStore.uploadAggregatedStats')" />
           </AdminFormField>
-          <AdminFormField label="本服务器地址" required>
+          <AdminFormField :label="$t('pages.serverStore.serverUrl')" required>
             <AdminInput
               v-model="form.serverAddress"
-              placeholder="如 https://api.example.com 或 https://example.com"
+              :placeholder="$t('pages.serverStore.serverUrlPlaceholder')"
             />
           </AdminFormField>
-          <AdminFormField label="官网地址">
-            <AdminInput v-model="form.homepageUrl" placeholder="如 https://example.com" />
+          <AdminFormField :label="$t('pages.serverStore.homepageUrl')">
+            <AdminInput v-model="form.homepageUrl" :placeholder="$t('pages.serverStore.homepagePlaceholder')" />
           </AdminFormField>
-          <AdminFormField label="服务器名称" required>
-            <AdminInput v-model="form.name" placeholder="如 某某学习社区服务器" />
+          <AdminFormField :label="$t('pages.serverStore.serverName')" required>
+            <AdminInput v-model="form.name" :placeholder="$t('pages.serverStore.serverNamePlaceholder')" />
           </AdminFormField>
-          <AdminFormField label="地区">
-            <AdminInput v-model="form.region" placeholder="如 中国大陆 / Singapore" />
+          <AdminFormField :label="$t('pages.serverStore.region')">
+            <AdminInput v-model="form.region" :placeholder="$t('pages.serverStore.regionPlaceholder')" />
           </AdminFormField>
-          <AdminFormField label="联系邮箱">
+          <AdminFormField :label="$t('pages.serverStore.contactEmail')">
             <AdminInput v-model="form.contactEmail" type="email" placeholder="admin@example.com" />
           </AdminFormField>
-          <AdminFormField label="版本">
-            <AdminInput v-model="form.version" placeholder="如 1.0.0" />
+          <AdminFormField :label="$t('pages.serverStore.version')">
+            <AdminInput v-model="form.version" :placeholder="$t('pages.serverStore.versionPlaceholder')" />
           </AdminFormField>
-          <AdminFormField label="Logo 地址">
+          <AdminFormField :label="$t('pages.serverStore.logoUrl')">
             <AdminInput v-model="form.logoUrl" placeholder="https://example.com/logo.png" />
           </AdminFormField>
-          <AdminFormField label="心跳间隔（秒）">
+          <AdminFormField :label="$t('pages.serverStore.heartbeatInterval')">
             <AdminInput v-model="form.heartbeatIntervalSeconds" type="number" />
           </AdminFormField>
-          <AdminFormField class="md:col-span-2" label="一句话简介">
+          <AdminFormField class="md:col-span-2" :label="$t('pages.serverStore.tagline')">
             <AdminInput
               v-model="form.summary"
               type="textarea"
               :rows="2"
-              placeholder="展示在官网列表中的简短介绍"
+              :placeholder="$t('pages.serverStore.taglinePlaceholder')"
             />
           </AdminFormField>
-          <AdminFormField class="md:col-span-2" label="详细简介">
+          <AdminFormField class="md:col-span-2" :label="$t('pages.serverStore.descriptionField')">
             <AdminInput
               v-model="form.description"
               type="textarea"
               :rows="5"
-              placeholder="服务器面向人群、使用说明、限制条件等"
+              :placeholder="$t('pages.serverStore.descriptionPlaceholder')"
             />
           </AdminFormField>
         </div>
 
         <div class="mt-6 flex flex-wrap gap-3">
-          <AdminButton variant="secondary" :loading="saving" @click="save">保存配置</AdminButton>
+          <AdminButton variant="secondary" :loading="saving" @click="save">{{ $t("pages.serverStore.saveConfig") }}</AdminButton>
           <AdminButton variant="primary" :loading="publishing" @click="publish">
-            保存并上传到官网
+            {{ $t("pages.serverStore.saveAndUpload") }}
           </AdminButton>
           <AdminButton variant="secondary" :loading="heartbeating" @click="heartbeat">
-            立即发送心跳
+            {{ $t("pages.serverStore.sendHeartbeat") }}
           </AdminButton>
         </div>
         </div>
@@ -261,14 +260,14 @@ onMounted(() => {
       <div class="space-y-4">
         <AdminPanel>
           <div class="p-4 md:p-5">
-          <h2 class="text-base font-semibold text-foreground">官网状态</h2>
+          <h2 class="text-base font-semibold text-foreground">{{ $t("pages.serverStore.officialStatus") }}</h2>
           <dl class="mt-4 space-y-3 text-sm">
             <div>
-              <dt class="text-muted">官网域名</dt>
+              <dt class="text-muted">{{ $t("pages.serverStore.officialDomain") }}</dt>
               <dd class="mt-1 break-all text-foreground">{{ form.officialHomeUrl }}</dd>
             </div>
             <div>
-              <dt class="text-muted">商店链接</dt>
+              <dt class="text-muted">{{ $t("pages.serverStore.storeLink") }}</dt>
               <dd class="mt-1 break-all">
                 <a
                   :href="form.officialStoreUrl"
@@ -281,25 +280,25 @@ onMounted(() => {
               </dd>
             </div>
             <div>
-              <dt class="text-muted">官网服务器 ID</dt>
+              <dt class="text-muted">{{ $t("pages.serverStore.officialServerId") }}</dt>
               <dd class="mt-1 break-all text-foreground">
-                {{ form.officialServerId || "尚未上传" }}
+                {{ form.officialServerId || $t("common.notYet") }}
               </dd>
             </div>
             <div>
-              <dt class="text-muted">最近同步</dt>
+              <dt class="text-muted">{{ $t("pages.serverStore.lastSync") }}</dt>
               <dd class="mt-1 text-foreground">
-                {{ form.lastSyncAt ? formatDateTime(form.lastSyncAt) : "暂无" }}
+                {{ form.lastSyncAt ? formatDateTime(form.lastSyncAt) : $t("common.none") }}
               </dd>
             </div>
             <div>
-              <dt class="text-muted">最近心跳</dt>
+              <dt class="text-muted">{{ $t("pages.serverStore.lastHeartbeat") }}</dt>
               <dd class="mt-1 text-foreground">
-                {{ form.lastHeartbeatAt ? formatDateTime(form.lastHeartbeatAt) : "暂无" }}
+                {{ form.lastHeartbeatAt ? formatDateTime(form.lastHeartbeatAt) : $t("common.none") }}
               </dd>
             </div>
           </dl>
-          <AdminAlert v-if="form.lastError" class="mt-4 !mb-0" variant="warning" title="最近错误">
+          <AdminAlert v-if="form.lastError" class="mt-4 !mb-0" variant="warning" :title="$t('pages.serverStore.lastError')">
             {{ form.lastError }}
           </AdminAlert>
           </div>
@@ -307,9 +306,9 @@ onMounted(() => {
 
         <AdminPanel>
           <div class="p-4 md:p-5">
-          <h2 class="text-base font-semibold text-foreground">将上传的统计数据</h2>
+          <h2 class="text-base font-semibold text-foreground">{{ $t("pages.serverStore.statsToUpload") }}</h2>
           <p class="mt-2 text-sm text-muted">
-            仅在开启“上传统计数据”后发送到官网，内容为聚合数量。
+            {{ $t("pages.serverStore.statsHint") }}
           </p>
           <div v-if="stats.length" class="mt-4 grid grid-cols-2 gap-3">
             <div v-for="stat in stats" :key="stat.label" class="rounded-lg bg-surface-muted p-3">
@@ -317,7 +316,7 @@ onMounted(() => {
               <div class="mt-1 text-lg font-semibold text-foreground">{{ stat.value }}</div>
             </div>
           </div>
-          <p v-else class="mt-4 text-sm text-muted">当前未开启统计上传。</p>
+          <p v-else class="mt-4 text-sm text-muted">{{ $t("pages.serverStore.statsDisabled") }}</p>
           </div>
         </AdminPanel>
       </div>

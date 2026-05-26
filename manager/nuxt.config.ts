@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   app: {
     head: {
-      title: "小浪AI 运营后台",
+      title: "XlangAI Manager",
       link: [
         {
           rel: "stylesheet",

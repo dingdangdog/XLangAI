@@ -60,15 +60,15 @@ function apiKeyLabel(protocol: string): string {
     case "baidu_translate":
       return "App ID";
     case "aliyun_translate":
-      return "AccessKey ID";
+      return t("fields.accessKeyId");
     case "google_translate":
-      return "API Key";
+      return t("fields.apiKey");
     case "deepl":
       return "Auth Key";
     case "azure_translator":
-      return "订阅密钥";
+      return t("pages.translateConfigs.subscriptionKey");
     default:
-      return "API Key";
+      return t("fields.apiKey");
   }
 }
 
@@ -77,9 +77,9 @@ function apiSecretLabel(protocol: string): string {
     case "tencent_translate":
       return "SecretKey";
     case "baidu_translate":
-      return "密钥（Secret Key）";
+      return t("pages.translateConfigs.secretKey");
     case "aliyun_translate":
-      return "AccessKey Secret";
+      return t("fields.secretAccessKey");
     default:
       return "API Secret";
   }
@@ -257,11 +257,11 @@ async function submit() {
   }
   if (form.protocol === "openai" && useLlmLink.value) {
     if (!form.llmConfigId.trim()) {
-      toast.warning("请选择要关联的 LLM 配置");
+      toast.warning(t("validation.selectLlmConfig"));
       return;
     }
   } else if (modelRequired() && !form.modelCode.trim()) {
-    toast.warning("请填写模型 code，或改为关联已有 LLM 配置");
+    toast.warning(t("validation.fillModelOrLinkLlm"));
     return;
   }
   if (!modelRequired() && !form.modelCode.trim()) {
@@ -319,7 +319,7 @@ async function submit() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该翻译配置？",
+    message: t("confirm.deleteTranslateConfig"),
     danger: true,
     confirmLabel: t("common.delete"),
   });
@@ -334,10 +334,10 @@ async function removeRow(row: Record<string, unknown>) {
   }
 }
 
-const statusOptions = [
-  { value: "active", label: "active（启用，将自动停用其它配置）" },
+const statusOptions = computed(() => [
+  { value: "active", label: t("pages.translateConfigs.statusActive") },
   { value: "inactive", label: "inactive" },
-];
+]);
 
 const protocolOptions = PROTOCOLS.map((p) => ({ value: p.value, label: p.label }));
 
@@ -357,31 +357,20 @@ const { activateRow, activatingId } = useActivateConfigRow({
   <AdminListPage>
     <template #header>
       <AdminPageHeader
-        title="翻译服务配置"
-        description="全局仅一条 active。列表「今日/本月用量」为成功翻译次数与源文本字符数（UTC 自然日）。"
+        :title="$t('pages.translateConfigs.title')"
+        :description="$t('pages.translateConfigs.description')"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
-      <AdminAlert v-if="activeCount > 1" title="配置异常" variant="warning">
-        当前列表中有 {{ activeCount }} 条 active 记录，应仅保留一条。请编辑并将多余项设为 inactive。
+      <AdminAlert v-if="activeCount > 1" :title="$t('pages.objectStorage.configAnomalyTitle')" variant="warning">
+        {{ $t("pages.translateConfigs.configAnomaly", { count: activeCount }) }}
       </AdminAlert>
 
-      <AdminAlert title="协议说明">
-        <ul class="list-disc pl-5 text-sm space-y-1">
-          <li>
-            <strong>openai（LLM 翻译）</strong>：可<strong>关联</strong>「LLM 服务配置」中已启用的 OpenAI
-            兼容项，复用 Base URL / API Key / 模型，无需重复填写；也可单独自定义。
-          </li>
-          <li><strong>azure_translator</strong>：config 中配置 region；订阅密钥填在 API Key。</li>
-          <li><strong>deepl</strong>：Auth Key；<code>use_free_api</code> 可选。</li>
-          <li><strong>google_translate</strong>：Google API Key。</li>
-          <li><strong>baidu_translate</strong>：App ID + 密钥（双字段）。</li>
-          <li><strong>tencent_translate</strong>：SecretId + SecretKey（双字段，与 loden 一致）；region 写在扩展 JSON。</li>
-          <li><strong>aliyun_translate</strong>：AccessKey ID + AccessKey Secret；region 写在扩展 JSON。</li>
-        </ul>
+      <AdminAlert :title="$t('pages.translateConfigs.protocolAlert')">
+        <p class="whitespace-pre-line text-sm">{{ $t("pages.translateConfigs.protocolAlertDetails") }}</p>
       </AdminAlert>
     </template>
 
@@ -389,12 +378,12 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh width="140px">协议</AdminTh>
-          <AdminTh>模型 / 关联</AdminTh>
-          <AdminTh>密钥</AdminTh>
+          <AdminTh width="140px">{{ $t("fields.protocol") }}</AdminTh>
+          <AdminTh>{{ $t("fields.modelOrLink") }}</AdminTh>
+          <AdminTh>{{ $t("fields.secret") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
-          <AdminTh width="120px">今日用量</AdminTh>
-          <AdminTh width="120px">本月用量</AdminTh>
+          <AdminTh width="120px">{{ $t("common.todayUsage") }}</AdminTh>
+          <AdminTh width="120px">{{ $t("common.monthUsage") }}</AdminTh>
           <AdminTh width="72px">{{ $t("common.sort") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
           <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
@@ -403,7 +392,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
           <AdminTd>{{ row.name }}</AdminTd>
           <AdminTd>{{ row.protocol }}</AdminTd>
           <AdminTd>
-            <span v-if="row.llmConfigId">关联 {{ llmLinkDisplay(row.llmConfigId) }}</span>
+            <span v-if="row.llmConfigId">{{ $t("pages.translateConfigs.linkedPrefix", { label: llmLinkDisplay(row.llmConfigId) }) }}</span>
             <span v-else>{{ row.modelCode }}</span>
           </AdminTd>
           <AdminTd class="space-y-1">
@@ -430,11 +419,11 @@ const { activateRow, activatingId } = useActivateConfigRow({
               :loading="activatingId === String(row.id)"
               @click="activateRow(row)"
             >
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -444,7 +433,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
 
     <AdminDialog
       v-model="dialogVisible"
-      :title="dialogMode === 'create' ? '新建翻译配置' : '编辑翻译配置'"
+      :title="dialogMode === 'create' ? $t('pages.translateConfigs.createDialog') : $t('pages.translateConfigs.editDialog')"
       width="lg"
     >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
@@ -453,55 +442,57 @@ const { activateRow, activatingId } = useActivateConfigRow({
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
       </AdminFormField>
-      <AdminFormField label="协议">
+      <AdminFormField :label="$t('fields.protocol')">
         <AdminSelect v-model="form.protocol" :options="protocolOptions" />
       </AdminFormField>
 
       <template v-if="form.protocol === 'openai'">
-        <AdminFormField label="LLM 配置来源">
+        <AdminFormField :label="$t('pages.translateConfigs.llmSource')">
           <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
             <input v-model="useLlmLink" type="checkbox" class="rounded border-border" />
-            关联已有 LLM 服务配置（推荐，避免重复填 Key）
+            {{ $t("pages.translateConfigs.linkLlmRecommended") }}
           </label>
         </AdminFormField>
-        <AdminFormField v-if="useLlmLink" label="关联 LLM" required>
+        <AdminFormField v-if="useLlmLink" :label="$t('fields.linkedLlmShort')" required>
           <AdminSelect
             v-model="form.llmConfigId"
             :options="llmConfigOptions"
-            placeholder="选择已启用的 OpenAI 兼容 LLM"
+            :placeholder="$t('pages.translateConfigs.selectActiveLlm')"
           />
           <p v-if="llmConfigOptions.length === 0" class="mt-1 text-xs text-muted">
-            请先在「LLM 服务配置」中创建并启用一条 OpenAI 兼容配置。
+            {{ $t("pages.translateConfigs.createLlmFirst") }}
           </p>
-          <p v-else-if="llmLinkLabel" class="mt-1 text-xs text-muted">已选：{{ llmLinkLabel }}</p>
+          <p v-else-if="llmLinkLabel" class="mt-1 text-xs text-muted">
+            {{ $t("pages.translateConfigs.selectedLlm", { label: llmLinkLabel }) }}
+          </p>
         </AdminFormField>
         <template v-else>
-          <AdminFormField label="Base URL" hint="OpenAI 兼容根地址（勿带 /v1）">
-            <AdminInput v-model="form.baseUrl" placeholder="可选，默认 OpenAI 官方" />
+          <AdminFormField :label="$t('fields.baseUrl')" :hint="$t('pages.translateConfigs.baseUrlHint')">
+            <AdminInput v-model="form.baseUrl" :placeholder="$t('pages.translateConfigs.baseUrlPlaceholder')" />
           </AdminFormField>
-          <AdminFormField label="API Key" hint="必填">
+          <AdminFormField :label="$t('fields.apiKey')" :hint="$t('pages.translateConfigs.apiKeyRequired')">
             <AdminInput v-model="form.apiKey" type="password" />
           </AdminFormField>
-          <AdminFormField label="模型 code" required>
+          <AdminFormField :label="$t('fields.modelCode')" required>
             <AdminInput v-model="form.modelCode" placeholder="gpt-4o-mini" />
           </AdminFormField>
         </template>
         <AdminFormField
           v-if="useLlmLink"
-          label="模型 code（可选）"
-          hint="留空则使用关联 LLM 的 model_code"
+          :label="`${$t('fields.modelCode')} (${$t('common.optional')})`"
+          :hint="$t('pages.translateConfigs.modelOverrideHint')"
         >
-          <AdminInput v-model="form.modelCode" placeholder="可选覆盖" />
+          <AdminInput v-model="form.modelCode" :placeholder="$t('pages.translateConfigs.modelOverride')" />
         </AdminFormField>
       </template>
 
       <template v-else>
         <AdminFormField
           v-if="form.protocol === 'azure_translator' || form.protocol === 'deepl'"
-          label="Base URL"
-          hint="可选；厂商自定义端点"
+          :label="$t('fields.baseUrl')"
+          :hint="$t('pages.translateConfigs.customEndpointHint')"
         >
-          <AdminInput v-model="form.baseUrl" placeholder="可选" />
+          <AdminInput v-model="form.baseUrl" :placeholder="$t('pages.llmConfigs.optionalPlaceholder')" />
         </AdminFormField>
         <AdminFormField :label="apiKeyLabel(form.protocol)">
           <AdminInput v-model="form.apiKey" type="password" />
@@ -511,7 +502,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
         </AdminFormField>
       </template>
 
-      <AdminFormField label="扩展 JSON" :hint="CONFIG_HINTS[form.protocol]">
+      <AdminFormField :label="$t('fields.extJson')" :hint="CONFIG_HINTS[form.protocol]">
         <AdminInput v-model="form.config" type="textarea" :rows="4" class="font-mono text-sm" />
       </AdminFormField>
       <AdminFormField :label="$t('common.status')">

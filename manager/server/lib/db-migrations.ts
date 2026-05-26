@@ -21,7 +21,7 @@ type DatabaseTarget = {
   schemaName: string;
 };
 
-/** 与 Prisma migrate 一致：SHA-256 基于 LF 归一化后的 migration.sql */
+/** Matches Prisma migrate: SHA-256 of LF-normalized migration.sql */
 export function normalizeMigrationSql(sql: string): string {
   return sql.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 }

@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 import type { AppPrismaClient } from "./prisma";
 
-/** 与 Go `bcrypt.DefaultCost`、`userAdmin` 一致 */
+/** Matches Go bcrypt.DefaultCost and userAdmin */
 const BCRYPT_ROUNDS = 10;
 
-/** 标记运营后台 bootstrap 账号，便于后续鉴权或排查 */
+/** Marks manager bootstrap account for auth and troubleshooting */
 export const MANAGER_ADMIN_REMARK = "manager_admin";
 
 export type ManagerAdminBootstrapConfig = {
@@ -14,9 +14,9 @@ export type ManagerAdminBootstrapConfig = {
 };
 
 /**
- * 从环境变量读取运营管理员初始化配置。
- * 须同时设置 `MANAGER_ADMIN_USERNAME` 与 `MANAGER_ADMIN_PASSWORD`（明文，入库前 bcrypt）。
- * `MANAGER_ADMIN_SEED=false` 时跳过；未配置账号密码时不创建（不自动生成随机密码）。
+ * Reads manager admin bootstrap config from env.
+ * Requires both MANAGER_ADMIN_USERNAME and MANAGER_ADMIN_PASSWORD (hashed with bcrypt before insert).
+ * Skips when MANAGER_ADMIN_SEED=false or credentials are incomplete (no random password).
  */
 export function readManagerAdminBootstrapConfig(): ManagerAdminBootstrapConfig | null {
   const managerCfg = useRuntimeConfig().manager;
@@ -25,7 +25,7 @@ export function readManagerAdminBootstrapConfig(): ManagerAdminBootstrapConfig |
   }
   const username = managerCfg.adminUsername?.trim() ?? "";
   const password = String(managerCfg.adminPassword ?? "");
-  const nickname = managerCfg.adminNickname?.trim() || "管理员";
+  const nickname = managerCfg.adminNickname?.trim() || "Admin";
 
   if (!username && !password.trim()) {
     return null;
@@ -33,13 +33,13 @@ export function readManagerAdminBootstrapConfig(): ManagerAdminBootstrapConfig |
 
   if (!username || !password.trim()) {
     console.warn(
-      "[data-seed] 须同时设置 MANAGER_ADMIN_USERNAME 与 MANAGER_ADMIN_PASSWORD，跳过运营管理员初始化",
+      "[data-seed] set both MANAGER_ADMIN_USERNAME and MANAGER_ADMIN_PASSWORD; skip manager admin seed",
     );
     return null;
   }
 
   if (password.trim().length < 6) {
-    console.warn("[data-seed] MANAGER_ADMIN_PASSWORD 至少 6 位，跳过运营管理员初始化");
+    console.warn("[data-seed] MANAGER_ADMIN_PASSWORD must be at least 6 characters; skip manager admin seed");
     return null;
   }
 
@@ -59,9 +59,7 @@ function maskLoginId(id: string): string {
   return `${id.slice(0, 3)}****${id.slice(-2)}`;
 }
 
-/**
- * 幂等写入运营管理员（usr_users）：按手机或邮箱查重，密码 bcrypt 哈希后入库。
- */
+/** Idempotent manager admin user (usr_users); dedupe by phone or email; password stored as bcrypt hash. */
 export async function ensureManagerAdminUser(
   db: AppPrismaClient,
   config: ManagerAdminBootstrapConfig,
@@ -81,7 +79,7 @@ export async function ensureManagerAdminUser(
   if (rows.length > 0) {
     const row = rows[0]!;
     console.info(
-      `[data-seed] 运营管理员 ${maskLoginId(config.username)} 已存在（id=${row.id}），跳过插入`,
+      `[data-seed] manager admin ${maskLoginId(config.username)} already exists (id=${row.id}), skip insert`,
     );
     return;
   }
@@ -102,6 +100,6 @@ export async function ensureManagerAdminUser(
   });
 
   console.info(
-    `[data-seed] 已初始化运营管理员 ${maskLoginId(config.username)}（密码已 bcrypt 哈希入库，请勿在日志中输出明文）`,
+    `[data-seed] initialized manager admin ${maskLoginId(config.username)} (password stored as bcrypt hash)`,
   );
 }

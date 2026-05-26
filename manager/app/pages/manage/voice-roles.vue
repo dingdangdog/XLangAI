@@ -70,26 +70,28 @@ async function loadOptions() {
 
 watch([page, pageSize], () => void load(), { immediate: true });
 
-const VOICE_ROLE_TABLE_COLUMNS: { prop: string; label: string }[] = [
-  { prop: "name", label: "角色名称" },
-  { prop: "voiceCode", label: "音色代码" },
-  { prop: "languageLabel", label: "语言" },
-  { prop: "ttsConfigLabel", label: "TTS 配置" },
-  { prop: "gender", label: "性别" },
-  { prop: "previewAudioUrl", label: "试听" },
-  { prop: "status", label: "状态" },
-  { prop: "sortOrder", label: "排序" },
-  { prop: "remark", label: "备注" },
-  { prop: "createdAt", label: "创建时间" },
-  { prop: "updatedAt", label: "更新时间" },
-];
+const VOICE_ROLE_TABLE_COLUMN_KEYS = [
+  { prop: "name", labelKey: "fields.voiceRoleName" },
+  { prop: "voiceCode", labelKey: "fields.voiceCode" },
+  { prop: "languageLabel", labelKey: "fields.language" },
+  { prop: "ttsConfigLabel", labelKey: "fields.ttsConfig" },
+  { prop: "gender", labelKey: "fields.gender" },
+  { prop: "previewAudioUrl", labelKey: "fields.preview" },
+  { prop: "status", labelKey: "common.status" },
+  { prop: "sortOrder", labelKey: "common.sort" },
+  { prop: "remark", labelKey: "common.remark" },
+  { prop: "createdAt", labelKey: "common.createdAt" },
+  { prop: "updatedAt", labelKey: "common.updatedAt" },
+] as const;
 
 const tableColumns = computed(() => {
-  if (!list.value.length) {
-    return VOICE_ROLE_TABLE_COLUMNS;
-  }
-  const keys = new Set(Object.keys(list.value[0] as object));
-  return VOICE_ROLE_TABLE_COLUMNS.filter((c) => keys.has(c.prop));
+  const columns =
+    !list.value.length
+      ? VOICE_ROLE_TABLE_COLUMN_KEYS
+      : VOICE_ROLE_TABLE_COLUMN_KEYS.filter((c) =>
+          Object.keys(list.value[0] as object).includes(c.prop),
+        );
+  return columns.map((c) => ({ prop: c.prop, label: t(c.labelKey) }));
 });
 
 function cellValue(row: Record<string, unknown>, key: string) {
@@ -124,15 +126,15 @@ const selectedTts = computed(() =>
 const voiceCodeHint = computed(() => {
   const p = (selectedTts.value?.provider ?? "").trim();
   if (p === "azure_speech_rest") {
-    return "Azure 神经语音短名，例如 zh-CN-XiaoxiaoNeural、en-US-JennyNeural；须与语音资源区域能力一致。";
+    return t("pages.voiceRoles.hintAzure");
   }
   if (p === "openai_rest") {
-    return "OpenAI TTS 的 voice 名称，如 alloy、nova、echo 等（以当前 API 文档为准）。";
+    return t("pages.voiceRoles.hintOpenai");
   }
   if (!p) {
-    return "未选择 TTS 配置时无法判断协议；请先选择配置。空 provider 时服务端可能按 OpenAI 处理。";
+    return t("pages.voiceRoles.hintNoTts");
   }
-  return `当前 provider 为「${p}」，音色代码须与服务端对该协议的约定一致。`;
+  return t("pages.voiceRoles.hintProvider", { provider: p });
 });
 
 function resetVoiceForm() {
@@ -192,15 +194,15 @@ async function submitVoice() {
     return;
   }
   if (!voiceForm.ttsServiceConfigId) {
-    toast.warning("请选择 TTS 服务配置（决定厂商与协议）");
+    toast.warning(t("validation.selectTtsConfig"));
     return;
   }
   if (!voiceForm.voiceCode.trim()) {
-    toast.warning("请填写音色代码");
+    toast.warning(t("validation.fillVoiceCode"));
     return;
   }
   if (!voiceForm.name.trim()) {
-    toast.warning("请填写显示名称");
+    toast.warning(t("validation.fillDisplayName"));
     return;
   }
   const payload = buildPayload();
@@ -228,7 +230,7 @@ async function submitVoice() {
 
 async function removeRow(row: Record<string, unknown>) {
   const ok = await confirm({
-    message: "确认删除该语音角色？",
+    message: t("confirm.deleteVoiceRole"),
     danger: true,
     confirmLabel: t("common.delete"),
   });
@@ -256,11 +258,11 @@ const ttsSelectOptions = computed(() =>
   ttsOptions.value.map((t) => ({ value: t.id, label: `${t.name} (${t.provider})` })),
 );
 
-const genderOptions = [
-  { value: "", label: "（不选）" },
-  { value: "female", label: "女" },
-  { value: "male", label: "男" },
-];
+const genderOptions = computed(() => [
+  { value: "", label: t("common.optionalParen") },
+  { value: "female", label: t("status.female") },
+  { value: "male", label: t("status.male") },
+]);
 
 const { activateRow, activatingId } = useActivateConfigRow({
   api,
@@ -309,7 +311,7 @@ function stopPreviewPlayback() {
 function playPreview(row: Record<string, unknown>) {
   const url = previewPlayUrl(row);
   if (!url) {
-    toast.warning("尚未生成试听，请先点击「生成试听」");
+    toast.warning(t("validation.previewNotGenerated"));
     return;
   }
   let el = previewAudioEl.value;
@@ -319,7 +321,7 @@ function playPreview(row: Record<string, unknown>) {
   }
   el.src = url;
   void el.play().catch((e) => {
-    toast.error("播放失败");
+    toast.error(t("toast.playFailed"));
     console.error(e);
   });
 }
@@ -330,10 +332,10 @@ async function generatePreview(row: Record<string, unknown>) {
   previewGeneratingId.value = id;
   try {
     await $fetch(`/api/admin/voice-roles/${id}/generate-preview`, { method: "POST" });
-    toast.success("试听已生成");
+    toast.success(t("toast.previewGenerated"));
     await load();
   } catch (e) {
-    toast.error("生成试听失败");
+    toast.error(t("toast.previewGenerateFailed"));
     console.error(e);
   } finally {
     previewGeneratingId.value = null;
@@ -344,14 +346,14 @@ async function generatePreview(row: Record<string, unknown>) {
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader title="语音角色">
+      <AdminPageHeader :title="$t('pages.voiceRoles.title')">
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
 
-      <AdminAlert title="使用说明">
-        试听在本管理端生成：语言页配置试听文案模板 → 本页「生成试听」→ 按 media.assistant_tts.storage 写库与存储。Go API 只把 preview_audio_url 返回给客户端播放。
+      <AdminAlert :title="$t('pages.voiceRoles.usageAlertTitle')">
+        {{ $t("pages.voiceRoles.usageAlert") }}
       </AdminAlert>
     </template>
 
@@ -365,12 +367,12 @@ async function generatePreview(row: Record<string, unknown>) {
           <AdminTd v-for="col in tableColumns" :key="col.prop">
             <template v-if="col.prop === 'previewAudioUrl'">
               <span v-if="row.previewAudioUrl" class="inline-flex flex-col gap-0.5">
-                <span class="text-success-600">已生成</span>
+                <span class="text-success-600">{{ $t("common.generated") }}</span>
                 <span class="max-w-[220px] truncate text-xs text-surface-500">
                   {{ previewAudioLabel(row) }}
                 </span>
               </span>
-              <span v-else class="text-surface-500">未生成</span>
+              <span v-else class="text-surface-500">{{ $t("common.notGenerated") }}</span>
             </template>
             <template v-else>
               {{ cellValue(row, col.prop) }}
@@ -379,17 +381,17 @@ async function generatePreview(row: Record<string, unknown>) {
           <AdminTd align="right" class="whitespace-nowrap">
             <AdminButton v-if="String(row.status) !== 'active'" variant="link"
               :loading="activatingId === String(row.id)" @click="activateRow(row)">
-              启用
+              {{ $t("common.enable") }}
             </AdminButton>
             <AdminButton variant="link" :disabled="!row.previewAudioUrl" @click="playPreview(row)">
-              播放
+              {{ $t("common.play") }}
             </AdminButton>
             <AdminButton variant="link" :loading="previewGeneratingId === String(row.id)" @click="generatePreview(row)">
-              生成试听
+              {{ $t("common.generatePreview") }}
             </AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
             <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              删除
+              {{ $t("common.delete") }}
             </AdminButton>
           </AdminTd>
         </AdminTr>
@@ -397,27 +399,42 @@ async function generatePreview(row: Record<string, unknown>) {
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
 
-    <AdminDialog v-model="dialogVisible" :title="dialogMode === 'create' ? '新建语音角色' : '编辑语音角色'" width="lg">
+    <AdminDialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'create' ? $t('pages.voiceRoles.createDialog') : $t('pages.voiceRoles.editDialog')"
+      width="lg"
+    >
       <AdminSkeleton v-if="optionsLoading" :rows="6" />
       <template v-else>
-        <AdminFormField v-if="dialogMode === 'edit'" label="id">
+        <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="voiceForm.id" disabled />
         </AdminFormField>
-        <AdminFormField label="语言" required>
-          <AdminSelect v-model="voiceForm.languageId" :options="langSelectOptions" placeholder="选择语言" />
+        <AdminFormField :label="$t('fields.language')" required>
+          <AdminSelect
+            v-model="voiceForm.languageId"
+            :options="langSelectOptions"
+            :placeholder="$t('pages.voiceRoles.selectLanguage')"
+          />
         </AdminFormField>
-        <AdminFormField label="TTS 配置" required>
-          <AdminSelect v-model="voiceForm.ttsServiceConfigId" :options="ttsSelectOptions"
-            placeholder="选择 TTS 服务配置（含厂商）" />
+        <AdminFormField :label="$t('fields.ttsConfig')" required>
+          <AdminSelect
+            v-model="voiceForm.ttsServiceConfigId"
+            :options="ttsSelectOptions"
+            :placeholder="$t('pages.voiceRoles.selectTts')"
+          />
         </AdminFormField>
-        <AdminFormField label="音色代码" required :hint="voiceCodeHint">
-          <AdminInput v-model="voiceForm.voiceCode" placeholder="与所选厂商协议一致" />
+        <AdminFormField :label="$t('fields.voiceCode')" required :hint="voiceCodeHint">
+          <AdminInput v-model="voiceForm.voiceCode" :placeholder="$t('pages.voiceRoles.voiceCodePlaceholder')" />
         </AdminFormField>
-        <AdminFormField label="角色名称" required>
-          <AdminInput v-model="voiceForm.name" placeholder="列表与客户端展示用" />
+        <AdminFormField :label="$t('fields.voiceRoleName')" required>
+          <AdminInput v-model="voiceForm.name" :placeholder="$t('pages.voiceRoles.namePlaceholder')" />
         </AdminFormField>
-        <AdminFormField label="性别">
-          <AdminSelect v-model="voiceForm.gender" :options="genderOptions" placeholder="可选" />
+        <AdminFormField :label="$t('fields.gender')">
+          <AdminSelect
+            v-model="voiceForm.gender"
+            :options="genderOptions"
+            :placeholder="$t('pages.voiceRoles.genderPlaceholder')"
+          />
         </AdminFormField>
         <AdminFormField :label="$t('common.sort')">
           <AdminInput v-model="voiceForm.sortOrder" type="number" />
@@ -428,7 +445,7 @@ async function generatePreview(row: Record<string, unknown>) {
         <AdminFormField :label="$t('common.remark')">
           <AdminInput v-model="voiceForm.remark" type="textarea" :rows="2" />
         </AdminFormField>
-        <AdminFormField label="扩展 config" hint="可选 JSON 字符串">
+        <AdminFormField :label="$t('fields.extConfig')" :hint="$t('pages.voiceRoles.extConfigHint')">
           <AdminInput v-model="voiceForm.config" type="textarea" :rows="2" />
         </AdminFormField>
       </template>
