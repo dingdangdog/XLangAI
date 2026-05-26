@@ -12,6 +12,7 @@ export default defineNuxtConfig({
       ],
     },
   },
+  ssr: false,
   devtools: { enabled: true },
   modules: ["@nuxtjs/tailwindcss", "@pinia/nuxt", "@nuxtjs/i18n"],
   css: ["~/assets/css/themes.css", "~/assets/css/base.css"],
