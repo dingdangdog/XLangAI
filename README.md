@@ -270,7 +270,21 @@ docker-compose up -d
 
 ## CI/CD（Docker 镜像与自动部署）
 
-推送语义化 tag（如 `v0.0.2`）后，GitHub Actions 会构建多平台镜像并推送到 Docker Hub（`dingdangdog/xlangai`），同时创建 GitHub Release。生产服务器将 `docker/update.sh` 与 `docker-compose.yml` 放在同一目录，即可轮询 Release 并自动滚动部署。
+推送语义化 tag（如 `v0.0.2`）后，GitHub Actions 会构建多平台镜像并推送到 Docker Hub（`dingdangdog/xlangai`），同时创建 GitHub Release。生产服务器将 `docker/update.sh` 与 `docker-compose.yml` 放在同一目录，执行 `docker/start.sh` 即可注册定时任务并轮询 Release 自动滚动部署。
+
+### 停止自动更新
+
+`start.sh` / `update.sh` 不是常驻进程；`start.sh` 会向 crontab 写入每 10 分钟执行一次的 `update.sh`。要**停止自动检查与升级**，删除该 crontab 条目即可（将路径换成你服务器上 `update.sh` 的实际路径）：
+
+```bash
+crontab -l
+crontab -l | grep -v '/path/to/update.sh' | crontab -
+crontab -l   # 确认已无 update.sh 相关行
+```
+
+> 停掉定时任务**不会**停止 Docker 容器。若需停止 XLangAI 服务，在 compose 目录执行 `docker compose down`（数据卷默认保留）。
+
+更完整的 CI/CD 说明见 [docs/servers-cicd.md](../docs/servers-cicd.md)。
 
 ---
 

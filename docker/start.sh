@@ -2,6 +2,12 @@
 
 DEPLOY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 UPDATE_SCRIPT="${DEPLOY_DIR}/update.sh"
+SELF_SCRIPT="${DEPLOY_DIR}/start.sh"
+
+# 去掉 Windows 复制带来的 CRLF（避免 update.sh 报 set: pipefail 等错误）
+for f in "$SELF_SCRIPT" "$UPDATE_SCRIPT"; do
+    [ -f "$f" ] && sed -i 's/\r$//' "$f" 2>/dev/null || true
+done
 
 echo "=========================================="
 echo "          CI/CD 部署辅助脚本启动器          "
@@ -20,7 +26,7 @@ if [ ! -f "${DEPLOY_DIR}/docker-compose.yml" ] && [ ! -f "${DEPLOY_DIR}/docker-c
     exit 1
 fi
 
-chmod +x "$UPDATE_SCRIPT"
+chmod +x "$SELF_SCRIPT" "$UPDATE_SCRIPT"
 
 echo "正在执行首次同步测试..."
 bash "$UPDATE_SCRIPT"

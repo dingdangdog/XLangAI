@@ -1,5 +1,12 @@
 #!/bin/bash
-set -euo pipefail
+# 若从 Windows 复制导致 CRLF，首次运行会自动修复并重新执行
+SCRIPT="$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")"
+if grep -q $'\r' "$SCRIPT" 2>/dev/null; then
+    sed -i 's/\r$//' "$SCRIPT"
+    exec /bin/bash "$SCRIPT" "$@"
+fi
+
+set -eu
 
 # 与 docker-compose.yml / docker-compose.yaml 放在同一目录即可，无需额外配置
 DEPLOY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

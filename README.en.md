@@ -271,7 +271,21 @@ Issues and pull requests are welcome. Before submitting:
 
 ## CI/CD (Docker Images & Auto-Deploy)
 
-When you push a semantic version tag (e.g. `v0.0.2`), GitHub Actions builds multi-platform images, pushes them to Docker Hub (`dingdangdog/xlangai`), and creates a GitHub Release. On production servers, place `docker/update.sh` in the same directory as `docker-compose.yml` to poll releases and roll deployments automatically.
+When you push a semantic version tag (e.g. `v0.0.2`), GitHub Actions builds multi-platform images, pushes them to Docker Hub (`dingdangdog/xlangai`), and creates a GitHub Release. On production servers, place `docker/update.sh` alongside `docker-compose.yml` and run `docker/start.sh` to register a cron job that polls releases and rolls deployments automatically.
+
+### Stop auto-updates
+
+`start.sh` and `update.sh` are not long-running daemons. `start.sh` adds a crontab entry that runs `update.sh` every 10 minutes. To **stop automatic version checks and upgrades**, remove that crontab line (replace the path with your actual `update.sh` path):
+
+```bash
+crontab -l
+crontab -l | grep -v '/path/to/update.sh' | crontab -
+crontab -l   # confirm no update.sh entry remains
+```
+
+> Removing the cron job does **not** stop Docker containers. To stop the XLangAI service, run `docker compose down` in your compose directory (volumes are kept by default).
+
+See [docs/servers-cicd.md](../docs/servers-cicd.md) for the full CI/CD guide.
 
 ---
 
