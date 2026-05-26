@@ -269,6 +269,12 @@ Issues and pull requests are welcome. Before submitting:
 
 ---
 
+## CI/CD (Docker Images & Auto-Deploy)
+
+When you push a semantic version tag (e.g. `v0.0.2`), GitHub Actions builds multi-platform images, pushes them to Docker Hub (`dingdangdog/xlangai`), and creates a GitHub Release. On production servers, place `docker/update.sh` in the same directory as `docker-compose.yml` to poll releases and roll deployments automatically.
+
+---
+
 ## License
 
 This project is released under the [MIT License](LICENSE).

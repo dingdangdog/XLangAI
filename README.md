@@ -268,6 +268,12 @@ docker-compose up -d
 
 ---
 
+## CI/CD（Docker 镜像与自动部署）
+
+推送语义化 tag（如 `v0.0.2`）后，GitHub Actions 会构建多平台镜像并推送到 Docker Hub（`dingdangdog/xlangai`），同时创建 GitHub Release。生产服务器将 `docker/update.sh` 与 `docker-compose.yml` 放在同一目录，即可轮询 Release 并自动滚动部署。
+
+---
+
 ## 许可证
 
 本项目采用 [MIT License](LICENSE) 开源。
