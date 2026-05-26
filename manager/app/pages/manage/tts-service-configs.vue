@@ -192,9 +192,15 @@ function voiceHint(): string {
   return m[form.provider] ?? "在「语音角色」中配置 voice_code";
 }
 
+/** 库表 code 唯一；Go 按 id 查 TTS 配置，不按 code 查。新建时自动生成。 */
+function autoTtsCode(provider: string) {
+  const p = (provider || "openai_rest").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+  return `${p}-${Date.now()}`;
+}
+
 async function submitForm() {
-  if (!form.code.trim() || !form.name.trim()) {
-    toast.warning(t("validation.fillCodeAndName"));
+  if (!form.name.trim()) {
+    toast.warning(t("validation.fillName"));
     return;
   }
   if (regionRequired() && !form.region.trim()) {
@@ -213,7 +219,10 @@ async function submitForm() {
     configStr = "{}";
   }
   const body = {
-    code: form.code.trim(),
+    code:
+      dialogMode.value === "create"
+        ? autoTtsCode(form.provider)
+        : form.code.trim(),
     name: form.name.trim(),
     provider: form.provider,
     baseUrl: form.baseUrl.trim() || null,
@@ -281,7 +290,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
     <template #header>
       <AdminPageHeader
         title="TTS 服务配置"
-        description="支持全球主流语音合成厂商。列表「今日/本月用量」为成功合成次数与输出文本字符数（UTC 自然日）。"
+        description="Go 按 id 选用 TTS 配置，不按编码查找；新建时编码自动生成。列表「今日/本月用量」为成功合成次数与输出文本字符数（UTC 自然日）。"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
@@ -354,13 +363,6 @@ const { activateRow, activatingId } = useActivateConfigRow({
     >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
-      </AdminFormField>
-      <AdminFormField label="编码" required>
-        <AdminInput
-          v-model="form.code"
-          :disabled="dialogMode === 'edit'"
-          placeholder="唯一，如 tencent_zh_female"
-        />
       </AdminFormField>
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />

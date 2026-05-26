@@ -99,9 +99,15 @@ function openEdit(row: Record<string, unknown>) {
   dialogVisible.value = true;
 }
 
+/** 库表 code 唯一；Go 取 sort_order 最小的 active，不按 code 查。新建时自动生成。 */
+function autoSttCode(protocol: string) {
+  const p = (protocol || "openai").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+  return `${p}-${Date.now()}`;
+}
+
 async function submit() {
-  if (!form.code.trim() || !form.name.trim()) {
-    toast.warning(t("validation.fillCodeAndName"));
+  if (!form.name.trim()) {
+    toast.warning(t("validation.fillName"));
     return;
   }
   if (form.protocol === "openai" && !form.modelCode.trim()) {
@@ -130,7 +136,10 @@ async function submit() {
     configStr = "{}";
   }
   const body = {
-    code: form.code.trim(),
+    code:
+      dialogMode.value === "create"
+        ? autoSttCode(form.protocol)
+        : form.code.trim(),
     name: form.name.trim(),
     protocol: form.protocol,
     baseUrl: form.baseUrl.trim() || null,
@@ -197,7 +206,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
     <template #header>
       <AdminPageHeader
         title="STT 服务配置"
-        description="数据表 sys_stt_service_configs。Go 读取 status = active 中 sort_order 最小的一条。OpenAI 兼容须实现 POST /v1/audio/transcriptions；Azure 使用认知服务短音频 REST，服务端需安装 ffmpeg。"
+        description="Go 读取 sort_order 最小的 active 记录，不按编码查找；新建时编码自动生成。OpenAI 兼容须实现 POST /v1/audio/transcriptions；Azure 使用认知服务短音频 REST，服务端需安装 ffmpeg。"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
@@ -268,9 +277,6 @@ const { activateRow, activatingId } = useActivateConfigRow({
       </AdminAlert>
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
-      </AdminFormField>
-      <AdminFormField label="编码" required>
-        <AdminInput v-model="form.code" :disabled="dialogMode === 'edit'" placeholder="唯一标识" />
       </AdminFormField>
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />

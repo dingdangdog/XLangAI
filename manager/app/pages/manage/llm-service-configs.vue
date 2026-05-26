@@ -112,6 +112,12 @@ function onProtocolChange(v: string) {
 
 watch(() => form.protocol, onProtocolChange);
 
+/** 库表 code 唯一；Go 按 id 或 sort_order 取 active，不按 code 查。新建时自动生成。 */
+function autoLlmCode(protocol: string) {
+  const p = (protocol || "openai").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+  return `${p}-${Date.now()}`;
+}
+
 function openCreate() {
   dialogMode.value = "create";
   resetForm();
@@ -157,8 +163,8 @@ function isOpenAICompatible(protocol: string): boolean {
 }
 
 async function submit() {
-  if (!form.code.trim() || !form.name.trim() || !form.modelCode.trim()) {
-    toast.warning("请填写编码、名称与模型 code");
+  if (!form.name.trim() || !form.modelCode.trim()) {
+    toast.warning("请填写名称与模型 code");
     return;
   }
   let configStr = (form.config ?? "").trim();
@@ -173,7 +179,10 @@ async function submit() {
     configStr = "{}";
   }
   const body = {
-    code: form.code.trim(),
+    code:
+      dialogMode.value === "create"
+        ? autoLlmCode(form.protocol)
+        : form.code.trim(),
     name: form.name.trim(),
     protocol: form.protocol,
     baseUrl: form.baseUrl.trim() || null,
@@ -240,7 +249,7 @@ const { activateRow, activatingId } = useActivateConfigRow({
     <template #header>
       <AdminPageHeader
         title="LLM 服务配置"
-        description="数据表 sys_llm_service_configs。列表「今日/本月用量」为成功调用次数与 LLM Token 合计（UTC 自然日）。"
+        description="Go 按 id 或 sort_order 最小的 active 记录选用，不按编码查找；新建时编码自动生成。"
       >
         <template #actions>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
@@ -318,9 +327,6 @@ const { activateRow, activatingId } = useActivateConfigRow({
     >
       <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
         <AdminInput v-model="form.id" disabled />
-      </AdminFormField>
-      <AdminFormField label="编码" required>
-        <AdminInput v-model="form.code" :disabled="dialogMode === 'edit'" placeholder="唯一标识" />
       </AdminFormField>
       <AdminFormField :label="$t('common.name')" required>
         <AdminInput v-model="form.name" />
