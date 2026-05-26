@@ -2,6 +2,7 @@ import prisma from "../prisma";
 import { resolvePreviewSampleText } from "./sampleText";
 import { synthesizePreviewAudio } from "./synthesize";
 import { saveAssistantPreviewAudio } from "./storage";
+import { applyAssistantTtsLoudness } from "./ttsLoudness";
 
 export type GeneratePreviewResult = {
   voiceRoleId: string;
@@ -51,7 +52,7 @@ export async function generateVoiceRolePreview(
   }
 
   const sampleText = resolvePreviewSampleText(langCode, langTemplate, role.name);
-  const { data, mimeType, ext } = await synthesizePreviewAudio(
+  const synthesized = await synthesizePreviewAudio(
     {
       provider: tts.provider,
       baseUrl: tts.baseUrl,
@@ -63,6 +64,13 @@ export async function generateVoiceRolePreview(
     },
     sampleText,
   );
+  const normalized = await applyAssistantTtsLoudness(
+    synthesized.data,
+    synthesized.mimeType,
+  );
+  const data = normalized.data;
+  const mimeType = normalized.mimeType;
+  const ext = normalized.ext;
 
   const saved = await saveAssistantPreviewAudio(
     data,

@@ -11,7 +11,7 @@ if (-not $ffmpeg) {
 }
 
 $dir = Join-Path $PSScriptRoot "..\storage\audio" | Resolve-Path
-$filter = "highpass=f=80,volume=6dB,loudnorm=I=-14:TP=-1:LRA=8:print_format=none,alimiter=limit=0.97"
+$filter = "highpass=f=80,volume=4dB,loudnorm=I=-14:TP=-1:LRA=8:print_format=none,alimiter=limit=0.97"
 
 Get-ChildItem "$dir\*.mp3" | ForEach-Object {
   $tmp = "$($_.FullName).norm.mp3"
