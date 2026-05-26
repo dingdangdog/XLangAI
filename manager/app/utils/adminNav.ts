@@ -1,6 +1,7 @@
 import type { Component } from "vue";
 import {
   ArchiveBoxIcon,
+  ArrowDownTrayIcon,
   ChatBubbleLeftIcon,
   ChartBarIcon,
   CloudArrowUpIcon,
@@ -58,12 +59,13 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     items: [
       { to: "/manage/server-store", labelKey: "nav.items.serverStore", icon: ServerIcon },
       { to: "/manage/system-settings", labelKey: "nav.items.systemSettings", icon: Cog6ToothIcon },
-      { to: "/manage/backups", labelKey: "nav.items.backups", icon: ArchiveBoxIcon },
+      { to: "/manage/data-backup", labelKey: "nav.items.dataBackup", icon: ArrowDownTrayIcon },
+      { to: "/manage/backups", labelKey: "nav.items.deletionRecords", icon: ArchiveBoxIcon },
     ],
   },
 ];
 
-/** 旧备份子路由重定向到统一页时，侧栏仍高亮「备份归档」 */
+/** 旧删除记录子路由重定向到统一页时，侧栏仍高亮对应菜单 */
 export const BACKUP_LEGACY_PATHS = [
   "/manage/users-backup",
   "/manage/conversations-backup",

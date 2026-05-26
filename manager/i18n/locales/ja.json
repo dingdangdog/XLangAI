@@ -33,7 +33,8 @@
       "objectStorage": "オブジェクトストレージ",
       "serverStore": "サーバーストア",
       "systemSettings": "システム変数",
-      "backups": "バックアップ"
+      "dataBackup": "データバックアップ",
+      "deletionRecords": "削除記録"
     }
   },
   "confirm": {
@@ -54,7 +55,9 @@
     "softDeleteUser": "このユーザーを論理削除しますか？ログイン不可。「削除済み含む」で確認可。",
     "deleteUsageRecord": "この利用記録を削除しますか？",
     "setUserStatus": "ユーザーを「{status}」にしますか？{extra}",
-    "cannotLoginAfter": "アプリにログインできなくなります。"
+    "cannotLoginAfter": "アプリにログインできなくなります。",
+    "importDbBackupMerge": "バックアップをインポートしますか？マージは id で upsert し、ファイルにない既存行は保持します。",
+    "importDbBackupReplace": "全量復元しますか？インポート前に現在の全データを削除します。元に戻せません。"
   },
   "activate": {
     "title": "設定を有効化",
@@ -141,7 +144,9 @@
     "unset": "なし",
     "filterByBackupBatch": "backupBatch で絞込",
     "openOfficialStore": "公式ストアを開く",
-    "adminFallback": "管理者"
+    "adminFallback": "管理者",
+    "refresh": "更新",
+    "clear": "クリア"
   },
   "toast": {
     "loadFailed": "読み込みに失敗",
@@ -170,7 +175,12 @@
     "heartbeatSent": "ハートビート送信済",
     "userCreated": "作成済。電話/メール+パスワードでログイン可",
     "savedWithPassword": "保存済（新パスワード含む）",
-    "statusSet": "{action}しました"
+    "statusSet": "{action}しました",
+    "dbBackupExported": "DB バックアップをダウンロードしました",
+    "dbBackupExportFailed": "バックアップのエクスポートに失敗しました",
+    "dbBackupImported": "{count} 件をインポートしました（{mode}）",
+    "dbBackupImportFailed": "バックアップのインポートに失敗しました",
+    "dbBackupFileRequired": "JSON バックアップファイルを選択してください"
   },
   "pagination": {
     "total": "全 {total} 件",
@@ -436,13 +446,61 @@
       "variablesHint": "JSON 例 [\"name\"] または空"
     },
     "backups": {
-      "title": "バックアップ保管",
-      "description": "退会等の読取専用スナップショット",
-      "readonlyAlert": "監査・復旧参照のみ；ここでは編集不可",
+      "title": "削除記録",
+      "description": "退会・論理削除などで残された履歴（読取専用）",
+      "readonlyAlert": "監査・コンプライアンス用。ここでは編集不可。全 DB のバックアップ/復元は「データバックアップ」を使用。",
       "tabUsers": "ユーザー",
       "tabConversations": "会話",
       "tabMessages": "メッセージ",
       "tabUsage": "利用量"
+    },
+    "dataBackup": {
+      "title": "データバックアップ",
+      "description": "PostgreSQL 全業務データを JSON でエクスポート/復元",
+      "alertTitle": "注意",
+      "alertBody": "システム設定、ユーザー、会話、メッセージ、削除記録を含みます。全量復元は既存データを消去します。事前にエクスポートし、慎重に使用してください。",
+      "exportTitle": "バックアップをエクスポート",
+      "exportHint": "全業務テーブルを JSON ファイルとしてダウンロード（移行・復旧用）。",
+      "export": "JSON バックアップをダウンロード",
+      "currentData": "テーブル一覧",
+      "currentDataHint": "エクスポート前の確認用：各表の現在行数",
+      "totalRows": "合計 {total} 行",
+      "tableName": "テーブル",
+      "rowCount": "行数",
+      "importTitle": "バックアップをインポート",
+      "importHint": "以前エクスポートした JSON を選択。マージは移行向け、全量復元は全データ置換。",
+      "importMode": "インポートモード",
+      "selectFile": "バックアップファイル",
+      "import": "インポート開始",
+      "mode": {
+        "merge": "マージインポート",
+        "mergeHint": "id で upsert。バックアップにない既存行は保持",
+        "replace": "全量復元",
+        "replaceHint": "全表を削除してからインポート（現在の DB を上書き）"
+      },
+      "tableLabels": {
+        "languages": "言語",
+        "membershipTiers": "会員ランク",
+        "sysLlmServiceConfigs": "LLM 設定",
+        "sysSttServiceConfigs": "STT 設定",
+        "sysTranslateServiceConfigs": "翻訳設定",
+        "sysObjectStorageConfigs": "オブジェクトストレージ",
+        "sysSystemSettings": "システム変数",
+        "ttsServiceConfigs": "TTS 設定",
+        "billingProducts": "課金商品",
+        "voiceRoles": "音声ロール",
+        "promptTemplates": "プロンプト",
+        "users": "ユーザー",
+        "storeTransactions": "ストア取引",
+        "userUsage": "利用量",
+        "conversations": "会話",
+        "messages": "メッセージ",
+        "sysServiceUsageDaily": "サービス利用統計",
+        "usersBackup": "削除記録 · ユーザー",
+        "conversationsBackup": "削除記録 · 会話",
+        "messagesBackup": "削除記録 · メッセージ",
+        "userUsageBackup": "削除記録 · 利用量"
+      }
     },
     "serverStore": {
       "title": "サーバーストア",
