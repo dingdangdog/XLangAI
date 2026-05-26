@@ -10,9 +10,8 @@ import { BACKUP_LEGACY_PATHS } from "~/utils/adminNav";
 
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, locale, locales } = useI18n();
 const localePath = useLocalePath();
-const localeHead = useLocaleHead({ seo: true });
 const { groups: navGroups } = useAdminNav();
 const themeStore = useThemeStore();
 const userStore = useUserStore();
@@ -22,9 +21,9 @@ const logoutLoading = ref(false);
 
 useHead(() => ({
   title: t("app.title"),
-  htmlAttrs: localeHead.value.htmlAttrs,
-  link: localeHead.value.link,
-  meta: localeHead.value.meta,
+  htmlAttrs: {
+    lang: locales.value.find((item) => item.code === locale.value)?.language ?? locale.value,
+  },
 }));
 
 const backupLegacyPaths = computed(() =>

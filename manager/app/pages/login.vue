@@ -6,9 +6,8 @@ definePageMeta({
   middleware: ["guest"],
 });
 
-const { t } = useI18n();
+const { t, locale, locales } = useI18n();
 const localePath = useLocalePath();
-const localeHead = useLocaleHead({ seo: true });
 const { resolveAuthRedirect } = useAuthRedirect();
 const { localizeAuthError } = useAuthApiError();
 const route = useRoute();
@@ -26,9 +25,9 @@ const errors = reactive<{ username?: string; password?: string }>({});
 
 useHead(() => ({
   title: t("pages.login.title"),
-  htmlAttrs: localeHead.value.htmlAttrs,
-  link: localeHead.value.link,
-  meta: localeHead.value.meta,
+  htmlAttrs: {
+    lang: locales.value.find((item) => item.code === locale.value)?.language ?? locale.value,
+  },
 }));
 
 function validate() {
