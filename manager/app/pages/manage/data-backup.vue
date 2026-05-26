@@ -153,95 +153,10 @@ onMounted(() => {
 
     <AdminSkeleton v-if="loading" :rows="10" />
 
-    <div v-else class="flex min-h-0 flex-1 flex-col gap-4">
-      <div class="grid shrink-0 gap-4 lg:grid-cols-2">
-        <AdminPanel>
-          <div class="flex h-full flex-col p-4 md:p-5">
-            <h2 class="text-base font-semibold text-foreground">
-              {{ $t("pages.dataBackup.exportTitle") }}
-            </h2>
-            <p class="mt-1 text-sm text-muted">{{ $t("pages.dataBackup.exportHint") }}</p>
-            <p class="mt-3 text-sm text-foreground">
-              {{ $t("pages.dataBackup.totalRows", { total: info?.totalRows ?? 0 }) }}
-            </p>
-            <div class="mt-4 flex flex-wrap gap-3">
-              <AdminButton variant="primary" :loading="exporting" @click="exportBackup">
-                {{ $t("pages.dataBackup.export") }}
-              </AdminButton>
-            </div>
-          </div>
-        </AdminPanel>
-
-        <AdminPanel>
-          <div class="flex h-full flex-col p-4 md:p-5">
-            <h2 class="text-base font-semibold text-foreground">
-              {{ $t("pages.dataBackup.importTitle") }}
-            </h2>
-            <p class="mt-1 text-sm text-muted">{{ $t("pages.dataBackup.importHint") }}</p>
-
-            <div class="mt-4 space-y-4">
-              <AdminFormField :label="$t('pages.dataBackup.importMode')">
-                <div class="space-y-2">
-                  <label class="flex items-start gap-2 text-sm">
-                    <input v-model="importMode" type="radio" value="merge" class="mt-1" />
-                    <span>
-                      <span class="font-medium text-foreground">
-                        {{ $t("pages.dataBackup.mode.merge") }}
-                      </span>
-                      <span class="mt-0.5 block text-muted">
-                        {{ $t("pages.dataBackup.mode.mergeHint") }}
-                      </span>
-                    </span>
-                  </label>
-                  <label class="flex items-start gap-2 text-sm">
-                    <input v-model="importMode" type="radio" value="replace" class="mt-1" />
-                    <span>
-                      <span class="font-medium text-foreground">
-                        {{ $t("pages.dataBackup.mode.replace") }}
-                      </span>
-                      <span class="mt-0.5 block text-muted">
-                        {{ $t("pages.dataBackup.mode.replaceHint") }}
-                      </span>
-                    </span>
-                  </label>
-                </div>
-              </AdminFormField>
-
-              <AdminFormField :label="$t('pages.dataBackup.selectFile')">
-                <input
-                  ref="fileInputRef"
-                  type="file"
-                  accept="application/json,.json"
-                  class="block w-full text-sm text-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
-                  @change="onFileChange"
-                />
-                <p v-if="selectedFile" class="mt-2 text-xs text-muted">
-                  {{ selectedFile.name }} ({{ Math.ceil(selectedFile.size / 1024) }} KB)
-                </p>
-              </AdminFormField>
-
-              <div class="flex flex-wrap gap-3">
-                <AdminButton
-                  variant="primary"
-                  :loading="importing"
-                  :disabled="!selectedFile"
-                  @click="importBackup"
-                >
-                  {{ $t("pages.dataBackup.import") }}
-                </AdminButton>
-                <AdminButton
-                  variant="secondary"
-                  :disabled="!selectedFile || importing"
-                  @click="clearFile"
-                >
-                  {{ $t("common.clear") }}
-                </AdminButton>
-              </div>
-            </div>
-          </div>
-        </AdminPanel>
-      </div>
-
+    <div
+      v-else
+      class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto xl:flex-row xl:items-stretch xl:overflow-hidden"
+    >
       <AdminPanel class="flex min-h-0 min-w-0 flex-1 flex-col">
         <div
           class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border p-4 md:px-5 md:py-4"
@@ -250,7 +165,9 @@ onMounted(() => {
             <h2 class="text-base font-semibold text-foreground">
               {{ $t("pages.dataBackup.currentData") }}
             </h2>
-            <p class="mt-1 text-sm text-muted">{{ $t("pages.dataBackup.currentDataHint") }}</p>
+            <p class="mt-1 text-sm text-muted">
+              {{ $t("pages.dataBackup.totalRows", { total: info?.totalRows ?? 0 }) }}
+            </p>
           </div>
           <AdminButton variant="secondary" @click="loadInfo">
             {{ $t("common.refresh") }}
@@ -267,6 +184,87 @@ onMounted(() => {
             <AdminTd>{{ row.count }}</AdminTd>
           </AdminTr>
         </AdminTable>
+      </AdminPanel>
+
+      <AdminPanel class="flex w-full shrink-0 flex-col overflow-y-auto xl:w-[420px]">
+        <div class="p-4 md:p-5">
+          <h2 class="text-base font-semibold text-foreground">
+            {{ $t("pages.dataBackup.exportTitle") }}
+          </h2>
+          <p class="mt-1 text-sm text-muted">{{ $t("pages.dataBackup.exportHint") }}</p>
+          <div class="mt-4">
+            <AdminButton variant="primary" :loading="exporting" @click="exportBackup">
+              {{ $t("pages.dataBackup.export") }}
+            </AdminButton>
+          </div>
+
+          <div class="my-6 border-t border-border" />
+
+          <h2 class="text-base font-semibold text-foreground">
+            {{ $t("pages.dataBackup.importTitle") }}
+          </h2>
+          <p class="mt-1 text-sm text-muted">{{ $t("pages.dataBackup.importHint") }}</p>
+
+          <div class="mt-4 space-y-4">
+            <AdminFormField :label="$t('pages.dataBackup.importMode')">
+              <div class="space-y-2">
+                <label class="flex items-start gap-2 text-sm">
+                  <input v-model="importMode" type="radio" value="merge" class="mt-1" />
+                  <span>
+                    <span class="font-medium text-foreground">
+                      {{ $t("pages.dataBackup.mode.merge") }}
+                    </span>
+                    <span class="mt-0.5 block text-muted">
+                      {{ $t("pages.dataBackup.mode.mergeHint") }}
+                    </span>
+                  </span>
+                </label>
+                <label class="flex items-start gap-2 text-sm">
+                  <input v-model="importMode" type="radio" value="replace" class="mt-1" />
+                  <span>
+                    <span class="font-medium text-foreground">
+                      {{ $t("pages.dataBackup.mode.replace") }}
+                    </span>
+                    <span class="mt-0.5 block text-muted">
+                      {{ $t("pages.dataBackup.mode.replaceHint") }}
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </AdminFormField>
+
+            <AdminFormField :label="$t('pages.dataBackup.selectFile')">
+              <input
+                ref="fileInputRef"
+                type="file"
+                accept="application/json,.json"
+                class="block w-full text-sm text-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                @change="onFileChange"
+              />
+              <p v-if="selectedFile" class="mt-2 text-xs text-muted">
+                {{ selectedFile.name }} ({{ Math.ceil(selectedFile.size / 1024) }} KB)
+              </p>
+            </AdminFormField>
+
+            <div class="flex flex-wrap gap-3">
+              <AdminButton
+                variant="primary"
+                :loading="importing"
+                :disabled="!selectedFile"
+                @click="importBackup"
+              >
+                {{ $t("pages.dataBackup.import") }}
+              </AdminButton>
+              <AdminButton
+                variant="secondary"
+                :disabled="!selectedFile || importing"
+                @click="clearFile"
+              >
+                {{ $t("common.clear") }}
+              </AdminButton>
+            </div>
+          </div>
+        </div>
       </AdminPanel>
     </div>
   </AdminListPage>
