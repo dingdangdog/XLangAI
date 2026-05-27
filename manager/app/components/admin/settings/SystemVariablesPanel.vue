@@ -44,6 +44,14 @@ function labelForKey(k: string) {
   return te(i18nKey) ? t(i18nKey) : k;
 }
 
+function displayValue(row: Record<string, unknown>) {
+  const value = String(row.value ?? "");
+  if (row.valueType === "bool") {
+    return value === "true" ? t("status.on") : t("status.off");
+  }
+  return value;
+}
+
 function storageOptionsForKey(k: string) {
   if (k === "media.user_recording.storage") return storageOptionsAll.value;
   return storageOptionsNoClient.value;
@@ -156,7 +164,7 @@ const boolValueOptions = computed(() => [
         <template #head>
           <AdminTh>Key</AdminTh>
           <AdminTh>{{ $t("common.description") }}</AdminTh>
-          <AdminTh>{{ $t("common.value") }}</AdminTh>
+          <AdminTh width="160px">{{ $t("common.value") }}</AdminTh>
           <AdminTh width="72px">{{ $t("common.type") }}</AdminTh>
           <AdminTh>{{ $t("common.remark") }}</AdminTh>
           <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
@@ -165,11 +173,8 @@ const boolValueOptions = computed(() => [
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd nowrap><code class="text-xs">{{ row.key }}</code></AdminTd>
           <AdminTd>{{ labelForKey(String(row.key ?? '')) }}</AdminTd>
-          <AdminTd>
-            <span v-if="row.valueType === 'bool'">
-              {{ row.value === 'true' ? $t('status.on') : $t('status.off') }}
-            </span>
-            <span v-else>{{ row.value }}</span>
+          <AdminTd class="max-w-[160px]">
+            <span class="block truncate" :title="displayValue(row)">{{ displayValue(row) }}</span>
           </AdminTd>
           <AdminTd>{{ row.valueType }}</AdminTd>
           <AdminTd>{{ row.description ?? t("common.emDash") }}</AdminTd>

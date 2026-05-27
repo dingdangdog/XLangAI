@@ -1,5 +1,6 @@
 import { createError } from "h3";
 import {
+  isInternalSystemSettingKey,
   isKnownSystemSettingKey,
   KEY_META,
   MEDIA_STORAGE_VALUES,
@@ -7,6 +8,12 @@ import {
   VALUE_TYPES,
   type SystemSettingKey,
 } from "./systemSettingsKeys";
+
+export function assertEditableSystemSettingKey(key: string) {
+  if (isInternalSystemSettingKey(key)) {
+    throw createError({ statusCode: 403, message: "This setting is managed elsewhere" });
+  }
+}
 
 function validateValue(key: SystemSettingKey, value: unknown, valueType: string) {
   const meta = KEY_META[key];

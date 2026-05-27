@@ -14,7 +14,8 @@ import { attachServiceConfigUsageFields } from "./serviceUsageAdmin";
 import { prepareObjectStorageServiceConfigWrite } from "./objectStorageServiceConfigAdmin";
 import { prepareTranslateServiceConfigWrite } from "./translateServiceConfigAdmin";
 import { prepareSttServiceConfigWrite } from "./sttServiceConfigAdmin";
-import { prepareSystemSettingWrite } from "./systemSettingsAdmin";
+import { assertEditableSystemSettingKey, prepareSystemSettingWrite } from "./systemSettingsAdmin";
+import { INTERNAL_SYSTEM_SETTING_KEYS } from "./systemSettingsKeys";
 import { jsonSafe } from "./jsonSafe";
 import { listVoiceRolesForAdmin } from "./voiceRoleList";
 
@@ -108,6 +109,9 @@ export async function adminListHandler(event: H3Event, resource: ResourceSlug) {
     q.backupBatch
   ) {
     where.backupBatch = String(q.backupBatch);
+  }
+  if (resource === "system-settings") {
+    where.key = { notIn: [...INTERNAL_SYSTEM_SETTING_KEYS] };
   }
 
   const [rawItems, total] =
@@ -211,6 +215,9 @@ export async function adminUpdateHandler(event: H3Event, resource: ResourceSlug)
     const existing = (await prisma.sysSystemSetting.findUnique({ where: { id } })) as {
       key?: string;
     } | null;
+    if (existing?.key) {
+      assertEditableSystemSettingKey(existing.key);
+    }
     data = prepareSystemSettingWrite(data, "update", existing?.key);
   }
   const updated = (await delegate.update({
@@ -231,6 +238,14 @@ export async function adminDeleteHandler(event: H3Event, resource: ResourceSlug)
     throw createError({ statusCode: 405, message: "Read-only" });
   }
   const delegate = getDelegate(prisma as unknown as Record<string, unknown>, resource);
+  if (resource === "system-settings") {
+    const existing = (await prisma.sysSystemSetting.findUnique({ where: { id } })) as {
+      key?: string;
+    } | null;
+    if (existing?.key) {
+      assertEditableSystemSettingKey(existing.key);
+    }
+  }
   if (SOFT_DELETE[resource]) {
     const row = await delegate.update({
       where: { id },

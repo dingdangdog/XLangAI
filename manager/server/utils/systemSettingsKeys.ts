@@ -49,8 +49,18 @@ export const KEY_META: Record<
   },
 };
 
+/** 由专用设置页管理，不在「系统变量」Tab 展示或编辑 */
+export const INTERNAL_SYSTEM_SETTING_KEYS = ["official_server_store.config"] as const;
+
+export type InternalSystemSettingKey = (typeof INTERNAL_SYSTEM_SETTING_KEYS)[number];
+
 const KEY_SET = new Set<string>(SYSTEM_SETTING_KEYS);
+const INTERNAL_KEY_SET = new Set<string>(INTERNAL_SYSTEM_SETTING_KEYS);
 
 export function isKnownSystemSettingKey(key: string): key is SystemSettingKey {
   return KEY_SET.has(key);
+}
+
+export function isInternalSystemSettingKey(key: string): key is InternalSystemSettingKey {
+  return INTERNAL_KEY_SET.has(key);
 }

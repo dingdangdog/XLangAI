@@ -39,14 +39,9 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     ],
   },
   {
-    titleKey: "nav.groups.aiVoice",
-    items: [
-      { to: "/manage/ai-settings", labelKey: "nav.items.aiSettings", icon: CpuChipIcon },
-    ],
-  },
-  {
     titleKey: "nav.groups.system",
     items: [
+      { to: "/manage/ai-settings", labelKey: "nav.items.aiSettings", icon: CpuChipIcon },
       { to: "/manage/system-settings", labelKey: "nav.items.systemSettings", icon: Cog6ToothIcon },
       { to: "/manage/backups", labelKey: "nav.items.deletionRecords", icon: ArchiveBoxIcon },
     ],
