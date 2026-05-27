@@ -5,7 +5,7 @@
 <h1 align="center">XLangAI Servers</h1>
 
 <p align="center">
-  <img alt="version" src="https://img.shields.io/badge/version-v0.0.1-blue" />
+  <img alt="release" src="https://img.shields.io/github/v/release/dingdangdog/xlangai" />
   <img alt="license" src="https://img.shields.io/badge/license-MIT-yellow.svg" />
   <img alt="go" src="https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white" />
   <img alt="nuxt" src="https://img.shields.io/badge/Nuxt-4-00DC82?logo=nuxt.js&logoColor=white" />
