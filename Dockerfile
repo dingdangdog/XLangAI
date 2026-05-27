@@ -20,21 +20,30 @@ RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/xlangai
 # ── Nuxt manager ───────────────────────────────────────────────────────
 FROM node:22.21.1-alpine3.22 AS manager-builder
 
+ARG APP_VERSION=dev
+ARG BUILD_SHA=unknown
+
 WORKDIR /app
 
-RUN apk add --no-cache openssl libc6-compat && corepack enable
+RUN apk add --no-cache openssl libc6-compat git && corepack enable
 
 COPY manager/package.json manager/pnpm-lock.yaml manager/pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts --registry=https://registry.npmmirror.com
 
 COPY manager/ ./
+ENV NUXT_PUBLIC_APP_VERSION=$APP_VERSION
+ENV NUXT_PUBLIC_BUILD_SHA=$BUILD_SHA
 RUN pnpm run postinstall && pnpm build
 
 # ── 运行镜像 ───────────────────────────────────────────────────────────
 FROM node:22.21.1-alpine3.22 AS runner
 
+ARG APP_VERSION=dev
+ARG BUILD_SHA=unknown
+
 LABEL org.opencontainers.image.title="xlangai"
 LABEL org.opencontainers.image.description="XlangAI manager (Nuxt) + API (Go) unified image"
+LABEL org.opencontainers.image.version="${APP_VERSION}"
 
 RUN apk add --no-cache \
   openssl \
@@ -85,6 +94,8 @@ ENV NUXT_MANAGER_ADMIN_SEED="true"
 
 # ── 4. Nuxt runtimeConfig — 公开（NUXT_PUBLIC_*）──────────────────────
 ENV NUXT_PUBLIC_OFFICIAL_HOME_URL="https://xlangai.com"
+ENV NUXT_PUBLIC_APP_VERSION="${APP_VERSION}"
+ENV NUXT_PUBLIC_BUILD_SHA="${BUILD_SHA}"
 
 # ── 5. 共享基础设施（Prisma / 跨服务路径，非 NUXT_ 前缀）────────────────
 ENV DATABASE_URL="postgresql://postgres:postgres@host.docker.internal:5432/xlangai?schema=public"

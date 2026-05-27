@@ -1,4 +1,26 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+function readBuildInfoFile() {
+  const path = join(dirname(fileURLToPath(import.meta.url)), ".build-info.json");
+  if (!existsSync(path)) {
+    return { version: "dev", sha: "" };
+  }
+  try {
+    const parsed = JSON.parse(readFileSync(path, "utf8")) as { version?: string; sha?: string };
+    return {
+      version: String(parsed.version || "dev").trim() || "dev",
+      sha: String(parsed.sha || "").trim(),
+    };
+  } catch {
+    return { version: "dev", sha: "" };
+  }
+}
+
+const buildInfo = readBuildInfoFile();
+
 export default defineNuxtConfig({
   compatibilityDate: "2025-07-15",
   app: {
@@ -56,6 +78,10 @@ export default defineNuxtConfig({
     public: {
       /** 官网 / 服务器商店；NUXT_PUBLIC_OFFICIAL_HOME_URL */
       officialHomeUrl: "https://xlangai.com",
+      /** 构建版本；NUXT_PUBLIC_APP_VERSION（CI tag 或 git describe） */
+      appVersion: buildInfo.version,
+      /** 构建 commit；NUXT_PUBLIC_BUILD_SHA */
+      buildSha: buildInfo.sha,
     },
   },
 });

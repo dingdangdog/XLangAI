@@ -1,5 +1,6 @@
 import { createError } from "h3";
 import prisma from "../lib/prisma";
+import { getAppVersionDisplay } from "./buildInfo";
 
 const CONFIG_KEY = "official_server_store.config";
 const DEFAULT_OFFICIAL_HOME_URL = "https://xlangai.com";
@@ -127,7 +128,7 @@ function normalizeConfig(input: Partial<LocalServerStoreConfig>, previous: Local
     contactEmail: asText(input.contactEmail, 255),
     logoUrl: normalizeUrl(input.logoUrl, "Logo 地址"),
     region: asText(input.region, 100),
-    version: asText(input.version, 100),
+    version: getAppVersionDisplay(),
     officialServerId: asText(input.officialServerId, 100) || previous.officialServerId,
     officialServerToken: asText(input.officialServerToken, 200) || previous.officialServerToken,
     heartbeatIntervalSeconds: Math.max(
@@ -249,7 +250,7 @@ function buildOfficialPayload(
     contactEmail: config.contactEmail || undefined,
     logoUrl: config.logoUrl || undefined,
     region: config.region || undefined,
-    version: config.version || undefined,
+    version: getAppVersionDisplay(),
     isPublic: config.enabled,
     uploadStats: config.uploadStats,
     stats: config.uploadStats ? stats : undefined,
@@ -260,7 +261,10 @@ function buildOfficialPayload(
 export async function getServerStoreAdminState() {
   const config = await getLocalServerStoreConfig();
   const stats = await collectServerStoreStats();
-  return publicConfig(config, stats);
+  return {
+    ...publicConfig(config, stats),
+    systemVersion: getAppVersionDisplay(),
+  };
 }
 
 export async function publishServerStoreConfig(input?: Partial<LocalServerStoreConfig>) {

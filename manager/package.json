@@ -3,6 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/gen-build-info.mjs",
+    "predev": "node scripts/gen-build-info.mjs",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",

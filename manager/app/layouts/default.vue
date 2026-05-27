@@ -16,6 +16,9 @@ const { groups: navGroups } = useAdminNav();
 const themeStore = useThemeStore();
 const userStore = useUserStore();
 const toast = useToast();
+const runtimeConfig = useRuntimeConfig();
+const appVersion = computed(() => String(runtimeConfig.public.appVersion || "").trim());
+const buildSha = computed(() => String(runtimeConfig.public.buildSha || "").trim());
 const mobileMenuOpen = ref(false);
 const logoutLoading = ref(false);
 
@@ -163,6 +166,10 @@ watch(
           <ArrowRightOnRectangleIcon class="h-5 w-5" />
           <span>{{ logoutLoading ? $t("common.loggingOut") : $t("common.logout") }}</span>
         </button>
+        <p v-if="appVersion" class="px-3 pt-2 text-[10px] leading-relaxed text-muted/70">
+          {{ $t("common.systemVersion") }} {{ appVersion
+          }}<span v-if="buildSha"> · {{ buildSha.slice(0, 7) }}</span>
+        </p>
       </div>
     </aside>
 

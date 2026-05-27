@@ -21,6 +21,7 @@ type ServerStoreConfig = {
   officialHomeUrl: string;
   officialStoreUrl: string;
   stats: Record<string, number> | null;
+  systemVersion: string;
 };
 
 const toast = useToast();
@@ -50,6 +51,7 @@ const form = reactive<ServerStoreConfig>({
   officialHomeUrl: "https://xlangai.com",
   officialStoreUrl: "https://xlangai.com/servers",
   stats: null,
+  systemVersion: "",
 });
 
 const statLabelKeys: Record<string, string> = {
@@ -89,7 +91,6 @@ function payload() {
     contactEmail: form.contactEmail,
     logoUrl: form.logoUrl,
     region: form.region,
-    version: form.version,
     officialServerId: form.officialServerId,
     officialServerToken: form.officialServerToken,
     heartbeatIntervalSeconds: Number(form.heartbeatIntervalSeconds) || 300,
@@ -212,7 +213,10 @@ onMounted(() => {
             <AdminInput v-model="form.contactEmail" type="email" placeholder="admin@example.com" />
           </AdminFormField>
           <AdminFormField :label="$t('pages.serverStore.version')">
-            <AdminInput v-model="form.version" :placeholder="$t('pages.serverStore.versionPlaceholder')" />
+            <p class="rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm text-foreground">
+              {{ form.systemVersion || $t('common.emDash') }}
+            </p>
+            <p class="mt-1 text-xs text-muted">{{ $t('pages.serverStore.versionAutoHint') }}</p>
           </AdminFormField>
           <AdminFormField :label="$t('pages.serverStore.logoUrl')">
             <AdminInput v-model="form.logoUrl" placeholder="https://example.com/logo.png" />
