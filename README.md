@@ -163,6 +163,8 @@ DATABASE_URL="postgresql://postgres:your-password@host.docker.internal:5432/xlan
 JWT_SECRET="请替换为足够长的随机字符串"
 
 NUXT_MANAGER_AUTH_SECRET="请替换为另一个足够长的随机字符串"
+# HTTP / 内网 Docker 保持 development；公网 HTTPS 部署改为 production
+NUXT_ENV="development"
 # 首次部署：运营管理员（写入后建议关闭初始化并删除密码变量）
 NUXT_MANAGER_ADMIN_USERNAME="admin@example.com"
 NUXT_MANAGER_ADMIN_PASSWORD="your-strong-password"
@@ -199,7 +201,13 @@ docker-compose up -d
 | `MANAGER_HOST_PORT`        | `3312` | 映射到容器内 `PORT`                |
 | `XLANGAI_SERVER_HOST_PORT` | `8080` | 映射到容器内 `XLANGAI_SERVER_PORT` |
 
-### 2. Nuxt runtimeConfig — manager 私有（`NUXT_MANAGER_*`）
+### 2. Nuxt runtimeConfig — 全局（`NUXT_*`）
+
+| 变量       | 默认          | 说明                                                                                               |
+| ---------- | ------------- | -------------------------------------------------------------------------------------------------- |
+| `NUXT_ENV` | `development` | 运行环境。`development`：HTTP 可登录（登录 Cookie 不带 Secure）；`production`：Cookie 带 Secure，**仅 HTTPS 可登录** |
+
+### 3. Nuxt runtimeConfig — manager 私有（`NUXT_MANAGER_*`）
 
 | 变量                                 | 默认     | 说明                                     |
 | ------------------------------------ | -------- | ---------------------------------------- |
@@ -212,7 +220,7 @@ docker-compose up -d
 | `NUXT_MANAGER_ADMIN_NICKNAME`        | `管理员` | 管理员昵称                               |
 | `NUXT_MANAGER_ADMIN_SEED`            | `true`   | 设为 `false` 关闭管理员自动初始化        |
 
-### 3. Nuxt runtimeConfig — 公开（`NUXT_PUBLIC_*`）
+### 4. Nuxt runtimeConfig — 公开（`NUXT_PUBLIC_*`）
 
 | 变量                            | 默认                  | 说明                  |
 | ------------------------------- | --------------------- | --------------------- |
@@ -247,6 +255,7 @@ docker-compose up -d
 - 首次管理员初始化完成后，关闭 `NUXT_MANAGER_ADMIN_SEED` 并移除 `NUXT_MANAGER_ADMIN_PASSWORD`。
 - 将 `NUXT_MANAGER_TEST_ACCOUNT_SEED` 保持为 `false`，避免创建联调测试账号。
 - 为运营后台和 API 配置 HTTPS；如暴露在公网，建议在反向代理层增加访问控制与限流。
+- 公网 HTTPS 部署时将 `NUXT_ENV` 设为 `production`；内网或纯 HTTP 访问保持 `development`。
 - 将 `storage/` 挂载到持久卷，并纳入备份策略。
 
 ---

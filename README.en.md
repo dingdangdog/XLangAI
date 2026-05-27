@@ -164,6 +164,8 @@ DATABASE_URL="postgresql://postgres:your-password@host.docker.internal:5432/xlan
 JWT_SECRET="replace-with-a-long-random-string"
 
 NUXT_MANAGER_AUTH_SECRET="replace-with-another-long-random-string"
+# Keep development for HTTP / internal Docker; use production for public HTTPS deployment
+NUXT_ENV="development"
 # First deployment: admin account. Disable bootstrap and remove the password variable after it is created.
 NUXT_MANAGER_ADMIN_USERNAME="admin@example.com"
 NUXT_MANAGER_ADMIN_PASSWORD="your-strong-password"
@@ -200,7 +202,13 @@ Variables are grouped by responsibility. **Nuxt app config** goes through `runti
 | `MANAGER_HOST_PORT`        | `3312`  | Maps to container `PORT`                |
 | `XLANGAI_SERVER_HOST_PORT` | `8080`  | Maps to container `XLANGAI_SERVER_PORT` |
 
-### 2. Nuxt runtimeConfig — manager private (`NUXT_MANAGER_*`)
+### 2. Nuxt runtimeConfig — global (`NUXT_*`)
+
+| Variable   | Default       | Description                                                                                                                                          |
+| ---------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NUXT_ENV` | `development` | Runtime environment. `development`: HTTP login works (login cookie without Secure). `production`: cookie uses Secure and **requires HTTPS to sign in** |
+
+### 3. Nuxt runtimeConfig — manager private (`NUXT_MANAGER_*`)
 
 | Variable                             | Default | Description                                                      |
 | ------------------------------------ | ------- | ---------------------------------------------------------------- |
@@ -213,7 +221,7 @@ Variables are grouped by responsibility. **Nuxt app config** goes through `runti
 | `NUXT_MANAGER_ADMIN_NICKNAME`        | `Admin` | Admin display name                                               |
 | `NUXT_MANAGER_ADMIN_SEED`            | `true`  | Set to `false` to disable admin bootstrap                        |
 
-### 3. Nuxt runtimeConfig — public (`NUXT_PUBLIC_*`)
+### 4. Nuxt runtimeConfig — public (`NUXT_PUBLIC_*`)
 
 | Variable                        | Default               | Description                      |
 | ------------------------------- | --------------------- | -------------------------------- |
@@ -248,6 +256,7 @@ If no admin credentials are configured, the system will not generate a random pa
 - After the first admin account is created, disable `NUXT_MANAGER_ADMIN_SEED` and remove `NUXT_MANAGER_ADMIN_PASSWORD`.
 - Keep `NUXT_MANAGER_TEST_ACCOUNT_SEED=false` to avoid creating the integration test account.
 - Configure HTTPS for the admin console and API. If exposed publicly, add access control and rate limiting at the reverse proxy layer.
+- Set `NUXT_ENV=production` for public HTTPS deployment; keep `development` for internal or plain HTTP access.
 - Mount `storage/` as a persistent volume and include it in backups.
 
 ---
