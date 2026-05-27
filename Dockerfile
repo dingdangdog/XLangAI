@@ -25,7 +25,7 @@ ARG BUILD_SHA=unknown
 
 WORKDIR /app
 
-RUN apk add --no-cache openssl libc6-compat git && corepack enable
+RUN apk add --no-cache openssl libc6-compat && corepack enable
 
 COPY manager/package.json manager/pnpm-lock.yaml manager/pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --ignore-scripts --registry=https://registry.npmmirror.com
