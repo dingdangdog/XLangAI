@@ -215,7 +215,7 @@ Variables are grouped by responsibility. **Nuxt app config** goes through `runti
 | `NUXT_MANAGER_DATABASE_AUTO_MIGRATE` | `true`  | Run Prisma migrations on startup                                 |
 | `NUXT_MANAGER_AUTH_SECRET`           | —       | Admin-console JWT secret (**change in production**)              |
 | `NUXT_MANAGER_AUTO_SEED`             | `true`  | Business seed data                                               |
-| `NUXT_MANAGER_TEST_ACCOUNT_SEED`     | `false` | Integration test account (`13800138000` / `123456`)              |
+| `NUXT_MANAGER_TEST_ACCOUNT_SEED`     | `false` | Integration test account (`13800138000`; password in startup logs) |
 | `NUXT_MANAGER_ADMIN_USERNAME`        | —       | First admin login ID                                             |
 | `NUXT_MANAGER_ADMIN_PASSWORD`        | —       | Plaintext password (≥6 characters), bcrypt-hashed before storage |
 | `NUXT_MANAGER_ADMIN_NICKNAME`        | `Admin` | Admin display name                                               |

@@ -214,7 +214,7 @@ docker-compose up -d
 | `NUXT_MANAGER_DATABASE_AUTO_MIGRATE` | `true`   | 启动时执行 Prisma 迁移                   |
 | `NUXT_MANAGER_AUTH_SECRET`           | —        | 运营后台 JWT 签名密钥（**生产必改**）    |
 | `NUXT_MANAGER_AUTO_SEED`             | `true`   | 业务种子数据                             |
-| `NUXT_MANAGER_TEST_ACCOUNT_SEED`     | `false`  | 联调测试账号（`13800138000` / `123456`） |
+| `NUXT_MANAGER_TEST_ACCOUNT_SEED`     | `false`  | 联调测试账号（`13800138000`，密码见启动日志） |
 | `NUXT_MANAGER_ADMIN_USERNAME`        | —        | 首次运营管理员登录名                     |
 | `NUXT_MANAGER_ADMIN_PASSWORD`        | —        | 明文密码（≥6 位），入库 bcrypt           |
 | `NUXT_MANAGER_ADMIN_NICKNAME`        | `管理员` | 管理员昵称                               |

@@ -177,6 +177,8 @@ function bundledVoicePreviewData(voiceCode: string): {
 
 /** Default test login phone (aligned with Nitro seed and integration docs) */
 export const TEST_SEED_PHONE = "13800138000";
+/** Initial test password; printed to console on first seed insert */
+export const TEST_SEED_PASSWORD = "XLang#Tst8k!mQ2$vL7@w";
 
 const SEED_MEMBERSHIP_TIERS = [
   {
@@ -489,7 +491,7 @@ export async function ensureTestSeedUser(db: AppPrismaClient) {
   }
 
   const bcrypt = await import("bcryptjs");
-  const passwordHash = await bcrypt.hash("123456", 10);
+  const passwordHash = await bcrypt.hash(TEST_SEED_PASSWORD, 10);
   const freeTier = await db.membershipTier.findUnique({ where: { code: "free" } });
 
   await db.user.create({
@@ -501,7 +503,9 @@ export async function ensureTestSeedUser(db: AppPrismaClient) {
       status: "active",
     },
   });
-  console.info(`[data-seed] inserted test user ${TEST_SEED_PHONE} (password 123456)`);
+  console.info(
+    `[data-seed] inserted test user ${TEST_SEED_PHONE} (password ${TEST_SEED_PASSWORD})`,
+  );
 }
 
 // ---------------------------------------------------------------------------
