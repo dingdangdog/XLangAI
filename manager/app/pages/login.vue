@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { MoonIcon, SunIcon } from "@heroicons/vue/24/outline";
+import type { ManagerAuthUser } from "~/stores/user";
 
 definePageMeta({
   layout: "blank",
@@ -51,7 +52,7 @@ async function submit() {
 
   loading.value = true;
   try {
-    const user = await $fetch("/api/auth/login", {
+    const user = await $fetch<ManagerAuthUser>("/api/auth/login", {
       method: "POST",
       body: {
         username: form.username.trim(),

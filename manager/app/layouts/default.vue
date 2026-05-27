@@ -7,6 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/vue/24/outline";
 import { AI_SETTINGS_LEGACY_PATHS, BACKUP_LEGACY_PATHS, SYSTEM_SETTINGS_LEGACY_PATHS } from "~/utils/adminNav";
+import { clearAuthStorage } from "~/utils/common";
 
 const route = useRoute();
 const router = useRouter();
@@ -44,12 +45,11 @@ const systemSettingsLegacyPaths = computed(() =>
 async function logout() {
   logoutLoading.value = true;
   try {
-    await $fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    userStore.clearUser();
+    clearAuthStorage();
     toast.success(t("toast.logoutSuccess"));
     await router.push(localePath("/login"));
   } catch {
-    userStore.clearUser();
+    clearAuthStorage();
     await router.push(localePath("/login"));
   } finally {
     logoutLoading.value = false;

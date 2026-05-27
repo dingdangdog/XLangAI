@@ -7,6 +7,7 @@ export type ManagerAuthUser = {
   phone?: string | null;
   email?: string | null;
   isManagerAdmin: true;
+  token?: string;
 };
 
 export const useUserStore = defineStore("manager-user", () => {
@@ -26,16 +27,12 @@ export const useUserStore = defineStore("manager-user", () => {
 
   async function fetchUser(): Promise<ManagerAuthUser | null> {
     try {
-      const headers: Record<string, string> = {};
-      if (import.meta.server) {
-        const cookie = useRequestHeaders(["cookie"]).cookie;
-        if (cookie) headers.cookie = cookie;
-      }
-
       const res = await $fetch<ManagerAuthUser>("/api/auth/me", {
         method: "GET",
+        headers: import.meta.server
+          ? { Authorization: useCookie("Authorization").value || "" }
+          : undefined,
         credentials: "include",
-        headers,
       });
       setUser(res);
       return res;

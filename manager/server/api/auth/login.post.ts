@@ -45,7 +45,8 @@ export default defineEventHandler(async (event) => {
     expiresInSeconds,
   );
 
-  const isProduction = process.env.NODE_ENV === "production";
+  const env = useRuntimeConfig().env;
+  const isProduction = env == "production";
   setCookie(event, "Authorization", token, {
     maxAge: expiresInSeconds,
     path: "/",
@@ -54,5 +55,5 @@ export default defineEventHandler(async (event) => {
     secure: isProduction,
   });
 
-  return authUser;
+  return { ...authUser, token };
 });

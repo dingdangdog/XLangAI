@@ -1,4 +1,4 @@
 export default defineEventHandler((event) => {
-  deleteCookie(event, "Authorization", { path: "/" });
+  deleteCookie(event, "Authorization");
   return { ok: true };
 });

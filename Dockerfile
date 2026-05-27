@@ -78,6 +78,7 @@ USER root
 ENV TZ="Asia/Shanghai"
 ENV APP_USER="xlangai"
 ENV NODE_ENV="production"
+ENV NUXT_ENV="development"
 
 # ── 2. Nuxt / Nitro（只需 PORT；host 默认 0.0.0.0）──────────────────────
 ENV PORT=3312

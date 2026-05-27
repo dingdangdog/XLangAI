@@ -16,6 +16,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@host.docker.internal:5432/xlangai?schema=public
 
       # Nuxt runtimeConfig — Manager Private
+      NUXT_ENV: "development"
       NUXT_MANAGER_AUTO_SEED: "true"
       NUXT_MANAGER_AUTH_SECRET: change-me-in-production
       NUXT_MANAGER_ADMIN_USERNAME: admin

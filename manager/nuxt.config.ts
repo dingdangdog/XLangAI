@@ -60,6 +60,8 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
+    /** 运行环境；NUXT_ENV。production 时 Cookie 带 Secure（需 HTTPS） */
+    env: "development",
     manager: {
       /** 启动时是否执行 Prisma 迁移；NUXT_MANAGER_DATABASE_AUTO_MIGRATE */
       databaseAutoMigrate: "true",

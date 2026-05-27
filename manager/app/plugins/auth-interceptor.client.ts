@@ -1,4 +1,5 @@
 import { useRouteBaseName } from "#i18n";
+import { getAuthHeaders } from "~/utils/api";
 
 export default defineNuxtPlugin(() => {
   if (!import.meta.client) return;
@@ -9,6 +10,13 @@ export default defineNuxtPlugin(() => {
   const { buildLoginRedirect } = useAuthRedirect();
 
   globalThis.$fetch = $fetch.create({
+    onRequest({ options }) {
+      options.credentials = options.credentials ?? "include";
+      options.headers = {
+        ...(options.headers as Record<string, string> | undefined),
+        ...getAuthHeaders(),
+      };
+    },
     onResponseError({ response }) {
       if (response.status !== 401) return;
       userStore.clearUser();
