@@ -6,7 +6,7 @@ import {
   SunIcon,
   XMarkIcon,
 } from "@heroicons/vue/24/outline";
-import { BACKUP_LEGACY_PATHS } from "~/utils/adminNav";
+import { AI_SETTINGS_LEGACY_PATHS, BACKUP_LEGACY_PATHS, SYSTEM_SETTINGS_LEGACY_PATHS } from "~/utils/adminNav";
 
 const route = useRoute();
 const router = useRouter();
@@ -28,6 +28,14 @@ useHead(() => ({
 
 const backupLegacyPaths = computed(() =>
   BACKUP_LEGACY_PATHS.map((path) => localePath(path)),
+);
+
+const aiSettingsLegacyPaths = computed(() =>
+  AI_SETTINGS_LEGACY_PATHS.map((path) => localePath(path)),
+);
+
+const systemSettingsLegacyPaths = computed(() =>
+  SYSTEM_SETTINGS_LEGACY_PATHS.map((path) => localePath(path)),
 );
 
 async function logout() {
@@ -55,6 +63,20 @@ function isActive(path: string) {
       route.path === localizedPath ||
       route.path.startsWith(`${localizedPath}/`) ||
       backupLegacyPaths.value.includes(route.path)
+    );
+  }
+  if (path === "/manage/ai-settings") {
+    return (
+      route.path === localizedPath ||
+      route.path.startsWith(`${localizedPath}/`) ||
+      aiSettingsLegacyPaths.value.includes(route.path)
+    );
+  }
+  if (path === "/manage/system-settings") {
+    return (
+      route.path === localizedPath ||
+      route.path.startsWith(`${localizedPath}/`) ||
+      systemSettingsLegacyPaths.value.includes(route.path)
     );
   }
   return route.path === localizedPath || route.path.startsWith(`${localizedPath}/`);

@@ -25,6 +25,7 @@
       "membershipTiers": "会员管理",
       "languages": "语言管理",
       "promptTemplates": "系统提示词",
+      "aiSettings": "AI 与语音服务",
       "llmConfigs": "LLM 服务配置",
       "sttConfigs": "STT 服务配置",
       "ttsConfigs": "TTS 服务配置",
@@ -32,7 +33,7 @@
       "translateConfigs": "翻译服务配置",
       "objectStorage": "对象存储 / 图床",
       "serverStore": "服务器商店",
-      "systemSettings": "系统变量",
+      "systemSettings": "系统设置",
       "dataBackup": "数据备份",
       "deletionRecords": "删除记录"
     }
@@ -607,6 +608,25 @@
       "createDialog": "新建用量记录",
       "editDialog": "编辑用量记录",
       "createRecord": "新建记录"
+    },
+    "aiSettings": {
+      "title": "AI 与语音服务",
+      "tabs": {
+        "llm": "LLM 服务",
+        "stt": "STT 服务",
+        "tts": "TTS 服务",
+        "translate": "翻译服务",
+        "voiceRoles": "语音角色",
+        "objectStorage": "对象存储"
+      }
+    },
+    "systemSettingsHub": {
+      "title": "系统设置",
+      "tabs": {
+        "variables": "系统变量",
+        "serverStore": "服务器商店",
+        "dataBackup": "数据备份"
+      }
     },
     "llmConfigs": {
       "title": "LLM 服务配置",

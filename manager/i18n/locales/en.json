@@ -25,6 +25,7 @@
       "membershipTiers": "Membership",
       "languages": "Languages",
       "promptTemplates": "Prompt templates",
+      "aiSettings": "AI & voice services",
       "llmConfigs": "LLM configs",
       "sttConfigs": "STT configs",
       "ttsConfigs": "TTS configs",
@@ -610,6 +611,25 @@
       "createDialog": "New usage record",
       "editDialog": "Edit usage record",
       "createRecord": "New record"
+    },
+    "aiSettings": {
+      "title": "AI & voice services",
+      "tabs": {
+        "llm": "LLM",
+        "stt": "STT",
+        "tts": "TTS",
+        "translate": "Translation",
+        "voiceRoles": "Voice roles",
+        "objectStorage": "Object storage"
+      }
+    },
+    "systemSettingsHub": {
+      "title": "System settings",
+      "tabs": {
+        "variables": "System variables",
+        "serverStore": "Server store",
+        "dataBackup": "Data backup"
+      }
     },
     "llmConfigs": {
       "title": "LLM service configs",

@@ -101,7 +101,7 @@ const entityGroups = computed(() => {
         {
           label: t("pages.dashboard.voiceRoles"),
           value: s.voiceRoles,
-          to: localePath("/manage/voice-roles"),
+          to: `${localePath("/manage/ai-settings")}?tab=voice-roles`,
           icon: SparklesIcon,
         },
         {
@@ -118,25 +118,25 @@ const entityGroups = computed(() => {
         {
           label: t("pages.dashboard.llmConfigs"),
           value: s.llmConfigs,
-          to: localePath("/manage/llm-service-configs"),
+          to: `${localePath("/manage/ai-settings")}?tab=llm`,
           icon: CpuChipIcon,
         },
         {
           label: t("pages.dashboard.sttConfigs"),
           value: s.sttConfigs,
-          to: localePath("/manage/stt-service-configs"),
+          to: `${localePath("/manage/ai-settings")}?tab=stt`,
           icon: ServerIcon,
         },
         {
           label: t("pages.dashboard.ttsConfigs"),
           value: s.ttsConfigs,
-          to: localePath("/manage/tts-service-configs"),
+          to: `${localePath("/manage/ai-settings")}?tab=tts`,
           icon: MicrophoneIcon,
         },
         {
           label: t("pages.dashboard.serverStore"),
           value: t("common.config"),
-          to: localePath("/manage/server-store"),
+          to: `${localePath("/manage/system-settings")}?tab=server-store`,
           icon: ServerIcon,
         },
       ] satisfies EntityCard[],

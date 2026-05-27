@@ -25,6 +25,7 @@
       "membershipTiers": "会員管理",
       "languages": "言語管理",
       "promptTemplates": "システムプロンプト",
+      "aiSettings": "AI・音声サービス",
       "llmConfigs": "LLM 設定",
       "sttConfigs": "STT 設定",
       "ttsConfigs": "TTS 設定",
@@ -32,7 +33,7 @@
       "translateConfigs": "翻訳設定",
       "objectStorage": "オブジェクトストレージ",
       "serverStore": "サーバーストア",
-      "systemSettings": "システム変数",
+      "systemSettings": "システム設定",
       "dataBackup": "データバックアップ",
       "deletionRecords": "削除記録"
     }
@@ -610,6 +611,25 @@
       "createDialog": "新規利用記録",
       "editDialog": "利用記録編集",
       "createRecord": "新規記録"
+    },
+    "aiSettings": {
+      "title": "AI・音声サービス",
+      "tabs": {
+        "llm": "LLM",
+        "stt": "STT",
+        "tts": "TTS",
+        "translate": "翻訳",
+        "voiceRoles": "音声ロール",
+        "objectStorage": "オブジェクトストレージ"
+      }
+    },
+    "systemSettingsHub": {
+      "title": "システム設定",
+      "tabs": {
+        "variables": "システム変数",
+        "serverStore": "サーバーストア",
+        "dataBackup": "データバックアップ"
+      }
     },
     "llmConfigs": {
       "title": "LLM サービス設定",

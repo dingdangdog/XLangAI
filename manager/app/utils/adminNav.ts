@@ -1,17 +1,12 @@
 import type { Component } from "vue";
 import {
   ArchiveBoxIcon,
-  ArrowDownTrayIcon,
-  ChatBubbleLeftIcon,
   ChartBarIcon,
-  CloudArrowUpIcon,
+  ChatBubbleLeftIcon,
   Cog6ToothIcon,
   CpuChipIcon,
   DocumentTextIcon,
   GlobeAltIcon,
-  MicrophoneIcon,
-  ServerIcon,
-  SparklesIcon,
   UserGroupIcon,
   UsersIcon,
 } from "@heroicons/vue/24/outline";
@@ -46,20 +41,13 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
   {
     titleKey: "nav.groups.aiVoice",
     items: [
-      { to: "/manage/llm-service-configs", labelKey: "nav.items.llmConfigs", icon: CpuChipIcon },
-      { to: "/manage/stt-service-configs", labelKey: "nav.items.sttConfigs", icon: ServerIcon },
-      { to: "/manage/tts-service-configs", labelKey: "nav.items.ttsConfigs", icon: MicrophoneIcon },
-      { to: "/manage/voice-roles", labelKey: "nav.items.voiceRoles", icon: SparklesIcon },
-      { to: "/manage/translate-service-configs", labelKey: "nav.items.translateConfigs", icon: GlobeAltIcon },
-      { to: "/manage/object-storage-configs", labelKey: "nav.items.objectStorage", icon: CloudArrowUpIcon },
+      { to: "/manage/ai-settings", labelKey: "nav.items.aiSettings", icon: CpuChipIcon },
     ],
   },
   {
     titleKey: "nav.groups.system",
     items: [
-      { to: "/manage/server-store", labelKey: "nav.items.serverStore", icon: ServerIcon },
       { to: "/manage/system-settings", labelKey: "nav.items.systemSettings", icon: Cog6ToothIcon },
-      { to: "/manage/data-backup", labelKey: "nav.items.dataBackup", icon: ArrowDownTrayIcon },
       { to: "/manage/backups", labelKey: "nav.items.deletionRecords", icon: ArchiveBoxIcon },
     ],
   },
@@ -71,6 +59,22 @@ export const BACKUP_LEGACY_PATHS = [
   "/manage/conversations-backup",
   "/manage/messages-backup",
   "/manage/user-usage-backup",
+] as const;
+
+/** 旧 AI 服务配置子路由重定向时，侧栏仍高亮 AI 设置菜单 */
+export const AI_SETTINGS_LEGACY_PATHS = [
+  "/manage/llm-service-configs",
+  "/manage/stt-service-configs",
+  "/manage/tts-service-configs",
+  "/manage/translate-service-configs",
+  "/manage/voice-roles",
+  "/manage/object-storage-configs",
+] as const;
+
+/** 旧系统管理子路由重定向时，侧栏仍高亮系统设置菜单 */
+export const SYSTEM_SETTINGS_LEGACY_PATHS = [
+  "/manage/server-store",
+  "/manage/data-backup",
 ] as const;
 
 export function useAdminNav() {
