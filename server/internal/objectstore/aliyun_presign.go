@@ -43,3 +43,15 @@ func downloadAliyun(_ context.Context, cfg *RuntimeConfig, key string) ([]byte, 
 	}
 	return readAll(body)
 }
+
+func deleteAliyun(_ context.Context, cfg *RuntimeConfig, key string) error {
+	client, err := oss.New(strings.TrimSpace(cfg.Endpoint), cfg.AccessKey, cfg.SecretKey)
+	if err != nil {
+		return err
+	}
+	bucket, err := client.Bucket(cfg.Bucket)
+	if err != nil {
+		return err
+	}
+	return bucket.DeleteObject(key)
+}

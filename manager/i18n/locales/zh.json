@@ -826,7 +826,8 @@
       "providerLocal": "本地目录（服务器磁盘）",
       "providerR2": "Cloudflare R2（S3 兼容）",
       "providerQiniu": "七牛云对象存储",
-      "providerAliyunOss": "阿里云 OSS"
+      "providerAliyunOss": "阿里云 OSS",
+      "qiniuUploadHint": "留空则按 config.zone 自动选择上传域名（z0/z1/z2/na0/as0）"
     }
   },
   "agentHub": {

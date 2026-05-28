@@ -64,3 +64,12 @@ func downloadR2(ctx context.Context, cfg *RuntimeConfig, key string) ([]byte, er
 	}
 	return readAll(out.Body)
 }
+
+func deleteR2(ctx context.Context, cfg *RuntimeConfig, key string) error {
+	client := newR2Client(cfg)
+	_, err := client.DeleteObject(ctx, &s3.DeleteObjectInput{
+		Bucket: aws.String(cfg.Bucket),
+		Key:    aws.String(key),
+	})
+	return err
+}

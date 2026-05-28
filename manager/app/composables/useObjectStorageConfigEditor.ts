@@ -33,6 +33,8 @@ export function useObjectStorageConfigEditor() {
   const activePreset = computed(() => getServicePreset("storage", form.vendorPresetId));
   const isR2 = computed(() => form.provider === "cloudflare_r2");
   const isLocal = computed(() => form.provider === "local");
+  const isQiniu = computed(() => form.provider === "qiniu");
+  const isAliyun = computed(() => form.provider === "aliyun_oss");
 
   const drawerTitle = computed(() =>
     hub.editorMode.value === "create"
@@ -217,6 +219,8 @@ export function useObjectStorageConfigEditor() {
     activePreset,
     isR2,
     isLocal,
+    isQiniu,
+    isAliyun,
     drawerTitle,
     drawerSubtitle,
     openCreate,

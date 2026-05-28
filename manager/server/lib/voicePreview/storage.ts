@@ -1,9 +1,14 @@
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
-import { DeleteObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import prisma from "../prisma";
 import { getAudioDir } from "../../utils/audioDir";
+import {
+  deleteObjects,
+  joinPublicUrl,
+  parseObjectStorageConfig,
+  uploadObject,
+} from "../objectStorage";
 
 /** 试听音频在对象存储桶内的目录前缀（与 R2/OSS 文件夹 demoaudio 一致）。 */
 const DEMO_AUDIO_PREFIX = "demoaudio";
@@ -93,39 +98,6 @@ async function deleteLocalCopy(localFilename: string): Promise<boolean> {
   }
 }
 
-async function deleteCloudObjects(keys: string[]): Promise<void> {
-  if (!keys.length) return;
-
-  const cfg = await getActiveObjectStorage();
-  if (!cfg) return;
-
-  const provider = (cfg.provider ?? "").trim().toLowerCase();
-  if (provider !== "cloudflare_r2" && provider !== "aliyun_oss") return;
-
-  const endpoint = (cfg.baseUrl ?? "").trim().replace(/\/$/, "");
-  const accessKey = (cfg.apiKey ?? "").trim();
-  const secretKey = (cfg.secretKey ?? "").trim();
-  const bucket = (cfg.bucket ?? "").trim();
-  if (!endpoint || !accessKey || !secretKey || !bucket) return;
-
-  const client = new S3Client({
-    region: (cfg.region ?? "auto").trim() || "auto",
-    endpoint,
-    credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
-    forcePathStyle: true,
-  });
-
-  await Promise.all(
-    keys.map(async (key) => {
-      try {
-        await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
-      } catch (e) {
-        console.warn(`[voicePreview] failed to delete cloud object ${key}:`, e);
-      }
-    }),
-  );
-}
-
 async function writeLocalCopy(
   data: Buffer,
   ext: string,
@@ -144,48 +116,29 @@ async function uploadCloud(
   contentType: string,
   preferredBaseName?: string,
 ): Promise<{ url: string; localFilename: string }> {
-  const cfg = await getActiveObjectStorage();
-  if (!cfg) {
+  const row = await getActiveObjectStorage();
+  if (!row) {
     throw new Error("media.assistant_tts.storage=cloud but no active object storage config");
   }
-  const provider = (cfg.provider ?? "").trim().toLowerCase();
+  const cfg = parseObjectStorageConfig(row);
   const normExt = ext.startsWith(".") ? ext : `.${ext}`;
   const localFilename = await writeLocalCopy(data, normExt, preferredBaseName);
   const key = `${DEMO_AUDIO_PREFIX}/${localFilename}`;
 
-  if (provider === "local") {
-    const base = (cfg.baseUrl ?? cfg.publicBaseUrl ?? "").replace(/\/$/, "");
-    const url = base ? `${base}/${key}` : `/api/v1/audio/${localFilename}`;
-    return { url, localFilename };
+  if (cfg.provider === "local") {
+    const url = joinPublicUrl(cfg.endpoint || cfg.publicBaseUrl, key);
+    return {
+      url: url || `/api/v1/audio/${localFilename}`,
+      localFilename,
+    };
   }
 
-  if (provider === "cloudflare_r2" || provider === "aliyun_oss") {
-    const endpoint = (cfg.baseUrl ?? "").trim().replace(/\/$/, "");
-    const accessKey = (cfg.apiKey ?? "").trim();
-    const secretKey = (cfg.secretKey ?? "").trim();
-    const bucket = (cfg.bucket ?? "").trim();
-    const publicBase = (cfg.publicBaseUrl ?? "").trim().replace(/\/$/, "");
-    if (!endpoint || !accessKey || !secretKey || !bucket || !publicBase) {
-      throw new Error("Object storage config incomplete (endpoint/keys/bucket/public_base_url)");
-    }
-    const client = new S3Client({
-      region: (cfg.region ?? "auto").trim() || "auto",
-      endpoint,
-      credentials: { accessKeyId: accessKey, secretAccessKey: secretKey },
-      forcePathStyle: true,
-    });
-    await client.send(
-      new PutObjectCommand({
-        Bucket: bucket,
-        Key: key,
-        Body: data,
-        ContentType: contentType || "application/octet-stream",
-      }),
-    );
-    return { url: `${publicBase}/${key}`, localFilename };
-  }
-
-  throw new Error(`Manager preview does not support object storage provider "${provider}"`);
+  const { url } = await uploadObject(cfg, {
+    key,
+    body: data,
+    contentType: contentType || "application/octet-stream",
+  });
+  return { url, localFilename };
 }
 
 /** Saves per media.assistant_tts.storage; cloud mode also writes a local copy under AUDIO_DIR. */
@@ -235,13 +188,16 @@ export async function deleteAssistantPreviewAudio(
 
   let cloudKeys: string[] = [];
   if (mode === "cloud") {
-    const cfg = await getActiveObjectStorage();
-    cloudKeys = resolveCloudObjectKeys({
-      previewAudioUrl,
-      localFilename,
-      publicBaseUrl: cfg?.publicBaseUrl,
-    });
-    await deleteCloudObjects(cloudKeys);
+    const row = await getActiveObjectStorage();
+    if (row) {
+      const cfg = parseObjectStorageConfig(row);
+      cloudKeys = resolveCloudObjectKeys({
+        previewAudioUrl,
+        localFilename,
+        publicBaseUrl: cfg.publicBaseUrl,
+      });
+      await deleteObjects(cfg, cloudKeys);
+    }
   }
 
   return { localDeleted, cloudKeys };

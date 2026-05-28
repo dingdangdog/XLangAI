@@ -21,6 +21,8 @@ const {
   activePreset,
   isR2,
   isLocal,
+  isQiniu,
+  isAliyun,
   configHints,
   drawerTitle,
   drawerSubtitle,
@@ -105,6 +107,45 @@ const theme = (id: string) => vendorTheme(id);
           </AgentField>
           <AgentField :label="t('fields.publicAccessUrl')" required>
             <AdminInput v-model="form.publicBaseUrl" />
+          </AgentField>
+        </template>
+
+        <template v-else-if="isQiniu">
+          <AgentField :label="t('fields.publicDomain')" required>
+            <AdminInput v-model="form.publicBaseUrl" placeholder="https://cdn.example.com" />
+          </AgentField>
+          <AgentField label="Access Key / API Key" required>
+            <AdminInput v-model="form.apiKey" type="password" autocomplete="off" />
+          </AgentField>
+          <AgentField label="Secret Key" required>
+            <AdminInput v-model="form.secretKey" type="password" autocomplete="off" />
+          </AgentField>
+          <AgentField :label="t('fields.bucket')" required>
+            <AdminInput v-model="form.bucket" />
+          </AgentField>
+          <AgentField :label="t('fields.endpointBaseUrl')" :hint="t('pages.objectStorage.qiniuUploadHint')">
+            <AdminInput v-model="form.baseUrl" placeholder="https://upload.qiniup.com" />
+          </AgentField>
+        </template>
+
+        <template v-else-if="isAliyun">
+          <AgentField :label="t('fields.endpointBaseUrl')" required>
+            <AdminInput v-model="form.baseUrl" placeholder="https://oss-cn-hangzhou.aliyuncs.com" />
+          </AgentField>
+          <AgentField :label="t('fields.publicDomain')" required>
+            <AdminInput v-model="form.publicBaseUrl" placeholder="https://bucket.oss-cn-hangzhou.aliyuncs.com" />
+          </AgentField>
+          <AgentField label="Access Key ID" required>
+            <AdminInput v-model="form.apiKey" type="password" autocomplete="off" />
+          </AgentField>
+          <AgentField label="Access Key Secret" required>
+            <AdminInput v-model="form.secretKey" type="password" autocomplete="off" />
+          </AgentField>
+          <AgentField :label="t('fields.bucket')" required>
+            <AdminInput v-model="form.bucket" />
+          </AgentField>
+          <AgentField :label="t('common.region')">
+            <AdminInput v-model="form.region" placeholder="cn-hangzhou" />
           </AgentField>
         </template>
 

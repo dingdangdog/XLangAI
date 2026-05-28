@@ -829,7 +829,8 @@
       "providerLocal": "Local directory (server disk)",
       "providerR2": "Cloudflare R2 (S3-compatible)",
       "providerQiniu": "Qiniu object storage",
-      "providerAliyunOss": "Aliyun OSS"
+      "providerAliyunOss": "Aliyun OSS",
+      "qiniuUploadHint": "Leave empty to pick upload host from config.zone (z0/z1/z2/na0/as0)"
     }
   },
   "agentHub": {

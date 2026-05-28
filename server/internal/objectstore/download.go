@@ -13,20 +13,14 @@ func DownloadObject(ctx context.Context, cfg *RuntimeConfig, key string) ([]byte
 		return nil, ErrNotConfigured
 	}
 	key = strings.TrimLeft(strings.TrimSpace(key), "/")
-	switch strings.ToLower(strings.TrimSpace(cfg.Provider)) {
-	case ProviderCloudflareR2:
-		if !cloudCredsReady(cfg) {
-			return nil, ErrNotConfigured
-		}
-		return downloadR2(ctx, cfg, key)
-	case ProviderAliyunOSS:
-		if !aliyunCredsReady(cfg) {
-			return nil, ErrNotConfigured
-		}
-		return downloadAliyun(ctx, cfg, key)
-	default:
-		return nil, fmt.Errorf("download not supported for provider %s", cfg.Provider)
+	backend, err := cloudBackendFor(cfg)
+	if err != nil {
+		return nil, err
 	}
+	if !backend.CredsReady(cfg) {
+		return nil, ErrNotConfigured
+	}
+	return backend.Download(ctx, cfg, key)
 }
 
 // DownloadByPublicURL 根据公网 URL 解析 key 并下载。

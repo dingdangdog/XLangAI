@@ -63,14 +63,19 @@ func (h *MediaHandler) PresignUpload(c *gin.Context) {
 		writeMediaStorageError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
+	out := gin.H{
 		"method":       res.Method,
 		"upload_url":   res.UploadURL,
 		"public_url":   res.PublicURL,
 		"object_key":   res.ObjectKey,
 		"content_type": res.ContentType,
 		"expires_at":   res.ExpiresAt.Format("2006-01-02T15:04:05Z"),
-	})
+		"provider":     res.Provider,
+	}
+	if res.UploadToken != "" {
+		out["upload_token"] = res.UploadToken
+	}
+	c.JSON(http.StatusOK, out)
 }
 
 func scopeFromKind(kind string) (media.StorageScope, error) {

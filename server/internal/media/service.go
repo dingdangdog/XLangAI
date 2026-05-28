@@ -134,8 +134,7 @@ func (s *Service) SupportsDirectUpload(ctx context.Context, scope StorageScope) 
 	if rc == nil {
 		return false, nil
 	}
-	p := strings.ToLower(strings.TrimSpace(rc.Provider))
-	return p == objectstore.ProviderCloudflareR2 || p == objectstore.ProviderAliyunOSS, nil
+	return objectstore.SupportsDirectUploadProvider(rc.Provider), nil
 }
 
 // PresignUpload 签发客户端直传凭证。

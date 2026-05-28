@@ -829,7 +829,8 @@
       "providerLocal": "ローカルディレクトリ（サーバーディスク）",
       "providerR2": "Cloudflare R2（S3 互換）",
       "providerQiniu": "七牛クラウドオブジェクトストレージ",
-      "providerAliyunOss": "阿里云 OSS"
+      "providerAliyunOss": "阿里云 OSS",
+      "qiniuUploadHint": "空の場合は config.zone（z0/z1/z2/na0/as0）からアップロード URL を自動選択"
     }
   },
   "agentHub": {

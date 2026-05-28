@@ -38,39 +38,24 @@ func Upload(ctx context.Context, cfg *RuntimeConfig, local LocalDirs, in UploadI
 
 	provider := ProviderLocal
 	if cfg != nil && strings.TrimSpace(cfg.Provider) != "" {
-		provider = strings.ToLower(strings.TrimSpace(cfg.Provider))
+		provider = normalizeProvider(cfg.Provider)
 	}
 
-	switch provider {
-	case ProviderLocal:
+	if provider == ProviderLocal {
 		return uploadLocal(local, in.Category, in.Data, ext)
-	case ProviderCloudflareR2:
-		if cfg == nil || !cloudCredsReady(cfg) {
-			return nil, ErrNotConfigured
-		}
-		if err := uploadR2(ctx, cfg, key, in.Data, in.ContentType); err != nil {
-			return nil, err
-		}
-		return &UploadResult{URL: joinPublicURL(cfg.PublicBaseURL, key)}, nil
-	case ProviderQiniu:
-		if cfg == nil || !qiniuCredsReady(cfg) {
-			return nil, ErrNotConfigured
-		}
-		if err := uploadQiniu(ctx, cfg, key, in.Data, in.ContentType); err != nil {
-			return nil, err
-		}
-		return &UploadResult{URL: joinPublicURL(cfg.PublicBaseURL, key)}, nil
-	case ProviderAliyunOSS:
-		if cfg == nil || !aliyunCredsReady(cfg) {
-			return nil, ErrNotConfigured
-		}
-		if err := uploadAliyun(ctx, cfg, key, in.Data, in.ContentType); err != nil {
-			return nil, err
-		}
-		return &UploadResult{URL: joinPublicURL(cfg.PublicBaseURL, key)}, nil
-	default:
-		return nil, fmt.Errorf("unsupported object storage provider: %s", provider)
 	}
+
+	backend, err := cloudBackendFor(cfg)
+	if err != nil {
+		return nil, err
+	}
+	if !backend.CredsReady(cfg) {
+		return nil, ErrNotConfigured
+	}
+	if err := backend.Upload(ctx, cfg, key, in.Data, in.ContentType); err != nil {
+		return nil, err
+	}
+	return &UploadResult{URL: joinPublicURL(cfg.PublicBaseURL, key)}, nil
 }
 
 func uploadLocal(local LocalDirs, cat Category, data []byte, ext string) (*UploadResult, error) {
@@ -115,4 +100,31 @@ func qiniuCredsReady(cfg *RuntimeConfig) bool {
 
 func aliyunCredsReady(cfg *RuntimeConfig) bool {
 	return cfg.Endpoint != "" && cfg.AccessKey != "" && cfg.SecretKey != "" && cfg.Bucket != "" && cfg.PublicBaseURL != ""
+}
+
+// DeleteObject 从云存储删除对象（供 Manager 等复用同一实现时参考）。
+func DeleteObject(ctx context.Context, cfg *RuntimeConfig, key string) error {
+	if cfg == nil || strings.TrimSpace(key) == "" {
+		return ErrNotConfigured
+	}
+	key = strings.TrimLeft(strings.TrimSpace(key), "/")
+	switch normalizeProvider(cfg.Provider) {
+	case ProviderCloudflareR2:
+		if !cloudCredsReady(cfg) {
+			return ErrNotConfigured
+		}
+		return deleteR2(ctx, cfg, key)
+	case ProviderAliyunOSS:
+		if !aliyunCredsReady(cfg) {
+			return ErrNotConfigured
+		}
+		return deleteAliyun(ctx, cfg, key)
+	case ProviderQiniu:
+		if !qiniuCredsReady(cfg) {
+			return ErrNotConfigured
+		}
+		return deleteQiniu(ctx, cfg, key)
+	default:
+		return fmt.Errorf("delete not supported for provider %s", cfg.Provider)
+	}
 }

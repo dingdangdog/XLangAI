@@ -3,7 +3,6 @@ package media
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"xlangai/server/internal/objectstore"
 )
@@ -38,12 +37,11 @@ func (s *Service) presignDiagnostics(ctx context.Context, scope StorageScope) (s
 		return "", nil, err
 	}
 	if rc == nil {
-		return "对象存储：没有 status=active 的配置，请在后台启用一条 cloudflare_r2", nil, nil
+		return "对象存储：没有 status=active 的配置，请在后台启用一条云存储配置", nil, nil
 	}
-	p := strings.ToLower(strings.TrimSpace(rc.Provider))
-	if p != objectstore.ProviderCloudflareR2 && p != objectstore.ProviderAliyunOSS {
+	if !objectstore.SupportsDirectUploadProvider(rc.Provider) {
 		return fmt.Sprintf(
-			"对象存储：当前启用的 provider=%q，预签名需要 cloudflare_r2（或 aliyun_oss）",
+			"对象存储：当前启用的 provider=%q 不支持客户端直传",
 			rc.Provider,
 		), rc, nil
 	}
