@@ -98,6 +98,12 @@
 - **Docker Compose**: one-command startup with a persistent `storage` volume
 - **Split deployment**: `server` and `manager` can run separately while sharing the same PostgreSQL database
 
+### Third-party API providers
+
+> Due to limited maintainer bandwidth, the LLM, speech (STT/TTS), SMS, object-storage, and other API integrations in this project **have not all been thoroughly regression-tested**. You may encounter compatibility or stability issues in production—we appreciate your patience.
+>
+> If you run into problems, please [open a GitHub Issue](https://github.com/DingDangDog/XLangAI/issues), help with testing, or submit a pull request so we can improve provider coverage together.
+
 ---
 
 ## Architecture

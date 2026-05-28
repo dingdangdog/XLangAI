@@ -97,6 +97,12 @@
 - **Docker Compose**：一键启动，挂载 `storage` 持久卷
 - **分体部署**：`server` 与 `manager` 可分别本地或容器运行，共用同一 PostgreSQL
 
+### 第三方 API 渠道
+
+> 受限于个人维护精力，本项目接入的 LLM、语音（STT/TTS）、短信、对象存储等多种 API 渠道**尚未全部完成充分测试**，实际使用中可能出现兼容性或稳定性问题，敬请谅解。
+>
+> 若您在使用中遇到问题，欢迎通过 [GitHub Issue](https://github.com/DingDangDog/XLangAI/issues) 反馈，或参与测试、提交 Pull Request，共同完善各渠道的接入质量。
+
 ---
 
 ## 架构
