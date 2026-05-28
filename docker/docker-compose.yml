@@ -1,6 +1,14 @@
 # XlangAI Unified Deployment: Single Image Exposure of Operations Backend 3312 and Go API 8080
 
 services:
+  # 可选：取消注释以启用 Redis 分布式缓存（多实例部署推荐）
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: xlangai-redis
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data/redis:/data
+
   xlangai:
     build:
       context: ..
@@ -29,8 +37,12 @@ services:
       JWT_SECRET: change-me-in-production
       XLANGAI_FFMPEG_PATH: ffmpeg
       GIN_MODE: "release"
+      # 可选 Redis（启用上方 redis 服务后取消注释）
+      # REDIS_URL: redis://redis:6379
       # XLANGAI_VERBOSE_LOGS: ${XLANGAI_VERBOSE_LOGS:-0}
     volumes:
       - ./data/storage:/app/storage
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # depends_on:
+    #   - redis

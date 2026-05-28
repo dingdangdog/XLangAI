@@ -5,3 +5,7 @@ XLANGAI_DEV_FULL_ACCESS=true
 # TTS/STT 响度与转码依赖 ffmpeg（Windows 示例路径，请按本机安装位置修改）
 # XLANGAI_FFMPEG_PATH=D:\Program Files\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe
 # XLANGAI_TTS_TARGET_LUFS=-14
+# 可选 Redis：留空则使用进程内内存缓存
+# REDIS_URL=redis://localhost:6379/0
+# 带密码（requirepass）：redis://:密码@主机:6379/0
+# REDIS_URL=redis://:your-password@localhost:6379/0

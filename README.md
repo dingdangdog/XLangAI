@@ -235,6 +235,37 @@ docker-compose up -d
 | `AVATAR_DIR`        | `/app/storage/avatars`         | 用户头像（Go）                                           |
 | `BUNDLED_AUDIO_DIR` | `/app/bootstrap-storage/audio` | 内置试听音频（Go fallback）                              |
 
+### 6. Go API 缓存（`REDIS_URL` / `XLANG_*`）
+
+Go API 内置统一缓存工具（`server/internal/cache`）：**已配置且可连通的 `REDIS_URL` 时使用 Redis**，否则自动降级为**进程内内存**（单实例开发可用）。
+
+| 变量                       | 默认 | 说明                                                                 |
+| -------------------------- | ---- | -------------------------------------------------------------------- |
+| `REDIS_URL`                | —    | Redis 连接串（见下方示例）；留空则使用内存缓存          |
+| `LANG_CACHE_TTL_SEC`       | `300` | 语种列表缓存 TTL（秒）                                              |
+| `PRINCIPAL_CACHE_TTL_SEC`  | `60`  | 用户会员 Principal 缓存 TTL（秒）                                   |
+
+> **多实例部署**（水平扩展多个 Go API 副本）务必配置 `REDIS_URL`，否则 OTP、Principal 等缓存各实例互不共享。
+
+`REDIS_URL` 使用标准 Redis URI（`go-redis` `ParseURL`），**密码写在 URL 里**即可：
+
+```env
+# 无密码
+REDIS_URL=redis://127.0.0.1:6379/0
+
+# 仅密码（常见 requirepass）
+REDIS_URL=redis://:your-password@127.0.0.1:6379/0
+
+# Redis 6+ ACL（用户名 + 密码）
+REDIS_URL=redis://default:your-password@127.0.0.1:6379/0
+
+# TLS（云厂商常用 rediss://）
+REDIS_URL=rediss://:your-password@your-redis.example.com:6379/0
+```
+
+密码含 `@`、`#`、`/` 等特殊字符时需 [URL 编码](https://developer.mozilla.org/zh-CN/docs/Glossary/Percent-encoding)（例如 `@` → `%40`）。  
+若只写 `127.0.0.1:6379`（不带 `redis://` 前缀），当前实现**不会**解析密码，请改用完整 URI。
+
 ---
 
 ## 运营管理员（首次部署）

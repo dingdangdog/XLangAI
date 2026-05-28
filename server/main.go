@@ -109,7 +109,7 @@ func main() {
 
 	}
 
-	appCache := cache.New(rdb)
+	appCache := cache.Init(rdb)
 
 	ur := repository.NewUserRepo(gdb)
 

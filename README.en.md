@@ -236,6 +236,37 @@ Variables are grouped by responsibility. **Nuxt app config** goes through `runti
 | `AVATAR_DIR`        | `/app/storage/avatars`         | User avatars (Go)                                                         |
 | `BUNDLED_AUDIO_DIR` | `/app/bootstrap-storage/audio` | Bundled preview audio (Go fallback)                                       |
 
+### 6. Go API cache (`REDIS_URL` / `LANG_*`)
+
+The Go API includes a unified cache layer (`server/internal/cache`): it uses **Redis when `REDIS_URL` is set and reachable**, otherwise it falls back to an **in-process memory** cache (fine for single-instance development).
+
+| Variable                  | Default | Description                                                                 |
+| ------------------------- | ------- | --------------------------------------------------------------------------- |
+| `REDIS_URL`               | —       | Redis URL (see examples below); leave empty for in-memory cache       |
+| `LANG_CACHE_TTL_SEC`      | `300`   | Language list cache TTL (seconds)                                           |
+| `PRINCIPAL_CACHE_TTL_SEC` | `60`    | User membership Principal cache TTL (seconds)                               |
+
+> For **multi-instance deployments** (multiple Go API replicas), configure `REDIS_URL` so OTP, Principal, and other shared cache entries stay consistent across instances.
+
+`REDIS_URL` uses the standard Redis URI format (`go-redis` `ParseURL`); **put the password in the URL**:
+
+```env
+# No password
+REDIS_URL=redis://127.0.0.1:6379/0
+
+# Password only (typical requirepass)
+REDIS_URL=redis://:your-password@127.0.0.1:6379/0
+
+# Redis 6+ ACL (username + password)
+REDIS_URL=redis://default:your-password@127.0.0.1:6379/0
+
+# TLS (many cloud providers use rediss://)
+REDIS_URL=rediss://:your-password@your-redis.example.com:6379/0
+```
+
+URL-encode special characters in the password (e.g. `@` → `%40`).  
+If you use bare `127.0.0.1:6379` without the `redis://` prefix, the password is **not** parsed—use a full URI instead.
+
 ---
 
 ## First Admin Account
