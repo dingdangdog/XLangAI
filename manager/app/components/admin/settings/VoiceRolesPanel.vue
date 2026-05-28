@@ -103,11 +103,6 @@ function cellValue(row: Record<string, unknown>, key: string) {
   return String(v);
 }
 
-function cellTitle(row: Record<string, unknown>, key: string): string | undefined {
-  const text = cellValue(row, key);
-  return text || undefined;
-}
-
 const dialogVisible = ref(false);
 const dialogMode = ref<"create" | "edit">("create");
 const saving = ref(false);
@@ -394,9 +389,9 @@ async function deletePreview(row: Record<string, unknown>) {
               </span>
             </template>
             <template v-else>
-              <span class="line-clamp-2 max-w-[220px] break-words" :title="cellTitle(row, col.prop)">
+              <AdminCellText :title="cellValue(row, col.prop)">
                 {{ cellValue(row, col.prop) }}
-              </span>
+              </AdminCellText>
             </template>
           </AdminTd>
           <AdminTd align="right">

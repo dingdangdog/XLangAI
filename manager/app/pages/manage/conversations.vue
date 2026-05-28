@@ -15,16 +15,57 @@ const loading = ref(false);
 const showDeleted = ref(false);
 const filterUserId = ref("");
 
+const userOptions = ref<Opt[]>([]);
 const langOptions = ref<Opt[]>([]);
 const voiceOptions = ref<Opt[]>([]);
 const aiOptions = ref<Opt[]>([]);
 const promptOptions = ref<Opt[]>([]);
 const optionsLoading = ref(false);
 
+function buildUserLabel(r: Record<string, unknown>): string | null {
+  const nick = String(r.nickname ?? "").trim();
+  if (nick) return nick;
+  const phone = String(r.phone ?? "").trim();
+  if (phone) return phone;
+  const email = String(r.email ?? "").trim();
+  if (email) return email;
+  return null;
+}
+
+function refDisplayLabel(
+  map: Map<string, string>,
+  id: unknown,
+  unknownKey: "pages.conversations.unknownUser" | "pages.conversations.unknownLanguage" | "pages.conversations.unknownVoiceRole",
+  emptyKey: "common.emDash" = "common.emDash",
+): string {
+  const key = String(id ?? "").trim();
+  if (!key) return t(emptyKey);
+  return map.get(key) ?? t(unknownKey);
+}
+
+const userLabelById = computed(() => new Map(userOptions.value.map((o) => [o.id, o.label])));
+const langLabelById = computed(() => new Map(langOptions.value.map((o) => [o.id, o.label])));
+const voiceLabelById = computed(() => new Map(voiceOptions.value.map((o) => [o.id, o.label])));
+
+function userDisplayLabel(id: unknown): string {
+  return refDisplayLabel(userLabelById.value, id, "pages.conversations.unknownUser");
+}
+
+function languageDisplayLabel(id: unknown): string {
+  return refDisplayLabel(langLabelById.value, id, "pages.conversations.unknownLanguage");
+}
+
+function voiceRoleDisplayLabel(id: unknown): string {
+  return refDisplayLabel(voiceLabelById.value, id, "pages.conversations.unknownVoiceRole");
+}
+
 async function loadRefs() {
   optionsLoading.value = true;
   try {
-    const [lr, vr, ar, pr] = await Promise.all([
+    const [ur, lr, vr, ar, pr] = await Promise.all([
+      $fetch<{ items: Record<string, unknown>[] }>("/api/admin/users", {
+        query: { page: 1, pageSize: 500, includeDeleted: 1 },
+      }),
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/languages", {
         query: { page: 1, pageSize: 500 },
       }),
@@ -38,6 +79,10 @@ async function loadRefs() {
         query: { page: 1, pageSize: 200 },
       }),
     ]);
+    userOptions.value = ur.items.map((r) => ({
+      id: String(r.id),
+      label: buildUserLabel(r) ?? t("pages.conversations.unknownUser"),
+    }));
     langOptions.value = lr.items.map((r) => ({
       id: String(r.id),
       label: `${r.code} · ${r.name}`,
@@ -61,6 +106,8 @@ async function loadRefs() {
     optionsLoading.value = false;
   }
 }
+
+onMounted(() => void loadRefs());
 
 async function load() {
   loading.value = true;
@@ -200,6 +247,11 @@ const optionalSelect = (opts: Opt[]) => [
   ...opts.map((o) => ({ value: o.id, label: o.label })),
 ];
 
+const userSelectOptions = computed(() => userOptions.value.map((o) => ({ value: o.id, label: o.label })));
+const userFilterOptions = computed(() => [
+  { value: "", label: t("pages.conversations.filterAllUsers") },
+  ...userSelectOptions.value,
+]);
 const langSelectOptions = computed(() => langOptions.value.map((l) => ({ value: l.id, label: l.label })));
 const voiceSelectOptions = computed(() => optionalSelect(voiceOptions.value));
 const aiSelectOptions = computed(() => optionalSelect(aiOptions.value));
@@ -216,7 +268,7 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
         <template #actions>
           <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
           <div class="w-56">
-            <AdminInput v-model="filterUserId" :placeholder="$t('pages.conversations.filterUserId')" />
+            <AdminSelect v-model="filterUserId" :options="userFilterOptions" />
           </div>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
@@ -227,8 +279,8 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh>{{ $t("fields.title") }}</AdminTh>
-          <AdminTh>{{ $t("fields.userId") }}</AdminTh>
-          <AdminTh>{{ $t("fields.languageId") }}</AdminTh>
+          <AdminTh>{{ $t("nav.items.users") }}</AdminTh>
+          <AdminTh>{{ $t("fields.language") }}</AdminTh>
           <AdminTh>{{ $t("fields.voiceRole") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
           <AdminTh>{{ $t("common.deletedAt") }}</AdminTh>
@@ -236,10 +288,26 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
           <AdminTh width="140px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
-          <AdminTd>{{ row.title }}</AdminTd>
-          <AdminTd>{{ row.userId }}</AdminTd>
-          <AdminTd>{{ row.languageId }}</AdminTd>
-          <AdminTd>{{ row.voiceRoleId ?? t("common.emDash") }}</AdminTd>
+          <AdminTd>
+            <AdminCellText :title="String(row.title ?? '')">
+              {{ row.title }}
+            </AdminCellText>
+          </AdminTd>
+          <AdminTd>
+            <AdminCellText :title="userDisplayLabel(row.userId)">
+              {{ userDisplayLabel(row.userId) }}
+            </AdminCellText>
+          </AdminTd>
+          <AdminTd>
+            <AdminCellText :title="languageDisplayLabel(row.languageId)">
+              {{ languageDisplayLabel(row.languageId) }}
+            </AdminCellText>
+          </AdminTd>
+          <AdminTd>
+            <AdminCellText :title="voiceRoleDisplayLabel(row.voiceRoleId)">
+              {{ voiceRoleDisplayLabel(row.voiceRoleId) }}
+            </AdminCellText>
+          </AdminTd>
           <AdminTd><AdminBadge>{{ row.status }}</AdminBadge></AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.deletedAt) }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
@@ -269,8 +337,12 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
         <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="form.id" disabled />
         </AdminFormField>
-        <AdminFormField :label="$t('fields.userId')" required>
-          <AdminInput v-model="form.userId" placeholder="UUID" />
+        <AdminFormField :label="$t('nav.items.users')" required>
+          <AdminSelect
+            v-model="form.userId"
+            :options="userSelectOptions"
+            :placeholder="$t('pages.conversations.selectUser')"
+          />
         </AdminFormField>
         <AdminFormField :label="$t('fields.language')" required>
           <AdminSelect

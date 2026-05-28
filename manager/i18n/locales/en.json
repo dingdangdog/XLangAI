@@ -448,7 +448,13 @@
     "conversations": {
       "title": "Conversations",
       "description": "Bound to user and language; optional voice role, LLM, prompt; soft delete.",
+      "filterUser": "Filter by user",
       "filterUserId": "Filter by user ID",
+      "filterAllUsers": "All users",
+      "selectUser": "Select user",
+      "unknownUser": "Unknown user",
+      "unknownLanguage": "Unknown language",
+      "unknownVoiceRole": "Unknown voice role",
       "createDialog": "New conversation",
       "editDialog": "Edit conversation",
       "defaultTitle": "New chat",

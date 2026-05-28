@@ -220,9 +220,21 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd><AdminBadge>{{ row.role }}</AdminBadge></AdminTd>
           <AdminTd>{{ aiStatusLabel(row) }}</AdminTd>
-          <AdminTd>{{ row.content }}</AdminTd>
-          <AdminTd>{{ row.conversationId }}</AdminTd>
-          <AdminTd>{{ row.audioUrl ?? t("common.emDash") }}</AdminTd>
+          <AdminTd>
+            <AdminCellText :title="String(row.content ?? '')">
+              {{ row.content ?? t("common.emDash") }}
+            </AdminCellText>
+          </AdminTd>
+          <AdminTd>
+            <AdminCellText :title="String(row.conversationId ?? '')">
+              {{ row.conversationId }}
+            </AdminCellText>
+          </AdminTd>
+          <AdminTd>
+            <AdminCellText :title="row.audioUrl != null ? String(row.audioUrl) : undefined">
+              {{ row.audioUrl ?? t("common.emDash") }}
+            </AdminCellText>
+          </AdminTd>
           <AdminTd>{{ row.durationMs ?? t("common.emDash") }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.deletedAt) }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.createdAt) }}</AdminTd>

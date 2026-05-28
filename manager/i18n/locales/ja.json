@@ -448,7 +448,13 @@
     "conversations": {
       "title": "会話",
       "description": "ユーザー・言語に紐付；音声ロール・LLM・プロンプト任意；論理削除",
+      "filterUser": "ユーザーで絞込",
       "filterUserId": "ユーザー ID で絞込",
+      "filterAllUsers": "すべてのユーザー",
+      "selectUser": "ユーザーを選択",
+      "unknownUser": "不明なユーザー",
+      "unknownLanguage": "不明な言語",
+      "unknownVoiceRole": "不明な音声ロール",
       "createDialog": "新規会話",
       "editDialog": "会話編集",
       "defaultTitle": "新しい会話",

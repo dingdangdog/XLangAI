@@ -32,6 +32,6 @@ const variants = {
 <template>
   <button :type="type" :disabled="disabled || loading" :class="[base, sizes[size], variants[variant]]">
     <span v-if="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-    <slot />
+    <slot></slot>
   </button>
 </template>
