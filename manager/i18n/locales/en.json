@@ -231,6 +231,7 @@
     "tier": "Membership",
     "tierLevel": "Membership tier",
     "nativeLanguage": "Native language",
+    "defaultLlm": "Default LLM",
     "accountStatus": "Account status",
     "todayUsageCol": "Today",
     "monthUsageCol": "This month",
@@ -419,7 +420,9 @@
       "passwordHintEdit": "Leave blank to keep; enter to replace",
       "passwordPlaceholderCreate": "Required",
       "passwordPlaceholderEdit": "Leave blank to keep",
-      "nativeLanguageHint": "For client STT bilingual assist; not practice target language"
+      "nativeLanguageHint": "For client STT bilingual assist; not practice target language",
+      "defaultLlmGlobal": "Use global default",
+      "defaultLlmHint": "Applies to LLM+TTS mode only; native_audio still uses the voice role's LLM"
     },
     "languages": {
       "title": "Languages",

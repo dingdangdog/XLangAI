@@ -37,6 +37,7 @@ type AIHandler struct {
 	ttsCfg       *repository.TtsConfigRepo
 	translateCfg *repository.TranslateConfigRepo
 	voice        *repository.VoiceRepo
+	userRepo     *repository.UserRepo
 	usage        *repository.UsageRepo
 	az           *authz.Service
 	media        *media.Service
@@ -53,6 +54,7 @@ func NewAIHandler(
 	ttsCfg *repository.TtsConfigRepo,
 	translateCfg *repository.TranslateConfigRepo,
 	voice *repository.VoiceRepo,
+	userRepo *repository.UserRepo,
 	usage *repository.UsageRepo,
 	az *authz.Service,
 	mediaSvc *media.Service,
@@ -60,7 +62,7 @@ func NewAIHandler(
 	return &AIHandler{
 		cfg: cfg, msg: msg, sys: sys, conv: conv, lang: lang,
 		llmCfg: llmCfg, sttCfg: sttCfg, ttsCfg: ttsCfg, translateCfg: translateCfg,
-		voice: voice, usage: usage, az: az, media: mediaSvc,
+		voice: voice, userRepo: userRepo, usage: usage, az: az, media: mediaSvc,
 	}
 }
 
@@ -860,21 +862,23 @@ func (h *AIHandler) llmAPIKey(cfg *repository.LLMServiceConfig) string {
 	return strings.TrimSpace(cfg.APIKey)
 }
 
-// resolveLLMForConversation 优先使用会话上的 llm_config_id（JSON 仍为 ai_config_id）；若该行无可用密钥或已失效，则回退到 sort_order 最前的活跃 LLM 配置。
+// resolveLLMForConversation 解析 TTS 模式对话 LLM：会话 llm_config_id → 用户默认 LLM → 全局首个 active；native_audio 不走此函数。
 func (h *AIHandler) resolveLLMForConversation(ctx context.Context, conv *model.Conversation) (*repository.LLMServiceConfig, error) {
-	seen := make(map[string]struct{})
-	var ids []string
+	convLLM := ""
 	if conv.LLMConfigID != nil {
-		if id := strings.TrimSpace(*conv.LLMConfigID); id != "" {
-			ids = append(ids, id)
-			seen[id] = struct{}{}
+		convLLM = strings.TrimSpace(*conv.LLMConfigID)
+	}
+	userLLM := ""
+	if h.userRepo != nil && strings.TrimSpace(conv.UserID) != "" {
+		if id, err := h.userRepo.ResolveActiveDefaultLlmConfigID(ctx, conv.UserID); err == nil && id != nil {
+			userLLM = *id
 		}
 	}
+	globalLLM := ""
 	if def, err := h.llmCfg.GetFirstActive(ctx); err == nil && def != nil {
-		if _, ok := seen[def.ID]; !ok {
-			ids = append(ids, def.ID)
-		}
+		globalLLM = def.ID
 	}
+	ids := repository.OrderedLLMConfigIDsForTTS(convLLM, userLLM, globalLLM)
 	for _, id := range ids {
 		cfg, err := h.llmCfg.GetByID(ctx, id)
 		if err != nil || cfg == nil {

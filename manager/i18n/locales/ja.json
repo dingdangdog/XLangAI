@@ -231,6 +231,7 @@
     "tier": "会員",
     "tierLevel": "会員ランク",
     "nativeLanguage": "母語",
+    "defaultLlm": "デフォルト LLM",
     "accountStatus": "アカウント状態",
     "todayUsageCol": "本日",
     "monthUsageCol": "今月",
@@ -417,7 +418,9 @@
       "passwordHintEdit": "空欄で変更なし；入力で上書き",
       "passwordPlaceholderCreate": "必須",
       "passwordPlaceholderEdit": "空欄で変更なし",
-      "nativeLanguageHint": "クライアント STT 補助用；学習言語とは無関係"
+      "nativeLanguageHint": "クライアント STT 補助用；学習言語とは無関係",
+      "defaultLlmGlobal": "グローバル既定に従う",
+      "defaultLlmHint": "LLM+TTS モードのみ。native_audio は音声ロールの LLM を使用"
     },
     "languages": {
       "title": "言語",

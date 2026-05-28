@@ -18,13 +18,14 @@ type ConvHandler struct {
 	convRepo   *repository.ConvRepo
 	msgRepo    *repository.MessageRepo
 	systemRepo *repository.SystemRepo
+	userRepo   *repository.UserRepo
 	voiceRepo  *repository.VoiceRepo
 	langRepo   *repository.LangRepo
 	verbose    bool
 }
 
-func NewConvHandler(convRepo *repository.ConvRepo, msgRepo *repository.MessageRepo, systemRepo *repository.SystemRepo, voiceRepo *repository.VoiceRepo, langRepo *repository.LangRepo, verbose bool) *ConvHandler {
-	return &ConvHandler{convRepo: convRepo, msgRepo: msgRepo, systemRepo: systemRepo, voiceRepo: voiceRepo, langRepo: langRepo, verbose: verbose}
+func NewConvHandler(convRepo *repository.ConvRepo, msgRepo *repository.MessageRepo, systemRepo *repository.SystemRepo, userRepo *repository.UserRepo, voiceRepo *repository.VoiceRepo, langRepo *repository.LangRepo, verbose bool) *ConvHandler {
+	return &ConvHandler{convRepo: convRepo, msgRepo: msgRepo, systemRepo: systemRepo, userRepo: userRepo, voiceRepo: voiceRepo, langRepo: langRepo, verbose: verbose}
 }
 
 func (h *ConvHandler) Create(c *gin.Context) {
@@ -94,7 +95,14 @@ func (h *ConvHandler) Create(c *gin.Context) {
 		}
 	}
 
-	conv, err := h.convRepo.Create(c.Request.Context(), uid, req.LangID, voiceID, def.LLMConfigID, def.PromptID, titleVal)
+	llmConfigID := def.LLMConfigID
+	if h.userRepo != nil {
+		if userLLM, uerr := h.userRepo.ResolveActiveDefaultLlmConfigID(c.Request.Context(), uid); uerr == nil && userLLM != nil {
+			llmConfigID = *userLLM
+		}
+	}
+
+	conv, err := h.convRepo.Create(c.Request.Context(), uid, req.LangID, voiceID, llmConfigID, def.PromptID, titleVal)
 	if err != nil {
 		log.Printf("ConvHandler.Create: user_id=%s lang_id=%s: %v", uid, req.LangID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

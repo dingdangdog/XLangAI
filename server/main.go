@@ -180,11 +180,11 @@ func main() {
 
 	lr := repository.NewLangRepo(gdb)
 
-	ch := handler.NewConvHandler(cr, msgR, sr, vr, lr, cfg.VerboseLogs)
+	ch := handler.NewConvHandler(cr, msgR, sr, ur, vr, lr, cfg.VerboseLogs)
 
 	mediaSvc := media.NewService(osr, cfg, sysSettings)
 
-	ah := handler.NewAIHandler(cfg, msgR, sr, cr, lr, llm, stt, tc, tr, vr, urUsage, az, mediaSvc)
+	ah := handler.NewAIHandler(cfg, msgR, sr, cr, lr, llm, stt, tc, tr, vr, ur, urUsage, az, mediaSvc)
 
 	lh := handler.NewLangHandler(lr, appCache, cfg.LangCacheTTL)
 

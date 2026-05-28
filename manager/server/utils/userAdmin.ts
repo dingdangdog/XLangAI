@@ -13,6 +13,32 @@ export function redactUserRecord(row: Record<string, unknown>): Record<string, u
   };
 }
 
+async function normalizeUserDefaultLlmConfigId(
+  value: unknown,
+): Promise<string | null | undefined> {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null || value === "") {
+    return null;
+  }
+  const id = String(value).trim();
+  if (!id) {
+    return null;
+  }
+  const row = await prisma.sysLlmServiceConfig.findFirst({
+    where: { id, status: "active" },
+    select: { id: true },
+  });
+  if (!row) {
+    throw createError({
+      statusCode: 400,
+      message: "指定的 LLM 配置不存在或已停用",
+    });
+  }
+  return id;
+}
+
 export async function prepareUserAdminWriteData(
   body: Record<string, unknown>,
   mode: "create" | "update",
@@ -43,6 +69,10 @@ export async function prepareUserAdminWriteData(
     data.passwordHash = await bcrypt.hash(plain, BCRYPT_ROUNDS);
   }
 
+  if ("defaultLlmConfigId" in body) {
+    data.defaultLlmConfigId = await normalizeUserDefaultLlmConfigId(body.defaultLlmConfigId);
+  }
+
   return data;
 }
 
@@ -70,17 +100,27 @@ export async function attachUserListFields(
         .filter((x): x is string => typeof x === "string" && x.length > 0),
     ),
   ];
+  const llmIds = [
+    ...new Set(
+      rows
+        .map((r) => r.defaultLlmConfigId)
+        .filter((x): x is string => typeof x === "string" && x.length > 0),
+    ),
+  ];
   const userIds = rows.map((r) => String(r.id ?? "")).filter((id) => id.length > 0);
 
   const today = utcDateOnly();
   const monthStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
 
-  const [tiers, langs, todayRows, monthGrouped] = await Promise.all([
+  const [tiers, langs, llms, todayRows, monthGrouped] = await Promise.all([
     tierIds.length
       ? prisma.membershipTier.findMany({ where: { id: { in: tierIds } } })
       : Promise.resolve([]),
     langIds.length
       ? prisma.language.findMany({ where: { id: { in: langIds } } })
+      : Promise.resolve([]),
+    llmIds.length
+      ? prisma.sysLlmServiceConfig.findMany({ where: { id: { in: llmIds } } })
       : Promise.resolve([]),
     userIds.length
       ? prisma.userUsage.findMany({
@@ -107,6 +147,7 @@ export async function attachUserListFields(
 
   const tierById = new Map(tiers.map((t) => [t.id, t]));
   const langById = new Map(langs.map((l) => [l.id, l]));
+  const llmById = new Map(llms.map((l) => [l.id, l]));
   const todayByUser = new Map(todayRows.map((u) => [u.userId, u]));
   const monthByUser = new Map(monthGrouped.map((g) => [g.userId, g]));
 
@@ -116,6 +157,8 @@ export async function attachUserListFields(
     const tier = typeof tierId === "string" ? tierById.get(tierId) : undefined;
     const langId = r.languageId;
     const lang = typeof langId === "string" ? langById.get(langId) : undefined;
+    const llmId = r.defaultLlmConfigId;
+    const llm = typeof llmId === "string" ? llmById.get(llmId) : undefined;
     const uid = String(r.id ?? "");
     const todayU = todayByUser.get(uid);
     const monthU = monthByUser.get(uid);
@@ -128,6 +171,7 @@ export async function attachUserListFields(
       tierLabel: tier ? `${tier.code} · ${tier.name}` : "",
       nativeLanguageCode: lang?.code ?? "",
       nativeLanguageLabel: lang ? `${lang.code} · ${lang.name}` : "",
+      defaultLlmLabel: llm ? `${llm.code} · ${llm.name}` : "",
       tierDailyLimit: tier?.dailyLimit ?? null,
       tierMonthlyLimit: tier?.monthlyLimit ?? null,
       todayUsageCount: todayU?.usageCount ?? 0,

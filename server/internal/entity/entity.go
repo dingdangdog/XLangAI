@@ -234,6 +234,7 @@ type User struct {
 	AvatarURL             *string    `gorm:"column:avatar_url;type:varchar(500)"`
 	TierID                *string    `gorm:"column:tier_id;type:varchar(36)"`
 	LanguageID            *string    `gorm:"column:language_id;type:varchar(36)"`
+	DefaultLlmConfigID    *string    `gorm:"column:default_llm_config_id;type:varchar(36)"`
 	Settings              *string    `gorm:"column:settings;type:text"`
 	TokenBalance          int64      `gorm:"column:token_balance"`
 	SubscriptionExpiresAt *time.Time `gorm:"column:subscription_expires_at"`

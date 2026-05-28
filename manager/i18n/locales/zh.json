@@ -228,6 +228,7 @@
     "tier": "会员",
     "tierLevel": "会员等级",
     "nativeLanguage": "母语",
+    "defaultLlm": "默认 LLM",
     "accountStatus": "账号状态",
     "todayUsageCol": "今日用量",
     "monthUsageCol": "本月用量",
@@ -416,7 +417,9 @@
       "passwordHintEdit": "留空则不修改；填写则覆盖为新密码",
       "passwordPlaceholderCreate": "必填",
       "passwordPlaceholderEdit": "留空不修改",
-      "nativeLanguageHint": "用于客户端语音转文字双语辅助识别；与练习目标语言无关"
+      "nativeLanguageHint": "用于客户端语音转文字双语辅助识别；与练习目标语言无关",
+      "defaultLlmGlobal": "跟随全局默认",
+      "defaultLlmHint": "仅影响 LLM+TTS 模式的新会话与对话；native_audio 模式仍使用语音角色绑定的 LLM"
     },
     "languages": {
       "title": "语言",

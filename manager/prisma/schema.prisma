@@ -256,6 +256,8 @@ model User {
   tierId                String?   @map("tier_id") @db.VarChar(36)
   /// 用户母语（sys_languages.id），用于客户端 STT 双语辅助识别等；与练习会话的目标语言无关。
   languageId            String?   @map("language_id") @db.VarChar(36)
+  /// 默认 LLM+TTS 对话使用的 LLM（sys_llm_service_configs.id）；native_audio 模式忽略此项，仍由语音角色的 LLM 决定。
+  defaultLlmConfigId    String?   @map("default_llm_config_id") @db.VarChar(36)
   settings              String?   @db.Text
   /// 可抵扣 LLM 对话的 token 余额（与 OpenAI usage.total_tokens 同量纲）；内购消耗型核销时累加。
   tokenBalance          BigInt    @default(0) @map("token_balance")

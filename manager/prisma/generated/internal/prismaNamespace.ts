@@ -2311,6 +2311,7 @@ export const UserScalarFieldEnum = {
   avatarUrl: 'avatarUrl',
   tierId: 'tierId',
   languageId: 'languageId',
+  defaultLlmConfigId: 'defaultLlmConfigId',
   settings: 'settings',
   tokenBalance: 'tokenBalance',
   subscriptionExpiresAt: 'subscriptionExpiresAt',

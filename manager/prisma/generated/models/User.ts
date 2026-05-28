@@ -43,6 +43,7 @@ export type UserMinAggregateOutputType = {
   avatarUrl: string | null
   tierId: string | null
   languageId: string | null
+  defaultLlmConfigId: string | null
   settings: string | null
   tokenBalance: bigint | null
   subscriptionExpiresAt: Date | null
@@ -65,6 +66,7 @@ export type UserMaxAggregateOutputType = {
   avatarUrl: string | null
   tierId: string | null
   languageId: string | null
+  defaultLlmConfigId: string | null
   settings: string | null
   tokenBalance: bigint | null
   subscriptionExpiresAt: Date | null
@@ -87,6 +89,7 @@ export type UserCountAggregateOutputType = {
   avatarUrl: number
   tierId: number
   languageId: number
+  defaultLlmConfigId: number
   settings: number
   tokenBalance: number
   subscriptionExpiresAt: number
@@ -119,6 +122,7 @@ export type UserMinAggregateInputType = {
   avatarUrl?: true
   tierId?: true
   languageId?: true
+  defaultLlmConfigId?: true
   settings?: true
   tokenBalance?: true
   subscriptionExpiresAt?: true
@@ -141,6 +145,7 @@ export type UserMaxAggregateInputType = {
   avatarUrl?: true
   tierId?: true
   languageId?: true
+  defaultLlmConfigId?: true
   settings?: true
   tokenBalance?: true
   subscriptionExpiresAt?: true
@@ -163,6 +168,7 @@ export type UserCountAggregateInputType = {
   avatarUrl?: true
   tierId?: true
   languageId?: true
+  defaultLlmConfigId?: true
   settings?: true
   tokenBalance?: true
   subscriptionExpiresAt?: true
@@ -272,6 +278,7 @@ export type UserGroupByOutputType = {
   avatarUrl: string | null
   tierId: string | null
   languageId: string | null
+  defaultLlmConfigId: string | null
   settings: string | null
   tokenBalance: bigint
   subscriptionExpiresAt: Date | null
@@ -317,6 +324,7 @@ export type UserWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   tierId?: Prisma.StringNullableFilter<"User"> | string | null
   languageId?: Prisma.StringNullableFilter<"User"> | string | null
+  defaultLlmConfigId?: Prisma.StringNullableFilter<"User"> | string | null
   settings?: Prisma.StringNullableFilter<"User"> | string | null
   tokenBalance?: Prisma.BigIntFilter<"User"> | bigint | number
   subscriptionExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -339,6 +347,7 @@ export type UserOrderByWithRelationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   tierId?: Prisma.SortOrderInput | Prisma.SortOrder
   languageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultLlmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   settings?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -366,6 +375,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   tierId?: Prisma.StringNullableFilter<"User"> | string | null
   languageId?: Prisma.StringNullableFilter<"User"> | string | null
+  defaultLlmConfigId?: Prisma.StringNullableFilter<"User"> | string | null
   settings?: Prisma.StringNullableFilter<"User"> | string | null
   tokenBalance?: Prisma.BigIntFilter<"User"> | bigint | number
   subscriptionExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -386,6 +396,7 @@ export type UserOrderByWithAggregationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   tierId?: Prisma.SortOrderInput | Prisma.SortOrder
   languageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultLlmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   settings?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -416,6 +427,7 @@ export type UserScalarWhereWithAggregatesInput = {
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   tierId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   languageId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  defaultLlmConfigId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   settings?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   tokenBalance?: Prisma.BigIntWithAggregatesFilter<"User"> | bigint | number
   subscriptionExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -438,6 +450,7 @@ export type UserCreateInput = {
   avatarUrl?: string | null
   tierId?: string | null
   languageId?: string | null
+  defaultLlmConfigId?: string | null
   settings?: string | null
   tokenBalance?: bigint | number
   subscriptionExpiresAt?: Date | string | null
@@ -460,6 +473,7 @@ export type UserUncheckedCreateInput = {
   avatarUrl?: string | null
   tierId?: string | null
   languageId?: string | null
+  defaultLlmConfigId?: string | null
   settings?: string | null
   tokenBalance?: bigint | number
   subscriptionExpiresAt?: Date | string | null
@@ -482,6 +496,7 @@ export type UserUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -504,6 +519,7 @@ export type UserUncheckedUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -526,6 +542,7 @@ export type UserCreateManyInput = {
   avatarUrl?: string | null
   tierId?: string | null
   languageId?: string | null
+  defaultLlmConfigId?: string | null
   settings?: string | null
   tokenBalance?: bigint | number
   subscriptionExpiresAt?: Date | string | null
@@ -548,6 +565,7 @@ export type UserUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -570,6 +588,7 @@ export type UserUncheckedUpdateManyInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -592,6 +611,7 @@ export type UserCountOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   tierId?: Prisma.SortOrder
   languageId?: Prisma.SortOrder
+  defaultLlmConfigId?: Prisma.SortOrder
   settings?: Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrder
@@ -618,6 +638,7 @@ export type UserMaxOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   tierId?: Prisma.SortOrder
   languageId?: Prisma.SortOrder
+  defaultLlmConfigId?: Prisma.SortOrder
   settings?: Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrder
@@ -640,6 +661,7 @@ export type UserMinOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   tierId?: Prisma.SortOrder
   languageId?: Prisma.SortOrder
+  defaultLlmConfigId?: Prisma.SortOrder
   settings?: Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrder
@@ -676,6 +698,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   avatarUrl?: boolean
   tierId?: boolean
   languageId?: boolean
+  defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
   subscriptionExpiresAt?: boolean
@@ -698,6 +721,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   tierId?: boolean
   languageId?: boolean
+  defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
   subscriptionExpiresAt?: boolean
@@ -720,6 +744,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   tierId?: boolean
   languageId?: boolean
+  defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
   subscriptionExpiresAt?: boolean
@@ -742,6 +767,7 @@ export type UserSelectScalar = {
   avatarUrl?: boolean
   tierId?: boolean
   languageId?: boolean
+  defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
   subscriptionExpiresAt?: boolean
@@ -755,7 +781,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "passwordHash" | "nickname" | "avatarUrl" | "tierId" | "languageId" | "settings" | "tokenBalance" | "subscriptionExpiresAt" | "appleSub" | "googleSub" | "status" | "lastLoginAt" | "remark" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "passwordHash" | "nickname" | "avatarUrl" | "tierId" | "languageId" | "defaultLlmConfigId" | "settings" | "tokenBalance" | "subscriptionExpiresAt" | "appleSub" | "googleSub" | "status" | "lastLoginAt" | "remark" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
@@ -772,6 +798,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      * 用户母语（sys_languages.id），用于客户端 STT 双语辅助识别等；与练习会话的目标语言无关。
      */
     languageId: string | null
+    /**
+     * 默认 LLM+TTS 对话使用的 LLM（sys_llm_service_configs.id）；native_audio 模式忽略此项，仍由语音角色的 LLM 决定。
+     */
+    defaultLlmConfigId: string | null
     settings: string | null
     /**
      * 可抵扣 LLM 对话的 token 余额（与 OpenAI usage.total_tokens 同量纲）；内购消耗型核销时累加。
@@ -1226,6 +1256,7 @@ export interface UserFieldRefs {
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly tierId: Prisma.FieldRef<"User", 'String'>
   readonly languageId: Prisma.FieldRef<"User", 'String'>
+  readonly defaultLlmConfigId: Prisma.FieldRef<"User", 'String'>
   readonly settings: Prisma.FieldRef<"User", 'String'>
   readonly tokenBalance: Prisma.FieldRef<"User", 'BigInt'>
   readonly subscriptionExpiresAt: Prisma.FieldRef<"User", 'DateTime'>

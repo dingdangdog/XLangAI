@@ -21,6 +21,7 @@ const statusBusyId = ref<string | null>(null);
 
 const tierOptions = ref<Opt[]>([]);
 const langOptions = ref<Opt[]>([]);
+const llmOptions = ref<Opt[]>([]);
 const optionsLoading = ref(false);
 
 const STATUS_LABELS = computed<Record<string, string>>(() => ({
@@ -48,12 +49,15 @@ function statusBadgeVariant(status: unknown): "success" | "warning" | "danger" |
 async function loadRefs() {
   optionsLoading.value = true;
   try {
-    const [tr, lr] = await Promise.all([
+    const [tr, lr, ar] = await Promise.all([
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/membership-tiers", {
         query: { page: 1, pageSize: 200 },
       }),
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/languages", {
         query: { page: 1, pageSize: 500 },
+      }),
+      $fetch<{ items: Record<string, unknown>[] }>("/api/admin/llm-service-configs", {
+        query: { page: 1, pageSize: 200 },
       }),
     ]);
     tierOptions.value = tr.items.map((r) => ({
@@ -61,6 +65,10 @@ async function loadRefs() {
       label: `${r.code} · ${r.name}`,
     }));
     langOptions.value = lr.items.map((r) => ({
+      id: String(r.id),
+      label: `${r.code} · ${r.name}`,
+    }));
+    llmOptions.value = ar.items.map((r) => ({
       id: String(r.id),
       label: `${r.code} · ${r.name}`,
     }));
@@ -162,6 +170,7 @@ const form = reactive({
   avatarUrl: "",
   tierId: "",
   languageId: "",
+  defaultLlmConfigId: "",
   settings: "{}",
   status: "active",
   remark: "",
@@ -176,6 +185,7 @@ function resetForm() {
   form.avatarUrl = "";
   form.tierId = "";
   form.languageId = "";
+  form.defaultLlmConfigId = "";
   form.settings = "{}";
   form.status = "active";
   form.remark = "";
@@ -198,6 +208,7 @@ function openEdit(row: Record<string, unknown>) {
   form.avatarUrl = String(row.avatarUrl ?? "");
   form.tierId = String(row.tierId ?? "");
   form.languageId = String(row.languageId ?? "");
+  form.defaultLlmConfigId = String(row.defaultLlmConfigId ?? "");
   form.settings = row.settings != null ? String(row.settings) : "{}";
   form.status = String(row.status ?? "active");
   form.remark = String(row.remark ?? "");
@@ -241,6 +252,7 @@ async function submit() {
     avatarUrl: form.avatarUrl.trim() || null,
     tierId: form.tierId || null,
     languageId: form.languageId || null,
+    defaultLlmConfigId: form.defaultLlmConfigId || null,
     settings: settingsStr,
     status: form.status,
     remark: form.remark.trim() || null,
@@ -325,6 +337,11 @@ const langSelectOptions = computed(() => [
   { value: "", label: t("common.optional") },
   ...langOptions.value.map((l) => ({ value: l.id, label: l.label })),
 ]);
+
+const llmSelectOptions = computed(() => [
+  { value: "", label: t("pages.users.defaultLlmGlobal") },
+  ...llmOptions.value.map((l) => ({ value: l.id, label: l.label })),
+]);
 </script>
 
 <template>
@@ -349,6 +366,7 @@ const langSelectOptions = computed(() => [
           <AdminTh>{{ $t("fields.nickname") }}</AdminTh>
           <AdminTh width="72px">{{ $t("fields.password") }}</AdminTh>
           <AdminTh width="160px">{{ $t("fields.tier") }}</AdminTh>
+          <AdminTh width="160px">{{ $t("fields.defaultLlm") }}</AdminTh>
           <AdminTh width="140px">{{ $t("fields.todayUsageCol") }}</AdminTh>
           <AdminTh width="140px">{{ $t("fields.monthUsageCol") }}</AdminTh>
           <AdminTh width="96px">{{ $t("common.status") }}</AdminTh>
@@ -372,6 +390,10 @@ const langSelectOptions = computed(() => [
               <span class="text-xs text-muted leading-snug">{{ tierSubline(row) }}</span>
             </div>
             <span v-else class="text-sm text-muted">{{ $t("common.notAssigned") }}</span>
+          </AdminTd>
+          <AdminTd class="text-sm">
+            <span v-if="row.defaultLlmLabel">{{ row.defaultLlmLabel }}</span>
+            <span v-else class="text-muted">{{ $t("pages.users.defaultLlmGlobal") }}</span>
           </AdminTd>
           <AdminTd class="text-sm tabular-nums">
             <div>{{ userUsagePrimaryLine(row, "today") }}</div>
@@ -463,6 +485,9 @@ const langSelectOptions = computed(() => [
         </AdminFormField>
         <AdminFormField :label="$t('fields.nativeLanguage')" :hint="$t('pages.users.nativeLanguageHint')">
           <AdminSelect v-model="form.languageId" :options="langSelectOptions" />
+        </AdminFormField>
+        <AdminFormField :label="$t('fields.defaultLlm')" :hint="$t('pages.users.defaultLlmHint')">
+          <AdminSelect v-model="form.defaultLlmConfigId" :options="llmSelectOptions" />
         </AdminFormField>
         <AdminFormField label="settings">
           <AdminInput v-model="form.settings" type="textarea" :rows="4" class="font-mono text-sm" />

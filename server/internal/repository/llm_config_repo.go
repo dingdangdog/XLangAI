@@ -71,6 +71,27 @@ func (r *LLMConfigRepo) GetByCode(ctx context.Context, code string) (*LLMService
 	return llmFromEntity(&row), nil
 }
 
+// OrderedLLMConfigIDsForTTS 返回 TTS 模式下解析 LLM 的配置 ID 尝试顺序（会话 → 用户默认 → 全局默认，去重）。
+func OrderedLLMConfigIDsForTTS(convLLM, userDefaultLLM, globalLLM string) []string {
+	seen := make(map[string]struct{})
+	var ids []string
+	appendID := func(id string) {
+		id = strings.TrimSpace(id)
+		if id == "" {
+			return
+		}
+		if _, ok := seen[id]; ok {
+			return
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	appendID(convLLM)
+	appendID(userDefaultLLM)
+	appendID(globalLLM)
+	return ids
+}
+
 func (r *LLMConfigRepo) GetFirstActive(ctx context.Context) (*LLMServiceConfig, error) {
 	var row entity.SysLlmServiceConfig
 	err := r.db.WithContext(ctx).

@@ -126,6 +126,44 @@ func (r *UserRepo) UpdatePassword(ctx context.Context, id, newPassword string) e
 	return nil
 }
 
+// ResolveActiveDefaultLlmConfigID 返回用户指定的、且仍为 active 的默认 LLM 配置 ID；未设置或已失效时返回 nil。
+func (r *UserRepo) ResolveActiveDefaultLlmConfigID(ctx context.Context, userID string) (*string, error) {
+	userID = strings.TrimSpace(userID)
+	if userID == "" {
+		return nil, nil
+	}
+	var row entity.User
+	err := r.db.WithContext(ctx).
+		Select("default_llm_config_id").
+		Where("id = ? AND deleted_at IS NULL", userID).
+		First(&row).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	if row.DefaultLlmConfigID == nil {
+		return nil, nil
+	}
+	pref := strings.TrimSpace(*row.DefaultLlmConfigID)
+	if pref == "" {
+		return nil, nil
+	}
+	var llm entity.SysLlmServiceConfig
+	err = r.db.WithContext(ctx).
+		Where("id = ? AND status = ?", pref, "active").
+		First(&llm).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	id := llm.ID
+	return &id, nil
+}
+
 func (r *UserRepo) GetByID(ctx context.Context, id string) (*model.User, error) {
 	var row entity.User
 	err := r.activeUserQuery().WithContext(ctx).Where("id = ?", id).First(&row).Error
