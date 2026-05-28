@@ -56,6 +56,7 @@ export const ModelName = {
   SysSttServiceConfig: 'SysSttServiceConfig',
   SysTranslateServiceConfig: 'SysTranslateServiceConfig',
   SysObjectStorageConfig: 'SysObjectStorageConfig',
+  SysSmsServiceConfig: 'SysSmsServiceConfig',
   SysSystemSetting: 'SysSystemSetting',
   TtsServiceConfig: 'TtsServiceConfig',
   VoiceRole: 'VoiceRole',
@@ -185,6 +186,27 @@ export const SysObjectStorageConfigScalarFieldEnum = {
 } as const
 
 export type SysObjectStorageConfigScalarFieldEnum = (typeof SysObjectStorageConfigScalarFieldEnum)[keyof typeof SysObjectStorageConfigScalarFieldEnum]
+
+
+export const SysSmsServiceConfigScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  provider: 'provider',
+  apiKey: 'apiKey',
+  secretKey: 'secretKey',
+  region: 'region',
+  signName: 'signName',
+  templateCode: 'templateCode',
+  config: 'config',
+  status: 'status',
+  sortOrder: 'sortOrder',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SysSmsServiceConfigScalarFieldEnum = (typeof SysSmsServiceConfigScalarFieldEnum)[keyof typeof SysSmsServiceConfigScalarFieldEnum]
 
 
 export const SysSystemSettingScalarFieldEnum = {

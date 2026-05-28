@@ -16,7 +16,13 @@ const (
 	cdKeyFmt          = "xlangai:login_otp_cd:v1:%s"
 	registerOtpKeyFmt = "xlangai:register_otp:v1:%s"
 	registerCdKeyFmt  = "xlangai:register_otp_cd:v1:%s"
+	smsSessionKeyFmt  = "xlangai:sms_session:v1:%s"
 )
+
+type smsSession struct {
+	Phone string `json:"phone"`
+	Code  string `json:"code"`
+}
 
 // Store 登录短信验证码；底层走统一 cache（Redis 或进程内内存）。
 type Store struct {
@@ -115,6 +121,40 @@ func (s *Store) DeleteRegisterCode(ctx context.Context, phone string) {
 		return
 	}
 	s.c.Delete(ctx, registerOtpKey(p))
+}
+
+func smsSessionKey(smsKey string) string { return fmt.Sprintf(smsSessionKeyFmt, smsKey) }
+
+// PutSmsSession 将验证码绑定到一次性 sms_key（防刷、防跨号重放）。
+func (s *Store) PutSmsSession(ctx context.Context, smsKey, phone, code string, ttl time.Duration) {
+	smsKey = strings.TrimSpace(smsKey)
+	p := normPhone(phone)
+	if smsKey == "" || p == "" || s.c == nil {
+		return
+	}
+	s.c.SetJSON(ctx, smsSessionKey(smsKey), smsSession{Phone: p, Code: strings.TrimSpace(code)}, ttl)
+}
+
+// GetSmsSession 读取 sms_key 对应的手机号与验证码。
+func (s *Store) GetSmsSession(ctx context.Context, smsKey string) (phone, code string, ok bool) {
+	smsKey = strings.TrimSpace(smsKey)
+	if smsKey == "" || s.c == nil {
+		return "", "", false
+	}
+	var sess smsSession
+	if !s.c.GetJSON(ctx, smsSessionKey(smsKey), &sess) {
+		return "", "", false
+	}
+	return sess.Phone, sess.Code, true
+}
+
+// DeleteSmsSession 验证成功后删除 sms_key。
+func (s *Store) DeleteSmsSession(ctx context.Context, smsKey string) {
+	smsKey = strings.TrimSpace(smsKey)
+	if smsKey == "" || s.c == nil {
+		return
+	}
+	s.c.Delete(ctx, smsSessionKey(smsKey))
 }
 
 // RandomDigits6 生成 6 位数字验证码。

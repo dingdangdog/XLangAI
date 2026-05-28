@@ -43,6 +43,11 @@ export type SysTranslateServiceConfig = Prisma.SysTranslateServiceConfigModel
  */
 export type SysObjectStorageConfig = Prisma.SysObjectStorageConfigModel
 /**
+ * Model SysSmsServiceConfig
+ * 短信服务商配置：阿里云、腾讯云等；全局仅允许一条 status = active。
+ */
+export type SysSmsServiceConfig = Prisma.SysSmsServiceConfigModel
+/**
  * Model SysSystemSetting
  * 系统变量（KEY-VALUE）：登录开关、媒体存储策略等；与厂商密钥表无关。
  */

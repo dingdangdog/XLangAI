@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler) *gin.Engine {
+func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler, captchaH *handler.CaptchaHandler) *gin.Engine {
 	r := gin.Default()
 	r.Use(handler.HTTPErrorLogMiddleware())
 
@@ -18,6 +18,8 @@ func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *han
 	r.GET("/api/v1/membership/tiers", mh.ListTiers)
 	r.GET("/api/v1/billing/catalog", bh.Catalog)
 	r.POST("/api/v1/users", uh.Create)
+	r.POST("/api/v1/captcha/ticket", captchaH.CreateTicket)
+	r.POST("/api/v1/captcha/verify", captchaH.Verify)
 	r.POST("/api/v1/auth/login", uh.Login)
 	r.POST("/api/v1/auth/login/sms/send", uh.SendLoginSms)
 	r.POST("/api/v1/auth/login/sms", uh.LoginWithSms)

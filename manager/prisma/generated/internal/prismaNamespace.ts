@@ -389,6 +389,7 @@ export const ModelName = {
   SysSttServiceConfig: 'SysSttServiceConfig',
   SysTranslateServiceConfig: 'SysTranslateServiceConfig',
   SysObjectStorageConfig: 'SysObjectStorageConfig',
+  SysSmsServiceConfig: 'SysSmsServiceConfig',
   SysSystemSetting: 'SysSystemSetting',
   TtsServiceConfig: 'TtsServiceConfig',
   VoiceRole: 'VoiceRole',
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "language" | "sysLlmServiceConfig" | "sysSttServiceConfig" | "sysTranslateServiceConfig" | "sysObjectStorageConfig" | "sysSystemSetting" | "ttsServiceConfig" | "voiceRole" | "promptTemplate" | "membershipTier" | "user" | "billingProduct" | "storeTransaction" | "userUsage" | "sysServiceUsageDaily" | "conversation" | "message" | "usersBackup" | "conversationsBackup" | "messagesBackup" | "userUsageBackup"
+    modelProps: "language" | "sysLlmServiceConfig" | "sysSttServiceConfig" | "sysTranslateServiceConfig" | "sysObjectStorageConfig" | "sysSmsServiceConfig" | "sysSystemSetting" | "ttsServiceConfig" | "voiceRole" | "promptTemplate" | "membershipTier" | "user" | "billingProduct" | "storeTransaction" | "userUsage" | "sysServiceUsageDaily" | "conversation" | "message" | "usersBackup" | "conversationsBackup" | "messagesBackup" | "userUsageBackup"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -791,6 +792,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SysObjectStorageConfigCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SysObjectStorageConfigCountAggregateOutputType> | number
+        }
+      }
+    }
+    SysSmsServiceConfig: {
+      payload: Prisma.$SysSmsServiceConfigPayload<ExtArgs>
+      fields: Prisma.SysSmsServiceConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SysSmsServiceConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SysSmsServiceConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.SysSmsServiceConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SysSmsServiceConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>
+        }
+        findMany: {
+          args: Prisma.SysSmsServiceConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>[]
+        }
+        create: {
+          args: Prisma.SysSmsServiceConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>
+        }
+        createMany: {
+          args: Prisma.SysSmsServiceConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SysSmsServiceConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.SysSmsServiceConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>
+        }
+        update: {
+          args: Prisma.SysSmsServiceConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.SysSmsServiceConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SysSmsServiceConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SysSmsServiceConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.SysSmsServiceConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SysSmsServiceConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.SysSmsServiceConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSysSmsServiceConfig>
+        }
+        groupBy: {
+          args: Prisma.SysSmsServiceConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SysSmsServiceConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SysSmsServiceConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SysSmsServiceConfigCountAggregateOutputType> | number
         }
       }
     }
@@ -2114,6 +2189,27 @@ export const SysObjectStorageConfigScalarFieldEnum = {
 export type SysObjectStorageConfigScalarFieldEnum = (typeof SysObjectStorageConfigScalarFieldEnum)[keyof typeof SysObjectStorageConfigScalarFieldEnum]
 
 
+export const SysSmsServiceConfigScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  provider: 'provider',
+  apiKey: 'apiKey',
+  secretKey: 'secretKey',
+  region: 'region',
+  signName: 'signName',
+  templateCode: 'templateCode',
+  config: 'config',
+  status: 'status',
+  sortOrder: 'sortOrder',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SysSmsServiceConfigScalarFieldEnum = (typeof SysSmsServiceConfigScalarFieldEnum)[keyof typeof SysSmsServiceConfigScalarFieldEnum]
+
+
 export const SysSystemSettingScalarFieldEnum = {
   id: 'id',
   key: 'key',
@@ -2614,6 +2710,7 @@ export type GlobalOmitConfig = {
   sysSttServiceConfig?: Prisma.SysSttServiceConfigOmit
   sysTranslateServiceConfig?: Prisma.SysTranslateServiceConfigOmit
   sysObjectStorageConfig?: Prisma.SysObjectStorageConfigOmit
+  sysSmsServiceConfig?: Prisma.SysSmsServiceConfigOmit
   sysSystemSetting?: Prisma.SysSystemSettingOmit
   ttsServiceConfig?: Prisma.TtsServiceConfigOmit
   voiceRole?: Prisma.VoiceRoleOmit

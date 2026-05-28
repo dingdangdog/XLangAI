@@ -15,6 +15,7 @@ import (
 	"xlangai/server/config"
 	"xlangai/server/internal/auth"
 	"xlangai/server/internal/authz"
+	"xlangai/server/internal/captcha"
 	"xlangai/server/internal/loginotp"
 	"xlangai/server/internal/media"
 	"xlangai/server/internal/model"
@@ -22,8 +23,10 @@ import (
 	"xlangai/server/internal/objectstore"
 	"xlangai/server/internal/repository"
 	"xlangai/server/internal/settings"
+	"xlangai/server/internal/sms"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -33,12 +36,14 @@ type UserHandler struct {
 	cfg      *config.Config
 	az       *authz.Service
 	otp      *loginotp.Store
+	captcha  *captcha.Store
+	sms      *sms.Service
 	media    *media.Service
 	settings *settings.Service
 }
 
-func NewUserHandler(repo *repository.UserRepo, langRepo *repository.LangRepo, cfg *config.Config, az *authz.Service, otp *loginotp.Store, mediaSvc *media.Service, sys *settings.Service) *UserHandler {
-	return &UserHandler{repo: repo, langRepo: langRepo, cfg: cfg, az: az, otp: otp, media: mediaSvc, settings: sys}
+func NewUserHandler(repo *repository.UserRepo, langRepo *repository.LangRepo, cfg *config.Config, az *authz.Service, otp *loginotp.Store, captchaStore *captcha.Store, smsSvc *sms.Service, mediaSvc *media.Service, sys *settings.Service) *UserHandler {
+	return &UserHandler{repo: repo, langRepo: langRepo, cfg: cfg, az: az, otp: otp, captcha: captchaStore, sms: smsSvc, media: mediaSvc, settings: sys}
 }
 
 func authAPIError(c *gin.Context, status int, msg, code string) {
@@ -124,16 +129,97 @@ func (h *UserHandler) Login(c *gin.Context) {
 const loginOtpTTL = 5 * time.Minute
 const loginSmsCooldown = 55 * time.Second
 
-// SendLoginSms 发送登录验证码（当前未对接短信网关；验证码存 Redis/内存，开启详细日志时打印到控制台便于联调）。
+func (h *UserHandler) deliverSmsCode(ctx context.Context, phone, code string) error {
+	if h.sms == nil {
+		if h.cfg.VerboseLogs {
+			log.Printf("[auth] SMS service nil; OTP phone=%s code=%s (not sent)\n", phone, code)
+			return nil
+		}
+		return sms.ErrNotConfigured
+	}
+	err := h.sms.SendVerificationCode(ctx, phone, code)
+	if err == nil {
+		return nil
+	}
+	if errors.Is(err, sms.ErrNotConfigured) && h.cfg.VerboseLogs {
+		log.Printf("[auth] SMS not configured; OTP phone=%s code=%s (not sent)\n", phone, code)
+		return nil
+	}
+	return err
+}
+
+func (h *UserHandler) respondSmsDeliveryError(c *gin.Context, err error) {
+	if errors.Is(err, sms.ErrNotConfigured) {
+		authAPIError(c, http.StatusServiceUnavailable, "sms service not configured", "SMS_NOT_CONFIGURED")
+		return
+	}
+	if errors.Is(err, sms.ErrUnsupported) {
+		authAPIError(c, http.StatusServiceUnavailable, "sms provider not supported", "SMS_PROVIDER_UNSUPPORTED")
+		return
+	}
+	log.Printf("[auth] sms send failed: %v\n", err)
+	authAPIError(c, http.StatusBadGateway, "failed to send sms", "SMS_SEND_FAILED")
+}
+
+func (h *UserHandler) consumeCaptchaTicket(c *gin.Context, ticket string) bool {
+	ticket = strings.TrimSpace(ticket)
+	if ticket == "" {
+		authAPIError(c, http.StatusBadRequest, "captcha required", "CAPTCHA_REQUIRED")
+		return false
+	}
+	if h.captcha == nil {
+		authAPIError(c, http.StatusServiceUnavailable, "captcha unavailable", "CAPTCHA_UNAVAILABLE")
+		return false
+	}
+	err := h.captcha.ConsumeVerified(c.Request.Context(), ticket)
+	if err == nil {
+		return true
+	}
+	switch {
+	case errors.Is(err, captcha.ErrTicketNotFound):
+		authAPIError(c, http.StatusBadRequest, "captcha expired, please refresh", "CAPTCHA_EXPIRED")
+	case errors.Is(err, captcha.ErrNotVerified):
+		authAPIError(c, http.StatusBadRequest, "captcha not verified", "CAPTCHA_NOT_VERIFIED")
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error(), "code": "CAPTCHA_CONSUME_FAILED"})
+	}
+	return false
+}
+
+func newSmsKey() string {
+	return "sms:" + uuid.NewString()
+}
+
+func (h *UserHandler) verifySmsSession(c *gin.Context, smsKey, phone, code string) (bool, func()) {
+	smsKey = strings.TrimSpace(smsKey)
+	phone = strings.TrimSpace(phone)
+	code = strings.TrimSpace(code)
+	if smsKey == "" {
+		authAPIError(c, http.StatusBadRequest, "sms_key required", "SMS_KEY_REQUIRED")
+		return false, nil
+	}
+	wantPhone, wantCode, ok := h.otp.GetSmsSession(c.Request.Context(), smsKey)
+	if !ok || wantPhone != phone || wantCode != code {
+		authAPIError(c, http.StatusUnauthorized, "invalid or expired code", "INVALID_OR_EXPIRED_CODE")
+		return false, nil
+	}
+	return true, func() { h.otp.DeleteSmsSession(c.Request.Context(), smsKey) }
+}
+
+// SendLoginSms 发送登录验证码（需先完成数学题 captcha；使用启用的短信服务商）。
 func (h *UserHandler) SendLoginSms(c *gin.Context) {
 	if !h.authEnabled(c, settings.AuthSmsEnabled) {
 		return
 	}
 	var req struct {
-		Phone string `json:"phone" binding:"required"`
+		Phone         string `json:"phone" binding:"required"`
+		CaptchaTicket string `json:"captcha_ticket"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if !h.consumeCaptchaTicket(c, req.CaptchaTicket) {
 		return
 	}
 	phone := strings.TrimSpace(req.Phone)
@@ -152,22 +238,25 @@ func (h *UserHandler) SendLoginSms(c *gin.Context) {
 		return
 	}
 	code := loginotp.RandomDigits6()
-	h.otp.PutCode(ctx, phone, code, loginOtpTTL)
-	h.otp.SetCooldown(ctx, phone, loginSmsCooldown)
-	if h.cfg.VerboseLogs {
-		log.Printf("[auth] login OTP phone=%s code=%s (SMS not integrated; shown for debugging only)\n", phone, code)
+	if err := h.deliverSmsCode(ctx, phone, code); err != nil {
+		h.respondSmsDeliveryError(c, err)
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{"ok": true})
+	smsKey := newSmsKey()
+	h.otp.PutSmsSession(ctx, smsKey, phone, code, loginOtpTTL)
+	h.otp.SetCooldown(ctx, phone, loginSmsCooldown)
+	c.JSON(http.StatusOK, gin.H{"ok": true, "sms_key": smsKey})
 }
 
-// LoginWithSms 使用手机号 + 短信验证码登录。
+// LoginWithSms 使用手机号 + 短信验证码 + sms_key 登录。
 func (h *UserHandler) LoginWithSms(c *gin.Context) {
 	if !h.authEnabled(c, settings.AuthSmsEnabled) {
 		return
 	}
 	var req struct {
-		Phone string `json:"phone" binding:"required"`
-		Code  string `json:"code" binding:"required"`
+		Phone  string `json:"phone" binding:"required"`
+		Code   string `json:"code" binding:"required"`
+		SmsKey string `json:"sms_key"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -176,9 +265,8 @@ func (h *UserHandler) LoginWithSms(c *gin.Context) {
 	phone := strings.TrimSpace(req.Phone)
 	code := strings.TrimSpace(req.Code)
 	ctx := c.Request.Context()
-	want, ok := h.otp.GetCode(ctx, phone)
-	if !ok || want != code {
-		authAPIError(c, http.StatusUnauthorized, "invalid or expired code", "INVALID_OR_EXPIRED_CODE")
+	ok, cleanup := h.verifySmsSession(c, req.SmsKey, phone, code)
+	if !ok {
 		return
 	}
 	u, err := h.repo.GetByPhone(ctx, phone)
@@ -186,7 +274,7 @@ func (h *UserHandler) LoginWithSms(c *gin.Context) {
 		authAPIError(c, http.StatusUnauthorized, "invalid credentials", "INVALID_CREDENTIALS")
 		return
 	}
-	h.otp.DeleteCode(ctx, phone)
+	cleanup()
 	role := u.Role
 	if role == "" {
 		role = authz.RoleUser
@@ -205,10 +293,14 @@ func (h *UserHandler) SendRegisterSms(c *gin.Context) {
 		return
 	}
 	var req struct {
-		Phone string `json:"phone" binding:"required"`
+		Phone         string `json:"phone" binding:"required"`
+		CaptchaTicket string `json:"captcha_ticket"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if !h.consumeCaptchaTicket(c, req.CaptchaTicket) {
 		return
 	}
 	phone := strings.TrimSpace(req.Phone)
@@ -229,15 +321,17 @@ func (h *UserHandler) SendRegisterSms(c *gin.Context) {
 		return
 	}
 	code := loginotp.RandomDigits6()
-	h.otp.PutRegisterCode(ctx, phone, code, loginOtpTTL)
-	h.otp.SetRegisterCooldown(ctx, phone, loginSmsCooldown)
-	if h.cfg.VerboseLogs {
-		log.Printf("[auth] register OTP phone=%s code=%s (SMS not integrated; shown for debugging only)\n", phone, code)
+	if err := h.deliverSmsCode(ctx, phone, code); err != nil {
+		h.respondSmsDeliveryError(c, err)
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{"ok": true})
+	smsKey := newSmsKey()
+	h.otp.PutSmsSession(ctx, smsKey, phone, code, loginOtpTTL)
+	h.otp.SetRegisterCooldown(ctx, phone, loginSmsCooldown)
+	c.JSON(http.StatusOK, gin.H{"ok": true, "sms_key": smsKey})
 }
 
-// RegisterWithSms 使用手机号 + 验证码完成注册并登录。
+// RegisterWithSms 使用手机号 + 验证码 + sms_key 完成注册并登录。
 func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 	if !h.authEnabled(c, settings.AuthSmsRegisterEnabled) {
 		return
@@ -245,6 +339,7 @@ func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 	var req struct {
 		Phone    string `json:"phone" binding:"required"`
 		Code     string `json:"code" binding:"required"`
+		SmsKey   string `json:"sms_key"`
 		Nickname string `json:"nickname"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -254,9 +349,8 @@ func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 	phone := strings.TrimSpace(req.Phone)
 	code := strings.TrimSpace(req.Code)
 	ctx := c.Request.Context()
-	want, ok := h.otp.GetRegisterCode(ctx, phone)
-	if !ok || want != code {
-		authAPIError(c, http.StatusUnauthorized, "invalid or expired code", "INVALID_OR_EXPIRED_CODE")
+	ok, cleanup := h.verifySmsSession(c, req.SmsKey, phone, code)
+	if !ok {
 		return
 	}
 	if _, err := h.repo.GetByPhone(ctx, phone); err == nil {
@@ -271,7 +365,7 @@ func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	h.otp.DeleteRegisterCode(ctx, phone)
+	cleanup()
 	h.oauthSessionJSON(c, u)
 }
 

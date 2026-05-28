@@ -48,6 +48,7 @@
     "deleteTier": "この会員ランクを削除しますか？ユーザー参照に注意。",
     "deletePrompt": "このプロンプトテンプレートを削除しますか？",
     "deleteObjectStorage": "このオブジェクトストレージ設定を削除しますか？",
+    "deleteSmsConfig": "この SMS 設定を削除しますか？",
     "deleteSttConfig": "この STT 設定を削除しますか？",
     "deleteTranslateConfig": "この翻訳設定を削除しますか？",
     "deleteLlmConfig": "この LLM 設定を削除しますか？",
@@ -75,6 +76,7 @@
     "stt_service_configs": "STT 設定",
     "translate_service_configs": "翻訳設定",
     "object_storage_configs": "オブジェクトストレージ",
+    "sms_service_configs": "SMS 設定",
     "system_settings": "システム変数",
     "tts_service_configs": "TTS 設定",
     "voice_roles": "音声ロール",
@@ -628,9 +630,27 @@
       "title": "システム設定",
       "tabs": {
         "variables": "システム変数",
+        "sms": "SMS サービス",
         "serverStore": "サーバーストア",
         "dataBackup": "データバックアップ"
       }
+    },
+    "smsService": {
+      "description": "アプリのログイン/登録 OTP 用に阿里云または腾讯云 SMS を設定。active は 1 件のみ。テンプレート変数は code（6 桁）",
+      "hintTitle": "注意",
+      "hintBody": "阿里云: api_key/secret_key は AccessKey。腾讯云: config に sdk_app_id 必須。開発時 XLANGAI_VERBOSE_LOGS=1 で未設定時はログのみ",
+      "configAnomaly": "active が {count} 件あります。1 件のみにしてください",
+      "configAnomalyTitle": "設定警告",
+      "createDialog": "新規 SMS 設定",
+      "editDialog": "SMS 設定を編集",
+      "providerAliyun": "阿里云 SMS",
+      "providerTencent": "腾讯云 SMS",
+      "signName": "署名",
+      "templateCode": "テンプレート ID",
+      "accessKey": "AccessKey / SecretId",
+      "secretKey": "AccessKeySecret / SecretKey",
+      "fillSignAndTemplate": "署名とテンプレート ID を入力してください",
+      "tencentConfigHint": "腾讯云は config JSON に sdk_app_id が必要です"
     },
     "llmConfigs": {
       "title": "LLM サービス設定",

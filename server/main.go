@@ -31,7 +31,9 @@ import (
 
 	"xlangai/server/internal/router"
 
+	"xlangai/server/internal/captcha"
 	"xlangai/server/internal/settings"
+	"xlangai/server/internal/sms"
 )
 
 func logDBTarget(dbURL string) {
@@ -164,6 +166,10 @@ func main() {
 
 	osr := repository.NewObjectStorageConfigRepo(gdb)
 
+	smsR := repository.NewSmsConfigRepo(gdb)
+
+	smsSvc := sms.NewService(smsR, cfg.VerboseLogs)
+
 	ssr := repository.NewSystemSettingsRepo(gdb)
 
 	sysSettings := settings.NewService(ssr)
@@ -185,8 +191,11 @@ func main() {
 	vh := handler.NewVoiceHandler(vr)
 
 	otpStore := loginotp.NewStore(appCache)
+	captchaStore := captcha.NewStore(appCache)
 
-	uh := handler.NewUserHandler(ur, lr, cfg, az, otpStore, mediaSvc, sysSettings)
+	captchaH := handler.NewCaptchaHandler(captchaStore)
+
+	uh := handler.NewUserHandler(ur, lr, cfg, az, otpStore, captchaStore, smsSvc, mediaSvc, sysSettings)
 
 	sth := handler.NewSettingsHandler(sysSettings)
 
@@ -198,7 +207,7 @@ func main() {
 
 	bh := handler.NewBillingHandler(cfg, appleCfg, br, ur, mr, az)
 
-	r := router.New(cfg, az, uh, ch, ah, lh, vh, mh, sh, bh, sth, mdh)
+	r := router.New(cfg, az, uh, ch, ah, lh, vh, mh, sh, bh, sth, mdh, captchaH)
 
 	log.Printf("listen :%s", cfg.Port)
 

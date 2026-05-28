@@ -768,6 +768,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     nickname: string | null
     avatarUrl: string | null
     tierId: string | null
+    /**
+     * 用户母语（sys_languages.id），用于客户端 STT 双语辅助识别等；与练习会话的目标语言无关。
+     */
     languageId: string | null
     settings: string | null
     /**

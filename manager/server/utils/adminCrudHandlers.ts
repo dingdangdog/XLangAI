@@ -12,6 +12,7 @@ import { stripVoiceRoleVirtualFields } from "./voiceRoleAdmin";
 import { attachUserListFields, prepareUserAdminWriteData, redactUserRecord } from "./userAdmin";
 import { attachServiceConfigUsageFields } from "./serviceUsageAdmin";
 import { prepareObjectStorageServiceConfigWrite } from "./objectStorageServiceConfigAdmin";
+import { prepareSmsServiceConfigWrite } from "./smsServiceConfigAdmin";
 import { prepareTranslateServiceConfigWrite } from "./translateServiceConfigAdmin";
 import { prepareSttServiceConfigWrite } from "./sttServiceConfigAdmin";
 import { assertEditableSystemSettingKey, prepareSystemSettingWrite } from "./systemSettingsAdmin";
@@ -173,6 +174,9 @@ export async function adminCreateHandler(event: H3Event, resource: ResourceSlug)
   if (resource === "object-storage-configs") {
     data = await prepareObjectStorageServiceConfigWrite(data);
   }
+  if (resource === "sms-service-configs") {
+    data = await prepareSmsServiceConfigWrite(data);
+  }
   if (resource === "system-settings") {
     data = prepareSystemSettingWrite(data, "create");
   }
@@ -210,6 +214,9 @@ export async function adminUpdateHandler(event: H3Event, resource: ResourceSlug)
   }
   if (resource === "object-storage-configs") {
     data = await prepareObjectStorageServiceConfigWrite(data, id);
+  }
+  if (resource === "sms-service-configs") {
+    data = await prepareSmsServiceConfigWrite(data, id);
   }
   if (resource === "system-settings") {
     const existing = (await prisma.sysSystemSetting.findUnique({ where: { id } })) as {

@@ -17,6 +17,7 @@ export const RESOURCE_SLUGS = [
   "stt-service-configs",
   "translate-service-configs",
   "object-storage-configs",
+  "sms-service-configs",
   "system-settings",
   "tts-service-configs",
   "voice-roles",
@@ -45,6 +46,7 @@ type DelegateKey =
   | "sysSttServiceConfig"
   | "sysTranslateServiceConfig"
   | "sysObjectStorageConfig"
+  | "sysSmsServiceConfig"
   | "sysSystemSetting"
   | "ttsServiceConfig"
   | "voiceRole"
@@ -89,6 +91,11 @@ export const RESOURCE_META: Record<
   },
   "object-storage-configs": {
     delegate: "sysObjectStorageConfig",
+    softListFilter: false,
+    orderBy: orderBySortOrderCode(),
+  },
+  "sms-service-configs": {
+    delegate: "sysSmsServiceConfig",
     softListFilter: false,
     orderBy: orderBySortOrderCode(),
   },

@@ -99,6 +99,26 @@ type SysObjectStorageConfig struct {
 
 func (SysObjectStorageConfig) TableName() string { return "sys_object_storage_configs" }
 
+type SysSmsServiceConfig struct {
+	ID           string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	Code         string    `gorm:"column:code;type:varchar(100);uniqueIndex"`
+	Name         string    `gorm:"column:name;type:varchar(200)"`
+	Provider     string    `gorm:"column:provider;type:varchar(50)"`
+	APIKey       *string   `gorm:"column:api_key;type:varchar(500)"`
+	SecretKey    *string   `gorm:"column:secret_key;type:varchar(500)"`
+	Region       *string   `gorm:"column:region;type:varchar(64)"`
+	SignName     *string   `gorm:"column:sign_name;type:varchar(100)"`
+	TemplateCode *string   `gorm:"column:template_code;type:varchar(100)"`
+	Config       *string   `gorm:"column:config;type:text"`
+	Status       string    `gorm:"column:status;type:varchar(20)"`
+	SortOrder    int       `gorm:"column:sort_order"`
+	Remark       *string   `gorm:"column:remark;type:varchar(500)"`
+	CreatedAt    time.Time `gorm:"column:created_at"`
+	UpdatedAt    time.Time `gorm:"column:updated_at"`
+}
+
+func (SysSmsServiceConfig) TableName() string { return "sys_sms_service_configs" }
+
 type SysSystemSetting struct {
 	ID          string    `gorm:"column:id;type:varchar(36);primaryKey"`
 	Key         string    `gorm:"column:key;type:varchar(128);uniqueIndex"`

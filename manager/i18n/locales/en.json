@@ -48,6 +48,7 @@
     "deleteTier": "Delete this membership tier? Users may still reference it.",
     "deletePrompt": "Delete this prompt template?",
     "deleteObjectStorage": "Delete this object storage config?",
+    "deleteSmsConfig": "Delete this SMS service config?",
     "deleteSttConfig": "Delete this STT config?",
     "deleteTranslateConfig": "Delete this translation config?",
     "deleteLlmConfig": "Delete this LLM config?",
@@ -75,6 +76,7 @@
     "stt_service_configs": "STT configs",
     "translate_service_configs": "Translation configs",
     "object_storage_configs": "Object storage",
+    "sms_service_configs": "SMS service configs",
     "system_settings": "System settings",
     "tts_service_configs": "TTS configs",
     "voice_roles": "Voice roles",
@@ -628,9 +630,27 @@
       "title": "System settings",
       "tabs": {
         "variables": "System variables",
+        "sms": "SMS service",
         "serverStore": "Server store",
         "dataBackup": "Data backup"
       }
+    },
+    "smsService": {
+      "description": "Aliyun or Tencent Cloud SMS for app login/register OTP. Only one active config. Template variable defaults to code (6 digits).",
+      "hintTitle": "Notes",
+      "hintBody": "Aliyun: api_key/secret_key are AccessKey pair; region defaults to cn-hangzhou. Tencent: api_key is SecretId, secret_key is SecretKey; sdk_app_id required in config JSON; phones get +86 prefix. Set XLANGAI_VERBOSE_LOGS=1 in dev to log OTP when SMS is not configured.",
+      "configAnomaly": "{count} active records; only one allowed.",
+      "configAnomalyTitle": "Config warning",
+      "createDialog": "New SMS config",
+      "editDialog": "Edit SMS config",
+      "providerAliyun": "Aliyun SMS",
+      "providerTencent": "Tencent Cloud SMS",
+      "signName": "SMS sign name",
+      "templateCode": "Template ID",
+      "accessKey": "AccessKey / SecretId",
+      "secretKey": "AccessKeySecret / SecretKey",
+      "fillSignAndTemplate": "Sign name and template ID are required",
+      "tencentConfigHint": "Tencent requires sdk_app_id in the config JSON."
     },
     "llmConfigs": {
       "title": "LLM service configs",

@@ -38,6 +38,7 @@ const EXPECTED_TABLES = [
   "sys_stt_service_configs",
   "sys_translate_service_configs",
   "sys_object_storage_configs",
+  "sys_sms_service_configs",
   "sys_system_settings",
   "sys_tts_service_configs",
   "sys_voice_roles",

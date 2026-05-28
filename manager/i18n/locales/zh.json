@@ -48,6 +48,7 @@
     "deleteTier": "确认删除该会员等级？若用户仍引用请谨慎操作。",
     "deletePrompt": "确认删除该提示词模板？",
     "deleteObjectStorage": "确认删除该对象存储配置？",
+    "deleteSmsConfig": "确认删除该短信服务配置？",
     "deleteSttConfig": "确认删除该 STT 配置？",
     "deleteTranslateConfig": "确认删除该翻译配置？",
     "deleteLlmConfig": "确认删除该 LLM 配置？",
@@ -75,6 +76,7 @@
     "stt_service_configs": "STT 服务配置",
     "translate_service_configs": "翻译服务配置",
     "object_storage_configs": "对象存储 / 图床",
+    "sms_service_configs": "短信服务配置",
     "system_settings": "系统变量",
     "tts_service_configs": "TTS 服务配置",
     "voice_roles": "语音角色",
@@ -625,9 +627,27 @@
       "title": "系统设置",
       "tabs": {
         "variables": "系统变量",
+        "sms": "短信服务",
         "serverStore": "服务器商店",
         "dataBackup": "数据备份"
       }
+    },
+    "smsService": {
+      "description": "配置阿里云或腾讯云短信，用于 App 登录/注册验证码。全局仅一条 active；模板变量默认 code（6 位数字）。",
+      "hintTitle": "使用说明",
+      "hintBody": "阿里云：api_key/secret_key 为 AccessKey；region 默认 cn-hangzhou。腾讯云：api_key 为 SecretId，secret_key 为 SecretKey；config 中必填 sdk_app_id；手机号自动加 +86 前缀。开发环境可设 XLANGAI_VERBOSE_LOGS=1，未配置时验证码仅打服务端日志。",
+      "configAnomaly": "当前列表中有 {count} 条 active 记录，应仅保留一条。",
+      "configAnomalyTitle": "配置异常",
+      "createDialog": "新建短信配置",
+      "editDialog": "编辑短信配置",
+      "providerAliyun": "阿里云短信",
+      "providerTencent": "腾讯云短信",
+      "signName": "短信签名",
+      "templateCode": "模板 ID",
+      "accessKey": "AccessKey / SecretId",
+      "secretKey": "AccessKeySecret / SecretKey",
+      "fillSignAndTemplate": "请填写短信签名与模板 ID",
+      "tencentConfigHint": "腾讯云须在 config JSON 中填写 sdk_app_id（短信应用 ID）。"
     },
     "llmConfigs": {
       "title": "LLM 服务配置",

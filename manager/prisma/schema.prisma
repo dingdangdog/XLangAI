@@ -116,6 +116,29 @@ model SysObjectStorageConfig {
   @@map("sys_object_storage_configs")
 }
 
+/// 短信服务商配置：阿里云、腾讯云等；全局仅允许一条 status = active。
+model SysSmsServiceConfig {
+  id           String   @id @default(uuid())
+  code         String   @unique @db.VarChar(100)
+  name         String   @db.VarChar(200)
+  provider     String   @default("aliyun") @db.VarChar(50)
+  apiKey       String?  @map("api_key") @db.VarChar(500)
+  secretKey    String?  @map("secret_key") @db.VarChar(500)
+  region       String?  @db.VarChar(64)
+  signName     String?  @map("sign_name") @db.VarChar(100)
+  templateCode String?  @map("template_code") @db.VarChar(100)
+  config       String?  @db.Text
+  status       String   @default("inactive") @db.VarChar(20)
+  sortOrder    Int      @default(0) @map("sort_order")
+  remark       String?  @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([provider])
+  @@index([status])
+  @@map("sys_sms_service_configs")
+}
+
 /// 系统变量（KEY-VALUE）：登录开关、媒体存储策略等；与厂商密钥表无关。
 model SysSystemSetting {
   id          String   @id @default(uuid())

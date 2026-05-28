@@ -70,6 +70,7 @@ export const AI_SETTINGS_LEGACY_PATHS = [
 export const SYSTEM_SETTINGS_LEGACY_PATHS = [
   "/manage/server-store",
   "/manage/data-backup",
+  "/manage/sms-service-configs",
 ] as const;
 
 export function useAdminNav() {

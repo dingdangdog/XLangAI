@@ -2,16 +2,18 @@
 import type { Component } from "vue";
 import {
   ArrowDownTrayIcon,
+  ChatBubbleBottomCenterTextIcon,
   Cog6ToothIcon,
   ServerIcon,
 } from "@heroicons/vue/24/outline";
 import DataBackupPanel from "~/components/admin/settings/DataBackupPanel.vue";
 import ServerStorePanel from "~/components/admin/settings/ServerStorePanel.vue";
+import SmsServiceConfigsPanel from "~/components/admin/settings/SmsServiceConfigsPanel.vue";
 import SystemVariablesPanel from "~/components/admin/settings/SystemVariablesPanel.vue";
 
 const { t } = useI18n();
 
-const TAB_KEYS = ["variables", "server-store", "data-backup"] as const;
+const TAB_KEYS = ["variables", "sms", "server-store", "data-backup"] as const;
 
 type TabKey = (typeof TAB_KEYS)[number];
 
@@ -23,6 +25,11 @@ const TAB_META: Record<
     icon: Cog6ToothIcon,
     labelKey: "pages.systemSettingsHub.tabs.variables",
     descriptionKey: "pages.systemSettings.description",
+  },
+  sms: {
+    icon: ChatBubbleBottomCenterTextIcon,
+    labelKey: "pages.systemSettingsHub.tabs.sms",
+    descriptionKey: "pages.smsService.description",
   },
   "server-store": {
     icon: ServerIcon,
@@ -53,6 +60,7 @@ const tabDescription = computed(() => t(TAB_META[activeTab.value].descriptionKey
 
 const TAB_PANEL = {
   variables: SystemVariablesPanel,
+  sms: SmsServiceConfigsPanel,
   "server-store": ServerStorePanel,
   "data-backup": DataBackupPanel,
 } as const;
