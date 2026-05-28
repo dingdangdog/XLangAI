@@ -29,6 +29,9 @@ func (s *Service) raw(ctx context.Context, key string) string {
 		}
 		return ""
 	}
+	if st := strings.TrimSpace(row.Status); st != "" && st != "active" {
+		return ""
+	}
 	return strings.TrimSpace(row.Value)
 }
 
@@ -54,6 +57,9 @@ func (s *Service) PublicMap(ctx context.Context) (map[string]interface{}, error)
 	out := make(map[string]interface{}, len(PublicKeys))
 	for _, key := range PublicKeys {
 		if row, ok := byKey[key]; ok {
+			if st := strings.TrimSpace(row.Status); st != "" && st != "active" {
+				continue
+			}
 			out[key] = parseValue(row.Value, row.ValueType)
 			continue
 		}

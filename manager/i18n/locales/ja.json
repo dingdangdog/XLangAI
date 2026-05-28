@@ -595,6 +595,28 @@
     "systemSettings": {
       "title": "システム変数",
       "description": "ログイン・メディア保存等。ベンダー API 鍵とは別",
+      "menuTitle": "設定項目",
+      "selectItem": "左から項目を選択して編集",
+      "statusHint": "無効にするとサーバーとアプリはこの行を参照しません（公開 API から除外、実行時はオフ扱い）。",
+      "groups": {
+        "auth": "認証・ログイン",
+        "authDesc": "クライアントに公開するログイン/登録方式",
+        "media": "メディア保存",
+        "mediaDesc": "録音・TTS・アバターの保存先"
+      },
+      "hints": {
+        "auth.password.enabled": "パスワードログインを許可",
+        "auth.password.register_enabled": "パスワード登録を許可",
+        "auth.sms.enabled": "SMS OTP ログインを許可",
+        "auth.sms.register_enabled": "SMS OTP 登録を許可",
+        "auth.google.enabled": "Google ログインを表示",
+        "auth.google.register_enabled": "初回 Google ログインで自動登録",
+        "auth.apple.enabled": "Apple ログインを表示",
+        "auth.apple.register_enabled": "初回 Apple ログインで自動登録",
+        "media.user_recording.storage": "ユーザー音声メッセージの保存先",
+        "media.assistant_tts.storage": "AI 返信音声の保存先",
+        "media.avatar.storage": "ユーザーアバターの保存先"
+      },
       "createDialog": "新規変数",
       "editDialog": "変数編集",
       "keyPlaceholder": "例 auth.sms.enabled",
@@ -634,6 +656,7 @@
     },
     "systemSettingsHub": {
       "title": "システム設定",
+      "navTitle": "カテゴリ",
       "tabs": {
         "variables": "システム変数",
         "sms": "SMS サービス",

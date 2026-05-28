@@ -592,6 +592,28 @@
     "systemSettings": {
       "title": "系统变量",
       "description": "登录开关、媒体存储策略等 KEY-VALUE。与 LLM / 对象存储等厂商密钥表无关。",
+      "menuTitle": "配置项",
+      "selectItem": "请从左侧选择一项配置进行编辑",
+      "statusHint": "设为「已禁用」后，服务端与 App 将不再读取该配置（公共接口不返回，运行时按关闭处理）。",
+      "groups": {
+        "auth": "认证与登录",
+        "authDesc": "控制各登录/注册方式是否对客户端开放",
+        "media": "媒体存储",
+        "mediaDesc": "录音、TTS、头像等文件的存储位置策略"
+      },
+      "hints": {
+        "auth.password.enabled": "是否允许使用账号密码登录",
+        "auth.password.register_enabled": "是否开放账号密码注册",
+        "auth.sms.enabled": "是否允许短信验证码登录",
+        "auth.sms.register_enabled": "是否开放短信验证码注册",
+        "auth.google.enabled": "是否显示 Google 登录入口",
+        "auth.google.register_enabled": "首次 Google 登录是否自动创建账号",
+        "auth.apple.enabled": "是否显示 Apple 登录入口",
+        "auth.apple.register_enabled": "首次 Apple 登录是否自动创建账号",
+        "media.user_recording.storage": "用户发送的语音消息存放位置",
+        "media.assistant_tts.storage": "AI 回复语音的存放位置",
+        "media.avatar.storage": "用户头像文件的存放位置"
+      },
       "createDialog": "新建系统变量",
       "editDialog": "编辑系统变量",
       "keyPlaceholder": "如 auth.sms.enabled",
@@ -631,6 +653,7 @@
     },
     "systemSettingsHub": {
       "title": "系统设置",
+      "navTitle": "设置分类",
       "tabs": {
         "variables": "系统变量",
         "sms": "短信服务",

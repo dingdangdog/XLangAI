@@ -33,12 +33,23 @@ function validateValue(key: SystemSettingKey, value: unknown, valueType: string)
   return v;
 }
 
+const STATUS_VALUES = ["active", "inactive"] as const;
+
 export function prepareSystemSettingWrite(
   data: Record<string, unknown>,
   mode: "create" | "update",
   existingKey?: string,
 ) {
   const next = { ...data };
+  if (typeof next.status !== "undefined") {
+    const status = String(next.status).trim();
+    if (!STATUS_VALUES.includes(status as (typeof STATUS_VALUES)[number])) {
+      throw createError({ statusCode: 400, message: "invalid status" });
+    }
+    next.status = status;
+  } else if (mode === "create") {
+    next.status = "active";
+  }
   const key = String(next.key ?? existingKey ?? "").trim();
   if (mode === "create") {
     if (!isKnownSystemSettingKey(key)) {

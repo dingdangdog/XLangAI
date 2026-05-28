@@ -124,6 +124,7 @@ type SysSystemSetting struct {
 	Key         string    `gorm:"column:key;type:varchar(128);uniqueIndex"`
 	Value       string    `gorm:"column:value;type:text"`
 	ValueType   string    `gorm:"column:value_type;type:varchar(20)"`
+	Status      string    `gorm:"column:status;type:varchar(20)"`
 	Description *string   `gorm:"column:description;type:varchar(500)"`
 	CreatedAt   time.Time `gorm:"column:created_at"`
 	UpdatedAt   time.Time `gorm:"column:updated_at"`

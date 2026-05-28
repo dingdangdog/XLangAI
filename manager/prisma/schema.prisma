@@ -145,11 +145,14 @@ model SysSystemSetting {
   key         String   @unique @db.VarChar(128)
   value       String   @db.Text
   valueType   String   @default("string") @map("value_type") @db.VarChar(20)
+  /// active：服务端与客户端生效；inactive：忽略库中 value，公共接口不返回
+  status      String   @default("active") @db.VarChar(20)
   description String?  @db.VarChar(500)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([key])
+  @@index([status])
   @@map("sys_system_settings")
 }
 

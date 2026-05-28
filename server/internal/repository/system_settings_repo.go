@@ -12,6 +12,7 @@ type SystemSettingRow struct {
 	Key       string
 	Value     string
 	ValueType string
+	Status    string
 }
 
 type SystemSettingsRepo struct {
@@ -32,6 +33,7 @@ func (r *SystemSettingsRepo) GetByKey(ctx context.Context, key string) (*SystemS
 		Key:       row.Key,
 		Value:     row.Value,
 		ValueType: row.ValueType,
+		Status:    row.Status,
 	}, nil
 }
 
@@ -47,6 +49,7 @@ func (r *SystemSettingsRepo) ListAll(ctx context.Context) ([]SystemSettingRow, e
 			Key:       rows[i].Key,
 			Value:     rows[i].Value,
 			ValueType: rows[i].ValueType,
+			Status:    rows[i].Status,
 		}
 	}
 	return out, nil
@@ -67,6 +70,7 @@ func (r *SystemSettingsRepo) ListByKeys(ctx context.Context, keys []string) ([]S
 			Key:       rows[i].Key,
 			Value:     rows[i].Value,
 			ValueType: rows[i].ValueType,
+			Status:    rows[i].Status,
 		}
 	}
 	return out, nil

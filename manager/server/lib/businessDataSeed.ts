@@ -479,32 +479,36 @@ const SEED_SYSTEM_SETTINGS: {
   key: string;
   value: string;
   valueType: string;
+  status: string;
   description: string;
 }[] = [
-    { key: "auth.password.enabled", value: "true", valueType: "bool", description: "Password login" },
-    { key: "auth.password.register_enabled", value: "false", valueType: "bool", description: "Password registration" },
-    { key: "auth.sms.enabled", value: "true", valueType: "bool", description: "SMS OTP login" },
-    { key: "auth.sms.register_enabled", value: "false", valueType: "bool", description: "SMS OTP registration" },
-    { key: "auth.google.enabled", value: "false", valueType: "bool", description: "Google sign-in" },
-    { key: "auth.google.register_enabled", value: "false", valueType: "bool", description: "Auto-register on first Google sign-in" },
-    { key: "auth.apple.enabled", value: "false", valueType: "bool", description: "Apple sign-in" },
-    { key: "auth.apple.register_enabled", value: "false", valueType: "bool", description: "Auto-register on first Apple sign-in" },
+    { key: "auth.password.enabled", value: "true", valueType: "bool", status: "active", description: "Password login" },
+    { key: "auth.password.register_enabled", value: "false", valueType: "bool", status: "active", description: "Password registration" },
+    { key: "auth.sms.enabled", value: "true", valueType: "bool", status: "active", description: "SMS OTP login" },
+    { key: "auth.sms.register_enabled", value: "false", valueType: "bool", status: "active", description: "SMS OTP registration" },
+    { key: "auth.google.enabled", value: "false", valueType: "bool", status: "active", description: "Google sign-in" },
+    { key: "auth.google.register_enabled", value: "false", valueType: "bool", status: "active", description: "Auto-register on first Google sign-in" },
+    { key: "auth.apple.enabled", value: "false", valueType: "bool", status: "active", description: "Apple sign-in" },
+    { key: "auth.apple.register_enabled", value: "false", valueType: "bool", status: "active", description: "Auto-register on first Apple sign-in" },
     {
       key: "media.user_recording.storage",
       value: "server",
       valueType: "string",
+      status: "active",
       description: "User recordings: server=local | cloud=object storage",
     },
     {
       key: "media.assistant_tts.storage",
       value: "server",
       valueType: "string",
+      status: "active",
       description: "Assistant TTS audio: server | cloud",
     },
     {
       key: "media.avatar.storage",
       value: "server",
       valueType: "string",
+      status: "active",
       description: "Avatars: server | cloud",
     },
   ];

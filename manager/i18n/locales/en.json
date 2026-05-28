@@ -595,6 +595,28 @@
     "systemSettings": {
       "title": "System variables",
       "description": "Login switches, media storage, etc. Not vendor API keys.",
+      "menuTitle": "Settings",
+      "selectItem": "Select an item on the left to edit",
+      "statusHint": "When set to inactive, the server and app ignore this row (omitted from public API; runtime treats it as off).",
+      "groups": {
+        "auth": "Authentication",
+        "authDesc": "Which login and registration methods are exposed to clients",
+        "media": "Media storage",
+        "mediaDesc": "Where recordings, TTS, and avatars are stored"
+      },
+      "hints": {
+        "auth.password.enabled": "Allow password sign-in",
+        "auth.password.register_enabled": "Allow password registration",
+        "auth.sms.enabled": "Allow SMS OTP sign-in",
+        "auth.sms.register_enabled": "Allow SMS OTP registration",
+        "auth.google.enabled": "Show Google sign-in",
+        "auth.google.register_enabled": "Auto-register on first Google sign-in",
+        "auth.apple.enabled": "Show Apple sign-in",
+        "auth.apple.register_enabled": "Auto-register on first Apple sign-in",
+        "media.user_recording.storage": "Where user voice messages are stored",
+        "media.assistant_tts.storage": "Where assistant TTS audio is stored",
+        "media.avatar.storage": "Where user avatars are stored"
+      },
       "createDialog": "New variable",
       "editDialog": "Edit variable",
       "keyPlaceholder": "e.g. auth.sms.enabled",
@@ -634,6 +656,7 @@
     },
     "systemSettingsHub": {
       "title": "System settings",
+      "navTitle": "Categories",
       "tabs": {
         "variables": "System variables",
         "sms": "SMS service",
