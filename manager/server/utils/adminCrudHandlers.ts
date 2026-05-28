@@ -8,7 +8,7 @@ import {
   RESOURCE_META,
   type ResourceSlug,
 } from "./adminResource";
-import { stripVoiceRoleVirtualFields } from "./voiceRoleAdmin";
+import { prepareVoiceRoleWrite, stripVoiceRoleVirtualFields } from "./voiceRoleAdmin";
 import { attachUserListFields, prepareUserAdminWriteData, redactUserRecord } from "./userAdmin";
 import { attachServiceConfigUsageFields } from "./serviceUsageAdmin";
 import { prepareObjectStorageServiceConfigWrite } from "./objectStorageServiceConfigAdmin";
@@ -32,6 +32,13 @@ async function attachVoiceRoleListFields(
         .filter((x): x is string => typeof x === "string" && x.length > 0),
     ),
   ];
+  const llmIds = [
+    ...new Set(
+      rows
+        .map((r) => r.llmServiceConfigId)
+        .filter((x): x is string => typeof x === "string" && x.length > 0),
+    ),
+  ];
   const langIds = [
     ...new Set(
       rows
@@ -39,32 +46,37 @@ async function attachVoiceRoleListFields(
         .filter((x): x is string => typeof x === "string" && x.length > 0),
     ),
   ];
-  const [ttsList, langList] = await Promise.all([
+  const [ttsList, llmList, langList] = await Promise.all([
     ttsIds.length
       ? prisma.ttsServiceConfig.findMany({ where: { id: { in: ttsIds } } })
+      : Promise.resolve([]),
+    llmIds.length
+      ? prisma.sysLlmServiceConfig.findMany({ where: { id: { in: llmIds } } })
       : Promise.resolve([]),
     langIds.length
       ? prisma.language.findMany({ where: { id: { in: langIds } } })
       : Promise.resolve([]),
   ]);
   const ttsById = new Map(ttsList.map((t) => [t.id, t]));
+  const llmById = new Map(llmList.map((l) => [l.id, l]));
   const langById = new Map(langList.map((l) => [l.id, l]));
   return rows.map((r) => {
     const tid = r.ttsServiceConfigId;
+    const llid = r.llmServiceConfigId;
     const lid = r.languageId;
     const t = typeof tid === "string" ? ttsById.get(tid) : undefined;
+    const llm = typeof llid === "string" ? llmById.get(llid) : undefined;
     const l = typeof lid === "string" ? langById.get(lid) : undefined;
     const languageLabel = l
       ? [l.code, l.name].filter((x) => x != null && String(x).length > 0).join(" · ")
       : "";
-    // const ttsConfigLabel = t
-    //   ? [t.provider, t.code, t.name].filter((x) => x != null && String(x).length > 0).join(" · ")
-    //   : "";
     const ttsConfigLabel = t ? t.name : "";
+    const llmConfigLabel = llm ? llm.name : "";
     return {
       ...r,
       languageLabel,
       ttsConfigLabel,
+      llmConfigLabel,
     };
   });
 }
@@ -185,6 +197,9 @@ export async function adminCreateHandler(event: H3Event, resource: ResourceSlug)
   if (resource === "tts-service-configs") {
     data = await prepareTtsServiceConfigWrite(data);
   }
+  if (resource === "voice-roles") {
+    data = prepareVoiceRoleWrite(data);
+  }
   if (resource === "system-settings") {
     data = prepareSystemSettingWrite(data, "create");
   }
@@ -209,7 +224,7 @@ export async function adminUpdateHandler(event: H3Event, resource: ResourceSlug)
   const delegate = getDelegate(prisma as unknown as Record<string, unknown>, resource);
   let data = omitReadonly(body);
   if (resource === "voice-roles") {
-    data = stripVoiceRoleVirtualFields(data);
+    data = prepareVoiceRoleWrite(data);
   }
   if (resource === "users") {
     data = await prepareUserAdminWriteData(data, "update");

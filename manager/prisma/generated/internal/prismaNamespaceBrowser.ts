@@ -214,6 +214,7 @@ export const SysSystemSettingScalarFieldEnum = {
   key: 'key',
   value: 'value',
   valueType: 'valueType',
+  status: 'status',
   description: 'description',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -245,10 +246,13 @@ export type TtsServiceConfigScalarFieldEnum = (typeof TtsServiceConfigScalarFiel
 export const VoiceRoleScalarFieldEnum = {
   id: 'id',
   languageId: 'languageId',
+  synthesisType: 'synthesisType',
+  llmServiceConfigId: 'llmServiceConfigId',
   ttsServiceConfigId: 'ttsServiceConfigId',
   voiceCode: 'voiceCode',
   name: 'name',
   gender: 'gender',
+  rolePrompt: 'rolePrompt',
   config: 'config',
   previewAudioUrl: 'previewAudioUrl',
   previewLocalFilename: 'previewLocalFilename',

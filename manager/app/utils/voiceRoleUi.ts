@@ -2,6 +2,13 @@
 export const VOICE_ROLE_VIRTUAL_FIELDS = [
   "languageLabel",
   "ttsConfigLabel",
+  "llmConfigLabel",
+] as const;
+
+export const VOICE_ROLE_SYNTHESIS_TYPES = [
+  "tts",
+  "native_audio_in_text",
+  "native_audio_io",
 ] as const;
 
 export function stripVoiceRoleVirtualFields(

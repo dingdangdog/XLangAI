@@ -180,6 +180,10 @@ model TtsServiceConfig {
 model VoiceRole {
   id                   String    @id @default(uuid())
   languageId           String?   @map("language_id") @db.VarChar(36)
+  /// tts | native_audio_in_text | native_audio_io
+  synthesisType        String    @default("tts") @map("synthesis_type") @db.VarChar(30)
+  /// native_* 必填；tts 须为空
+  llmServiceConfigId   String?   @map("llm_service_config_id") @db.VarChar(36)
   ttsServiceConfigId   String?   @map("tts_service_config_id") @db.VarChar(36)
   voiceCode            String    @map("voice_code") @db.VarChar(50)
   name                 String    @db.VarChar(100)
@@ -199,6 +203,8 @@ model VoiceRole {
   updatedAt            DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([languageId])
+  @@index([synthesisType])
+  @@index([llmServiceConfigId])
   @@index([ttsServiceConfigId])
   @@index([status])
   @@map("sys_voice_roles")

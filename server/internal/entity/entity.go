@@ -154,6 +154,8 @@ func (TtsServiceConfig) TableName() string { return "sys_tts_service_configs" }
 type VoiceRole struct {
 	ID                   string     `gorm:"column:id;type:varchar(36);primaryKey"`
 	LanguageID           *string    `gorm:"column:language_id;type:varchar(36)"`
+	SynthesisType        string     `gorm:"column:synthesis_type;type:varchar(30)"`
+	LlmServiceConfigID   *string    `gorm:"column:llm_service_config_id;type:varchar(36)"`
 	TtsServiceConfigID   *string    `gorm:"column:tts_service_config_id;type:varchar(36)"`
 	VoiceCode            string     `gorm:"column:voice_code;type:varchar(50)"`
 	Name                 string     `gorm:"column:name;type:varchar(100)"`

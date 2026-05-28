@@ -10,6 +10,7 @@ const { confirm } = useConfirm();
 
 type LangOpt = { id: string; code: string; name: string };
 type TtsOpt = { id: string; code: string; name: string; provider: string };
+type LlmOpt = { id: string; code: string; name: string; protocol: string };
 
 const page = ref(1);
 const pageSize = ref(20);
@@ -19,6 +20,7 @@ const loading = ref(false);
 
 const langOptions = ref<LangOpt[]>([]);
 const ttsOptions = ref<TtsOpt[]>([]);
+const llmOptions = ref<LlmOpt[]>([]);
 const optionsLoading = ref(false);
 
 async function load() {
@@ -38,11 +40,14 @@ async function load() {
 async function loadOptions() {
   optionsLoading.value = true;
   try {
-    const [lr, tr] = await Promise.all([
+    const [lr, tr, llr] = await Promise.all([
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/languages", {
         query: { page: 1, pageSize: 500 },
       }),
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/tts-service-configs", {
+        query: { page: 1, pageSize: 500 },
+      }),
+      $fetch<{ items: Record<string, unknown>[] }>("/api/admin/llm-service-configs", {
         query: { page: 1, pageSize: 500 },
       }),
     ]);
@@ -61,6 +66,14 @@ async function loadOptions() {
         name: String(r.name ?? ""),
         provider: String(r.provider ?? ""),
       }));
+    llmOptions.value = llr.items
+      .filter((r) => String(r.status ?? "active") === "active")
+      .map((r) => ({
+        id: String(r.id),
+        code: String(r.code ?? ""),
+        name: String(r.name ?? ""),
+        protocol: String(r.protocol ?? ""),
+      }));
   } catch (e) {
     toast.error(t("toast.loadOptionsFailed"));
     console.error(e);
@@ -73,9 +86,11 @@ watch([page, pageSize], () => void load(), { immediate: true });
 
 const VOICE_ROLE_TABLE_COLUMN_KEYS = [
   { prop: "name", labelKey: "fields.voiceRoleName" },
+  { prop: "synthesisType", labelKey: "fields.synthesisType" },
   { prop: "voiceCode", labelKey: "fields.voiceCode" },
   { prop: "languageLabel", labelKey: "fields.language" },
   { prop: "ttsConfigLabel", labelKey: "fields.ttsConfig" },
+  { prop: "llmConfigLabel", labelKey: "fields.llmConfig" },
   { prop: "gender", labelKey: "fields.gender" },
   { prop: "previewAudioUrl", labelKey: "fields.preview" },
   { prop: "status", labelKey: "common.status" },
@@ -110,6 +125,8 @@ const saving = ref(false);
 const voiceForm = reactive({
   id: "",
   languageId: "",
+  synthesisType: "tts",
+  llmServiceConfigId: "",
   ttsServiceConfigId: "",
   voiceCode: "",
   name: "",
@@ -121,11 +138,27 @@ const voiceForm = reactive({
   config: "",
 });
 
+const isTtsMode = computed(() => voiceForm.synthesisType === "tts");
+const isNativeMode = computed(
+  () =>
+    voiceForm.synthesisType === "native_audio_in_text"
+    || voiceForm.synthesisType === "native_audio_io",
+);
+
+const synthesisTypeOptions = computed(() => [
+  { value: "tts", label: t("pages.voiceRoles.synthesisTts") },
+  { value: "native_audio_in_text", label: t("pages.voiceRoles.synthesisNativeInText") },
+  { value: "native_audio_io", label: t("pages.voiceRoles.synthesisNativeIO") },
+]);
+
 const selectedTts = computed(() =>
   ttsOptions.value.find((t) => t.id === voiceForm.ttsServiceConfigId),
 );
 
 const voiceCodeHint = computed(() => {
+  if (isNativeMode.value) {
+    return t("pages.voiceRoles.hintNativeVoice");
+  }
   const p = (selectedTts.value?.provider ?? "").trim();
   if (p === "azure_speech_rest") {
     return t("pages.voiceRoles.hintAzure");
@@ -142,6 +175,8 @@ const voiceCodeHint = computed(() => {
 function resetVoiceForm() {
   voiceForm.id = "";
   voiceForm.languageId = "";
+  voiceForm.synthesisType = "tts";
+  voiceForm.llmServiceConfigId = "";
   voiceForm.ttsServiceConfigId = "";
   voiceForm.voiceCode = "";
   voiceForm.name = "";
@@ -165,6 +200,8 @@ function openEdit(row: Record<string, unknown>) {
   const r = stripVoiceRoleVirtualFields(row);
   voiceForm.id = String(r.id ?? "");
   voiceForm.languageId = String(r.languageId ?? "");
+  voiceForm.synthesisType = String(r.synthesisType ?? "tts") || "tts";
+  voiceForm.llmServiceConfigId = String(r.llmServiceConfigId ?? "");
   voiceForm.ttsServiceConfigId = String(r.ttsServiceConfigId ?? "");
   voiceForm.voiceCode = String(r.voiceCode ?? "");
   voiceForm.name = String(r.name ?? "");
@@ -181,7 +218,9 @@ function openEdit(row: Record<string, unknown>) {
 function buildPayload(): Record<string, unknown> {
   return {
     languageId: voiceForm.languageId || null,
-    ttsServiceConfigId: voiceForm.ttsServiceConfigId || null,
+    synthesisType: voiceForm.synthesisType,
+    llmServiceConfigId: isNativeMode.value ? voiceForm.llmServiceConfigId || null : null,
+    ttsServiceConfigId: isTtsMode.value ? voiceForm.ttsServiceConfigId || null : null,
     voiceCode: voiceForm.voiceCode.trim(),
     name: voiceForm.name.trim(),
     gender: voiceForm.gender || null,
@@ -198,8 +237,12 @@ async function submitVoice() {
     toast.warning(t("validation.selectTargetLanguage"));
     return;
   }
-  if (!voiceForm.ttsServiceConfigId) {
+  if (isTtsMode.value && !voiceForm.ttsServiceConfigId) {
     toast.warning(t("validation.selectTtsConfig"));
+    return;
+  }
+  if (isNativeMode.value && !voiceForm.llmServiceConfigId) {
+    toast.warning(t("validation.selectLlmConfig"));
     return;
   }
   if (!voiceForm.voiceCode.trim()) {
@@ -262,6 +305,19 @@ const langSelectOptions = computed(() =>
 const ttsSelectOptions = computed(() =>
   ttsOptions.value.map((t) => ({ value: t.id, label: `${t.name} (${t.provider})` })),
 );
+
+const llmSelectOptions = computed(() =>
+  llmOptions.value.map((l) => ({ value: l.id, label: `${l.name} (${l.protocol})` })),
+);
+
+function synthesisTypeLabel(raw: unknown): string {
+  const v = String(raw ?? "tts");
+  const opt = synthesisTypeOptions.value.find((o) => o.value === v);
+  return opt?.label ?? v;
+}
+
+const previewDisabledForRow = (row: Record<string, unknown>) =>
+  String(row.synthesisType ?? "tts") === "native_audio_in_text";
 
 const genderOptions = computed(() => [
   { value: "", label: t("common.optionalParen") },
@@ -392,6 +448,11 @@ async function deletePreview(row: Record<string, unknown>) {
                 <span class="sr-only">{{ $t("common.notGenerated") }}</span>
               </span>
             </template>
+            <template v-else-if="col.prop === 'synthesisType'">
+              <AdminCellText :title="synthesisTypeLabel(row.synthesisType)">
+                {{ synthesisTypeLabel(row.synthesisType) }}
+              </AdminCellText>
+            </template>
             <template v-else>
               <AdminCellText :title="cellValue(row, col.prop)">
                 {{ cellValue(row, col.prop) }}
@@ -416,8 +477,8 @@ async function deletePreview(row: Record<string, unknown>) {
                 </AdminButton>
               </div>
               <div class="flex flex-nowrap items-center justify-end gap-x-2">
-                <AdminButton variant="link" size="sm" :loading="previewGeneratingId === String(row.id)"
-                  @click="generatePreview(row)">
+                <AdminButton variant="link" size="sm" :disabled="previewDisabledForRow(row)"
+                  :loading="previewGeneratingId === String(row.id)" @click="generatePreview(row)">
                   {{ $t("common.generatePreview") }}
                 </AdminButton>
                 <AdminButton variant="link" size="sm" class="!text-danger-600" :disabled="!row.previewAudioUrl"
@@ -444,9 +505,17 @@ async function deletePreview(row: Record<string, unknown>) {
           <AdminSelect v-model="voiceForm.languageId" :options="langSelectOptions"
             :placeholder="$t('pages.voiceRoles.selectLanguage')" />
         </AdminFormField>
-        <AdminFormField :label="$t('fields.ttsConfig')" required>
+        <AdminFormField :label="$t('fields.synthesisType')" required>
+          <AdminSelect v-model="voiceForm.synthesisType" :options="synthesisTypeOptions"
+            :placeholder="$t('pages.voiceRoles.selectSynthesisType')" />
+        </AdminFormField>
+        <AdminFormField v-if="isTtsMode" :label="$t('fields.ttsConfig')" required>
           <AdminSelect v-model="voiceForm.ttsServiceConfigId" :options="ttsSelectOptions"
             :placeholder="$t('pages.voiceRoles.selectTts')" />
+        </AdminFormField>
+        <AdminFormField v-if="isNativeMode" :label="$t('fields.llmConfig')" required>
+          <AdminSelect v-model="voiceForm.llmServiceConfigId" :options="llmSelectOptions"
+            :placeholder="$t('pages.voiceRoles.selectLlm')" />
         </AdminFormField>
         <AdminFormField :label="$t('fields.voiceCode')" required :hint="voiceCodeHint">
           <AdminInput v-model="voiceForm.voiceCode" :placeholder="$t('pages.voiceRoles.voiceCodePlaceholder')" />

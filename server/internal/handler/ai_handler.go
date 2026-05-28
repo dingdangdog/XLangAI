@@ -223,7 +223,7 @@ func (h *AIHandler) Chat(c *gin.Context) {
 		originalAudioURL = &u
 	}
 
-	resp, err := h.runConversationTurn(c, conv, userID, req.Content, req.UseTTS, originalAudioURL, nil)
+	resp, err := h.runConversationTurn(c, conv, userID, req.Content, req.UseTTS, originalAudioURL, nil, nil, "")
 	if err != nil {
 		if resp != nil {
 			if skipped, _ := resp["ai_skipped"].(bool); skipped {
@@ -325,26 +325,38 @@ func (h *AIHandler) VoiceChat(c *gin.Context) {
 		audioURL = savedURL
 	}
 
-	transcript := strings.TrimSpace(c.PostForm("transcript"))
+	_, synthType, vrErr := h.loadVoiceRoleForConv(ctx, conv)
+	if vrErr != nil {
+		h.writeConversationError(c, vrErr)
+		return
+	}
+	nativeVoice := repository.IsNativeSynthesis(synthType) && len(audioBytes) > 0
+
 	var text string
-	if transcript != "" {
-		text = transcript
-	} else if h.chatQuotaExceeded(c) {
-		text = ""
+	var sttPtr *string
+	if nativeVoice {
+		text = strings.TrimSpace(userContentForNativeVoice(""))
 	} else {
-		var err error
-		text, err = h.transcribeAudio(c, conv, userID, filename, audioBytes)
-		if err != nil {
-			h.writeConversationError(c, err)
-			return
+		transcript := strings.TrimSpace(c.PostForm("transcript"))
+		if transcript != "" {
+			text = transcript
+		} else if h.chatQuotaExceeded(c) {
+			text = ""
+		} else {
+			var err error
+			text, err = h.transcribeAudio(c, conv, userID, filename, audioBytes)
+			if err != nil {
+				h.writeConversationError(c, err)
+				return
+			}
+		}
+		if text != "" {
+			sttPtr = &text
 		}
 	}
 
-	var sttPtr *string
-	if text != "" {
-		sttPtr = &text
-	}
-	resp, err := h.runConversationTurn(c, conv, userID, text, useTTS, audioURL, sttPtr)
+	audioMime := audioMimeType(filename)
+	resp, err := h.runConversationTurn(c, conv, userID, text, useTTS, audioURL, sttPtr, audioBytes, audioMime)
 	if err != nil {
 		if resp != nil {
 			if skipped, _ := resp["ai_skipped"].(bool); skipped {
@@ -369,8 +381,19 @@ func (h *AIHandler) runConversationTurn(
 	useTTS *bool,
 	originalAudioURL *string,
 	sttText *string,
+	userAudio []byte,
+	userAudioMime string,
 ) (gin.H, error) {
 	ctx := c.Request.Context()
+
+	vrEntity, synthType, vrErr := h.loadVoiceRoleForConv(ctx, conv)
+	if vrErr != nil {
+		// 尚未创建 userMsg，直接返回错误
+		return nil, vrErr
+	}
+	if repository.IsNativeSynthesis(synthType) {
+		userContent = userContentForNativeVoice(userContent)
+	}
 
 	userMsg, err := h.msg.Create(ctx, repository.CreateMessageInput{
 		ConversationID:   conv.ID,
@@ -401,49 +424,63 @@ func (h *AIHandler) runConversationTurn(
 		return h.failUserTurn(ctx, userMsg, err)
 	}
 
-	llmCfg, err := h.resolveLLMForConversation(ctx, conv)
-	if err != nil {
-		return h.failUserTurn(ctx, userMsg, err)
-	}
-	apiKey := h.llmAPIKey(llmCfg)
-	if apiKey == "" {
-		return h.failUserTurn(ctx, userMsg, errLLMKeyMissing)
-	}
-
-	msgs, err := h.msg.ListByConversation(ctx, conv.ID, 20, nil)
-	if err != nil {
-		return h.failUserTurn(ctx, userMsg, err)
-	}
-
-	chatMsgs := make([]struct{ Role, Content string }, 0, len(msgs))
-	for _, m := range msgs {
-		chatMsgs = append(chatMsgs, struct{ Role, Content string }{Role: m.Role, Content: m.Content})
-	}
-
-	llmMsgs := make([]llmchat.Message, len(chatMsgs))
-	for i, m := range chatMsgs {
-		llmMsgs[i] = llmchat.Message{Role: m.Role, Content: m.Content}
-	}
-	llmIn := llmchat.ServiceInputFromRepo(
-		llmCfg.Protocol, llmCfg.BaseURL, apiKey, llmCfg.ModelCode, llmCfg.Config,
-	)
 	debitTokens := false
 	if h.az != nil {
 		if p := CtxPrincipal(c); p != nil {
-			var err error
 			debitTokens, err = h.az.UsesTokenWalletForNextTurn(ctx, p)
 			if err != nil {
 				return h.failUserTurn(ctx, userMsg, err)
 			}
 		}
 	}
-	reply, usage, err := llmchat.Chat(ctx, llmIn, strings.TrimSpace(systemPrompt), llmMsgs)
-	if err != nil {
-		return h.failUserTurn(ctx, userMsg, err)
-	}
-	reply = ai.NormalizeAssistantReply(reply)
 
-	audioURL, err := h.synthesizeReply(c, userID, conv, reply, useTTS)
+	var reply string
+	var audioURL *string
+	var usage *ai.ChatUsage
+	var llmCfgID string
+
+	if repository.IsNativeSynthesis(synthType) && vrEntity != nil {
+		genUserText := userContent
+		if len(userAudio) > 0 {
+			genUserText = ""
+		}
+		reply, audioURL, usage, llmCfgID, err = h.runNativeSynthesisTurn(
+			c, ctx, conv, userID, userMsg, vrEntity, synthType, useTTS,
+			userAudio, userAudioMime, genUserText, systemPrompt,
+		)
+	} else {
+		llmCfg, llmErr := h.resolveLLMForConversation(ctx, conv)
+		if llmErr != nil {
+			return h.failUserTurn(ctx, userMsg, llmErr)
+		}
+		apiKey := h.llmAPIKey(llmCfg)
+		if apiKey == "" {
+			return h.failUserTurn(ctx, userMsg, errLLMKeyMissing)
+		}
+		llmCfgID = llmCfg.ID
+
+		msgs, listErr := h.msg.ListByConversation(ctx, conv.ID, 20, nil)
+		if listErr != nil {
+			return h.failUserTurn(ctx, userMsg, listErr)
+		}
+		llmMsgs := make([]llmchat.Message, 0, len(msgs))
+		for _, m := range msgs {
+			if strings.TrimSpace(m.Content) == "" {
+				continue
+			}
+			llmMsgs = append(llmMsgs, llmchat.Message{Role: m.Role, Content: m.Content})
+		}
+		llmIn := llmchat.ServiceInputFromRepo(
+			llmCfg.Protocol, llmCfg.BaseURL, apiKey, llmCfg.ModelCode, llmCfg.Config,
+		)
+		reply, usage, err = llmchat.Chat(ctx, llmIn, strings.TrimSpace(systemPrompt), llmMsgs)
+		if err != nil {
+			return h.failUserTurn(ctx, userMsg, err)
+		}
+		reply = ai.NormalizeAssistantReply(reply)
+		audioURL, err = h.synthesizeReply(c, userID, conv, reply, useTTS)
+	}
+
 	if err != nil {
 		return h.failUserTurn(ctx, userMsg, err)
 	}
@@ -470,7 +507,7 @@ func (h *AIHandler) runConversationTurn(
 		if usage != nil && usage.TotalTokens > 0 {
 			rec.LLMTokens = usage.TotalTokens
 			rec.ServiceType = repository.ServiceUsageLLM
-			rec.ServiceConfigID = llmCfg.ID
+			rec.ServiceConfigID = llmCfgID
 			rec.ServiceRequests = 1
 			rec.ServiceUnits = int64(usage.TotalTokens)
 		}
@@ -538,14 +575,20 @@ func (h *AIHandler) synthesizeReply(c *gin.Context, userID string, conv *model.C
 		return nil, nil
 	}
 
-	vr, err := h.voice.GetByID(c.Request.Context(), *voiceID)
-	if err != nil || vr == nil || vr.TtsServiceConfigID == "" || vr.VoiceCode == "" {
+	vrEntity, err := h.voice.GetEntityByID(c.Request.Context(), *voiceID)
+	if err != nil || vrEntity == nil {
 		return nil, nil
 	}
-
-	ttsRow, err := h.ttsCfg.GetByID(c.Request.Context(), vr.TtsServiceConfigID)
-	if err != nil || ttsRow == nil {
+	if repository.NormalizeSynthesisType(vrEntity.SynthesisType) != repository.SynthesisTTS {
 		return nil, nil
+	}
+	if vrEntity.TtsServiceConfigID == nil || strings.TrimSpace(*vrEntity.TtsServiceConfigID) == "" || strings.TrimSpace(vrEntity.VoiceCode) == "" {
+		return nil, errTTSFailed
+	}
+
+	ttsRow, err := h.ttsCfg.GetByID(c.Request.Context(), strings.TrimSpace(*vrEntity.TtsServiceConfigID))
+	if err != nil || ttsRow == nil {
+		return nil, errTTSFailed
 	}
 
 	apiKey, region, tBase := h.resolveTTSCredentials(ttsRow)
@@ -558,7 +601,7 @@ func (h *AIHandler) synthesizeReply(c *gin.Context, userID string, conv *model.C
 		Region:          region,
 		ModelCode:       ttsRow.ModelCode,
 		ConfigJSON:      ttsRow.ConfigJSON,
-		VoiceCode:       vr.VoiceCode,
+		VoiceCode:       vrEntity.VoiceCode,
 		Text:            reply,
 		AliyunAppKey:    strings.TrimSpace(ex.AppKey),
 		TencentSecretID: ex.TencentSecretID(),
@@ -567,10 +610,10 @@ func (h *AIHandler) synthesizeReply(c *gin.Context, userID string, conv *model.C
 		if h.cfg.VerboseLogs {
 			log.Printf("[tts] synthesize provider=%s code=%q: %v", ttsRow.Provider, ttsRow.Code, err)
 		}
-		return nil, nil
+		return nil, errTTSFailed
 	}
 	if result == nil || len(result.Audio) == 0 {
-		return nil, nil
+		return nil, errTTSFailed
 	}
 	if h.cfg.TTSLoudnessNorm {
 		opts := &ai.TTSLoudnessOptions{TargetLUFS: h.cfg.TTSTargetLUFS}
@@ -909,6 +952,36 @@ func (h *AIHandler) writeConversationError(c *gin.Context, err error) {
 			payload["detail"] = err.Error()
 		}
 		c.JSON(http.StatusServiceUnavailable, payload)
+	case errors.Is(err, errVoiceSynthConfig):
+		payload := gin.H{"error": "语音角色合成配置无效，请在管理后台检查合成类型与 LLM/TTS 绑定", "code": "VOICE_SYNTH_CONFIG"}
+		if h.cfg.VerboseLogs {
+			payload["detail"] = err.Error()
+		}
+		c.JSON(http.StatusBadRequest, payload)
+	case errors.Is(err, errVoiceSynthFailed):
+		payload := gin.H{"error": "多模态语音生成失败", "code": "VOICE_SYNTH_FAILED"}
+		if h.cfg.VerboseLogs {
+			payload["detail"] = err.Error()
+		}
+		c.JSON(http.StatusBadGateway, payload)
+	case errors.Is(err, errVoiceSynthNoTranscript):
+		payload := gin.H{"error": "多模态语音未返回文本", "code": "VOICE_SYNTH_NO_TRANSCRIPT"}
+		if h.cfg.VerboseLogs {
+			payload["detail"] = err.Error()
+		}
+		c.JSON(http.StatusBadGateway, payload)
+	case errors.Is(err, errVoiceSynthNoAudio):
+		payload := gin.H{"error": "多模态语音未返回音频", "code": "VOICE_SYNTH_NO_AUDIO"}
+		if h.cfg.VerboseLogs {
+			payload["detail"] = err.Error()
+		}
+		c.JSON(http.StatusBadGateway, payload)
+	case errors.Is(err, errTTSFailed):
+		payload := gin.H{"error": "TTS 合成失败", "code": "TTS_FAILED"}
+		if h.cfg.VerboseLogs {
+			payload["detail"] = err.Error()
+		}
+		c.JSON(http.StatusBadGateway, payload)
 	default:
 		payload := gin.H{"error": "服务异常，请稍后再试"}
 		if h.cfg.VerboseLogs {

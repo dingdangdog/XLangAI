@@ -12,6 +12,8 @@ import (
 type VoiceRole struct {
 	ID                 string `json:"id"`
 	LanguageID         string `json:"language_id"`
+	SynthesisType      string `json:"synthesis_type"`
+	LlmServiceConfigID string `json:"llm_service_config_id,omitempty"`
 	TtsServiceConfigID string `json:"tts_service_config_id"`
 	VoiceCode          string `json:"voice_code"`
 	Name               string `json:"name"`
@@ -32,12 +34,16 @@ func voiceFromEntity(v *entity.VoiceRole) *VoiceRole {
 		return nil
 	}
 	out := &VoiceRole{
-		ID:        v.ID,
-		VoiceCode: v.VoiceCode,
-		Name:      v.Name,
+		ID:            v.ID,
+		VoiceCode:     v.VoiceCode,
+		Name:          v.Name,
+		SynthesisType: NormalizeSynthesisType(v.SynthesisType),
 	}
 	if v.LanguageID != nil {
 		out.LanguageID = *v.LanguageID
+	}
+	if v.LlmServiceConfigID != nil {
+		out.LlmServiceConfigID = strings.TrimSpace(*v.LlmServiceConfigID)
 	}
 	if v.TtsServiceConfigID != nil {
 		out.TtsServiceConfigID = *v.TtsServiceConfigID
@@ -51,7 +57,7 @@ func voiceFromEntity(v *entity.VoiceRole) *VoiceRole {
 	return out
 }
 
-func (r *VoiceRepo) GetByID(ctx context.Context, id string) (*VoiceRole, error) {
+func (r *VoiceRepo) loadRow(ctx context.Context, id string) (*entity.VoiceRole, error) {
 	var row entity.VoiceRole
 	err := r.db.WithContext(ctx).
 		Where("id = ? AND status = ?", id, "active").
@@ -59,7 +65,23 @@ func (r *VoiceRepo) GetByID(ctx context.Context, id string) (*VoiceRole, error) 
 	if err != nil {
 		return nil, err
 	}
-	return voiceFromEntity(&row), nil
+	if row.SynthesisType == "" {
+		row.SynthesisType = SynthesisTTS
+	}
+	return &row, nil
+}
+
+func (r *VoiceRepo) GetByID(ctx context.Context, id string) (*VoiceRole, error) {
+	row, err := r.loadRow(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return voiceFromEntity(row), nil
+}
+
+// GetEntityByID 返回完整实体（含 rolePrompt、config），供对话编排使用。
+func (r *VoiceRepo) GetEntityByID(ctx context.Context, id string) (*entity.VoiceRole, error) {
+	return r.loadRow(ctx, id)
 }
 
 func (r *VoiceRepo) ListByLanguage(ctx context.Context, languageID string) ([]*VoiceRole, error) {
@@ -73,6 +95,9 @@ func (r *VoiceRepo) ListByLanguage(ctx context.Context, languageID string) ([]*V
 	}
 	list := make([]*VoiceRole, 0, len(rows))
 	for i := range rows {
+		if rows[i].SynthesisType == "" {
+			rows[i].SynthesisType = SynthesisTTS
+		}
 		list = append(list, voiceFromEntity(&rows[i]))
 	}
 	return list, nil

@@ -37,10 +37,13 @@ export type VoiceRoleSumAggregateOutputType = {
 export type VoiceRoleMinAggregateOutputType = {
   id: string | null
   languageId: string | null
+  synthesisType: string | null
+  llmServiceConfigId: string | null
   ttsServiceConfigId: string | null
   voiceCode: string | null
   name: string | null
   gender: string | null
+  rolePrompt: string | null
   config: string | null
   previewAudioUrl: string | null
   previewLocalFilename: string | null
@@ -55,10 +58,13 @@ export type VoiceRoleMinAggregateOutputType = {
 export type VoiceRoleMaxAggregateOutputType = {
   id: string | null
   languageId: string | null
+  synthesisType: string | null
+  llmServiceConfigId: string | null
   ttsServiceConfigId: string | null
   voiceCode: string | null
   name: string | null
   gender: string | null
+  rolePrompt: string | null
   config: string | null
   previewAudioUrl: string | null
   previewLocalFilename: string | null
@@ -73,10 +79,13 @@ export type VoiceRoleMaxAggregateOutputType = {
 export type VoiceRoleCountAggregateOutputType = {
   id: number
   languageId: number
+  synthesisType: number
+  llmServiceConfigId: number
   ttsServiceConfigId: number
   voiceCode: number
   name: number
   gender: number
+  rolePrompt: number
   config: number
   previewAudioUrl: number
   previewLocalFilename: number
@@ -101,10 +110,13 @@ export type VoiceRoleSumAggregateInputType = {
 export type VoiceRoleMinAggregateInputType = {
   id?: true
   languageId?: true
+  synthesisType?: true
+  llmServiceConfigId?: true
   ttsServiceConfigId?: true
   voiceCode?: true
   name?: true
   gender?: true
+  rolePrompt?: true
   config?: true
   previewAudioUrl?: true
   previewLocalFilename?: true
@@ -119,10 +131,13 @@ export type VoiceRoleMinAggregateInputType = {
 export type VoiceRoleMaxAggregateInputType = {
   id?: true
   languageId?: true
+  synthesisType?: true
+  llmServiceConfigId?: true
   ttsServiceConfigId?: true
   voiceCode?: true
   name?: true
   gender?: true
+  rolePrompt?: true
   config?: true
   previewAudioUrl?: true
   previewLocalFilename?: true
@@ -137,10 +152,13 @@ export type VoiceRoleMaxAggregateInputType = {
 export type VoiceRoleCountAggregateInputType = {
   id?: true
   languageId?: true
+  synthesisType?: true
+  llmServiceConfigId?: true
   ttsServiceConfigId?: true
   voiceCode?: true
   name?: true
   gender?: true
+  rolePrompt?: true
   config?: true
   previewAudioUrl?: true
   previewLocalFilename?: true
@@ -242,10 +260,13 @@ export type VoiceRoleGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type VoiceRoleGroupByOutputType = {
   id: string
   languageId: string | null
+  synthesisType: string
+  llmServiceConfigId: string | null
   ttsServiceConfigId: string | null
   voiceCode: string
   name: string
   gender: string | null
+  rolePrompt: string | null
   config: string | null
   previewAudioUrl: string | null
   previewLocalFilename: string | null
@@ -283,10 +304,13 @@ export type VoiceRoleWhereInput = {
   NOT?: Prisma.VoiceRoleWhereInput | Prisma.VoiceRoleWhereInput[]
   id?: Prisma.StringFilter<"VoiceRole"> | string
   languageId?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
+  synthesisType?: Prisma.StringFilter<"VoiceRole"> | string
+  llmServiceConfigId?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   ttsServiceConfigId?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   voiceCode?: Prisma.StringFilter<"VoiceRole"> | string
   name?: Prisma.StringFilter<"VoiceRole"> | string
   gender?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
+  rolePrompt?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   config?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   previewAudioUrl?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   previewLocalFilename?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
@@ -301,10 +325,13 @@ export type VoiceRoleWhereInput = {
 export type VoiceRoleOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   languageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  synthesisType?: Prisma.SortOrder
+  llmServiceConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   ttsServiceConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   voiceCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  rolePrompt?: Prisma.SortOrderInput | Prisma.SortOrder
   config?: Prisma.SortOrderInput | Prisma.SortOrder
   previewAudioUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   previewLocalFilename?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -322,10 +349,13 @@ export type VoiceRoleWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.VoiceRoleWhereInput[]
   NOT?: Prisma.VoiceRoleWhereInput | Prisma.VoiceRoleWhereInput[]
   languageId?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
+  synthesisType?: Prisma.StringFilter<"VoiceRole"> | string
+  llmServiceConfigId?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   ttsServiceConfigId?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   voiceCode?: Prisma.StringFilter<"VoiceRole"> | string
   name?: Prisma.StringFilter<"VoiceRole"> | string
   gender?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
+  rolePrompt?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   config?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   previewAudioUrl?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
   previewLocalFilename?: Prisma.StringNullableFilter<"VoiceRole"> | string | null
@@ -340,10 +370,13 @@ export type VoiceRoleWhereUniqueInput = Prisma.AtLeast<{
 export type VoiceRoleOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   languageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  synthesisType?: Prisma.SortOrder
+  llmServiceConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   ttsServiceConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   voiceCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  rolePrompt?: Prisma.SortOrderInput | Prisma.SortOrder
   config?: Prisma.SortOrderInput | Prisma.SortOrder
   previewAudioUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   previewLocalFilename?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -366,10 +399,13 @@ export type VoiceRoleScalarWhereWithAggregatesInput = {
   NOT?: Prisma.VoiceRoleScalarWhereWithAggregatesInput | Prisma.VoiceRoleScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"VoiceRole"> | string
   languageId?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
+  synthesisType?: Prisma.StringWithAggregatesFilter<"VoiceRole"> | string
+  llmServiceConfigId?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
   ttsServiceConfigId?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
   voiceCode?: Prisma.StringWithAggregatesFilter<"VoiceRole"> | string
   name?: Prisma.StringWithAggregatesFilter<"VoiceRole"> | string
   gender?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
+  rolePrompt?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
   config?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
   previewAudioUrl?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
   previewLocalFilename?: Prisma.StringNullableWithAggregatesFilter<"VoiceRole"> | string | null
@@ -384,10 +420,13 @@ export type VoiceRoleScalarWhereWithAggregatesInput = {
 export type VoiceRoleCreateInput = {
   id?: string
   languageId?: string | null
+  synthesisType?: string
+  llmServiceConfigId?: string | null
   ttsServiceConfigId?: string | null
   voiceCode: string
   name: string
   gender?: string | null
+  rolePrompt?: string | null
   config?: string | null
   previewAudioUrl?: string | null
   previewLocalFilename?: string | null
@@ -402,10 +441,13 @@ export type VoiceRoleCreateInput = {
 export type VoiceRoleUncheckedCreateInput = {
   id?: string
   languageId?: string | null
+  synthesisType?: string
+  llmServiceConfigId?: string | null
   ttsServiceConfigId?: string | null
   voiceCode: string
   name: string
   gender?: string | null
+  rolePrompt?: string | null
   config?: string | null
   previewAudioUrl?: string | null
   previewLocalFilename?: string | null
@@ -420,10 +462,13 @@ export type VoiceRoleUncheckedCreateInput = {
 export type VoiceRoleUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  synthesisType?: Prisma.StringFieldUpdateOperationsInput | string
+  llmServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ttsServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voiceCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rolePrompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewAudioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewLocalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -438,10 +483,13 @@ export type VoiceRoleUpdateInput = {
 export type VoiceRoleUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  synthesisType?: Prisma.StringFieldUpdateOperationsInput | string
+  llmServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ttsServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voiceCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rolePrompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewAudioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewLocalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -456,10 +504,13 @@ export type VoiceRoleUncheckedUpdateInput = {
 export type VoiceRoleCreateManyInput = {
   id?: string
   languageId?: string | null
+  synthesisType?: string
+  llmServiceConfigId?: string | null
   ttsServiceConfigId?: string | null
   voiceCode: string
   name: string
   gender?: string | null
+  rolePrompt?: string | null
   config?: string | null
   previewAudioUrl?: string | null
   previewLocalFilename?: string | null
@@ -474,10 +525,13 @@ export type VoiceRoleCreateManyInput = {
 export type VoiceRoleUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  synthesisType?: Prisma.StringFieldUpdateOperationsInput | string
+  llmServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ttsServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voiceCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rolePrompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewAudioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewLocalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -492,10 +546,13 @@ export type VoiceRoleUpdateManyMutationInput = {
 export type VoiceRoleUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   languageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  synthesisType?: Prisma.StringFieldUpdateOperationsInput | string
+  llmServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ttsServiceConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   voiceCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rolePrompt?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   config?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewAudioUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previewLocalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -510,10 +567,13 @@ export type VoiceRoleUncheckedUpdateManyInput = {
 export type VoiceRoleCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   languageId?: Prisma.SortOrder
+  synthesisType?: Prisma.SortOrder
+  llmServiceConfigId?: Prisma.SortOrder
   ttsServiceConfigId?: Prisma.SortOrder
   voiceCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrder
+  rolePrompt?: Prisma.SortOrder
   config?: Prisma.SortOrder
   previewAudioUrl?: Prisma.SortOrder
   previewLocalFilename?: Prisma.SortOrder
@@ -532,10 +592,13 @@ export type VoiceRoleAvgOrderByAggregateInput = {
 export type VoiceRoleMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   languageId?: Prisma.SortOrder
+  synthesisType?: Prisma.SortOrder
+  llmServiceConfigId?: Prisma.SortOrder
   ttsServiceConfigId?: Prisma.SortOrder
   voiceCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrder
+  rolePrompt?: Prisma.SortOrder
   config?: Prisma.SortOrder
   previewAudioUrl?: Prisma.SortOrder
   previewLocalFilename?: Prisma.SortOrder
@@ -550,10 +613,13 @@ export type VoiceRoleMaxOrderByAggregateInput = {
 export type VoiceRoleMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   languageId?: Prisma.SortOrder
+  synthesisType?: Prisma.SortOrder
+  llmServiceConfigId?: Prisma.SortOrder
   ttsServiceConfigId?: Prisma.SortOrder
   voiceCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   gender?: Prisma.SortOrder
+  rolePrompt?: Prisma.SortOrder
   config?: Prisma.SortOrder
   previewAudioUrl?: Prisma.SortOrder
   previewLocalFilename?: Prisma.SortOrder
@@ -578,10 +644,13 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 export type VoiceRoleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   languageId?: boolean
+  synthesisType?: boolean
+  llmServiceConfigId?: boolean
   ttsServiceConfigId?: boolean
   voiceCode?: boolean
   name?: boolean
   gender?: boolean
+  rolePrompt?: boolean
   config?: boolean
   previewAudioUrl?: boolean
   previewLocalFilename?: boolean
@@ -596,10 +665,13 @@ export type VoiceRoleSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type VoiceRoleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   languageId?: boolean
+  synthesisType?: boolean
+  llmServiceConfigId?: boolean
   ttsServiceConfigId?: boolean
   voiceCode?: boolean
   name?: boolean
   gender?: boolean
+  rolePrompt?: boolean
   config?: boolean
   previewAudioUrl?: boolean
   previewLocalFilename?: boolean
@@ -614,10 +686,13 @@ export type VoiceRoleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type VoiceRoleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   languageId?: boolean
+  synthesisType?: boolean
+  llmServiceConfigId?: boolean
   ttsServiceConfigId?: boolean
   voiceCode?: boolean
   name?: boolean
   gender?: boolean
+  rolePrompt?: boolean
   config?: boolean
   previewAudioUrl?: boolean
   previewLocalFilename?: boolean
@@ -632,10 +707,13 @@ export type VoiceRoleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 export type VoiceRoleSelectScalar = {
   id?: boolean
   languageId?: boolean
+  synthesisType?: boolean
+  llmServiceConfigId?: boolean
   ttsServiceConfigId?: boolean
   voiceCode?: boolean
   name?: boolean
   gender?: boolean
+  rolePrompt?: boolean
   config?: boolean
   previewAudioUrl?: boolean
   previewLocalFilename?: boolean
@@ -647,7 +725,7 @@ export type VoiceRoleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type VoiceRoleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "languageId" | "ttsServiceConfigId" | "voiceCode" | "name" | "gender" | "config" | "previewAudioUrl" | "previewLocalFilename" | "previewGeneratedAt" | "status" | "sortOrder" | "remark" | "createdAt" | "updatedAt", ExtArgs["result"]["voiceRole"]>
+export type VoiceRoleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "languageId" | "synthesisType" | "llmServiceConfigId" | "ttsServiceConfigId" | "voiceCode" | "name" | "gender" | "rolePrompt" | "config" | "previewAudioUrl" | "previewLocalFilename" | "previewGeneratedAt" | "status" | "sortOrder" | "remark" | "createdAt" | "updatedAt", ExtArgs["result"]["voiceRole"]>
 
 export type $VoiceRolePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "VoiceRole"
@@ -655,10 +733,22 @@ export type $VoiceRolePayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     languageId: string | null
+    /**
+     * tts | native_audio_in_text | native_audio_io
+     */
+    synthesisType: string
+    /**
+     * native_* 必填；tts 须为空
+     */
+    llmServiceConfigId: string | null
     ttsServiceConfigId: string | null
     voiceCode: string
     name: string
     gender: string | null
+    /**
+     * 角色专属提示词：职业、语气、情绪、风格等；Go 注入系统提示 {{voice_role_prompt}}，亦支持 {{voice_role_name}}、{{target_lang}}
+     */
+    rolePrompt: string | null
     config: string | null
     /**
      * 客户端播放用 URL（cloud 为公网地址，server 为 /api/v1/audio/...）
@@ -1099,10 +1189,13 @@ export interface Prisma__VoiceRoleClient<T, Null = never, ExtArgs extends runtim
 export interface VoiceRoleFieldRefs {
   readonly id: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly languageId: Prisma.FieldRef<"VoiceRole", 'String'>
+  readonly synthesisType: Prisma.FieldRef<"VoiceRole", 'String'>
+  readonly llmServiceConfigId: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly ttsServiceConfigId: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly voiceCode: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly name: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly gender: Prisma.FieldRef<"VoiceRole", 'String'>
+  readonly rolePrompt: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly config: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly previewAudioUrl: Prisma.FieldRef<"VoiceRole", 'String'>
   readonly previewLocalFilename: Prisma.FieldRef<"VoiceRole", 'String'>

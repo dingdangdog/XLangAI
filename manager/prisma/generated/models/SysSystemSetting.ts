@@ -29,6 +29,7 @@ export type SysSystemSettingMinAggregateOutputType = {
   key: string | null
   value: string | null
   valueType: string | null
+  status: string | null
   description: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -39,6 +40,7 @@ export type SysSystemSettingMaxAggregateOutputType = {
   key: string | null
   value: string | null
   valueType: string | null
+  status: string | null
   description: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,6 +51,7 @@ export type SysSystemSettingCountAggregateOutputType = {
   key: number
   value: number
   valueType: number
+  status: number
   description: number
   createdAt: number
   updatedAt: number
@@ -61,6 +64,7 @@ export type SysSystemSettingMinAggregateInputType = {
   key?: true
   value?: true
   valueType?: true
+  status?: true
   description?: true
   createdAt?: true
   updatedAt?: true
@@ -71,6 +75,7 @@ export type SysSystemSettingMaxAggregateInputType = {
   key?: true
   value?: true
   valueType?: true
+  status?: true
   description?: true
   createdAt?: true
   updatedAt?: true
@@ -81,6 +86,7 @@ export type SysSystemSettingCountAggregateInputType = {
   key?: true
   value?: true
   valueType?: true
+  status?: true
   description?: true
   createdAt?: true
   updatedAt?: true
@@ -164,6 +170,7 @@ export type SysSystemSettingGroupByOutputType = {
   key: string
   value: string
   valueType: string
+  status: string
   description: string | null
   createdAt: Date
   updatedAt: Date
@@ -195,6 +202,7 @@ export type SysSystemSettingWhereInput = {
   key?: Prisma.StringFilter<"SysSystemSetting"> | string
   value?: Prisma.StringFilter<"SysSystemSetting"> | string
   valueType?: Prisma.StringFilter<"SysSystemSetting"> | string
+  status?: Prisma.StringFilter<"SysSystemSetting"> | string
   description?: Prisma.StringNullableFilter<"SysSystemSetting"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SysSystemSetting"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SysSystemSetting"> | Date | string
@@ -205,6 +213,7 @@ export type SysSystemSettingOrderByWithRelationInput = {
   key?: Prisma.SortOrder
   value?: Prisma.SortOrder
   valueType?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -218,6 +227,7 @@ export type SysSystemSettingWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SysSystemSettingWhereInput | Prisma.SysSystemSettingWhereInput[]
   value?: Prisma.StringFilter<"SysSystemSetting"> | string
   valueType?: Prisma.StringFilter<"SysSystemSetting"> | string
+  status?: Prisma.StringFilter<"SysSystemSetting"> | string
   description?: Prisma.StringNullableFilter<"SysSystemSetting"> | string | null
   createdAt?: Prisma.DateTimeFilter<"SysSystemSetting"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SysSystemSetting"> | Date | string
@@ -228,6 +238,7 @@ export type SysSystemSettingOrderByWithAggregationInput = {
   key?: Prisma.SortOrder
   value?: Prisma.SortOrder
   valueType?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -244,6 +255,7 @@ export type SysSystemSettingScalarWhereWithAggregatesInput = {
   key?: Prisma.StringWithAggregatesFilter<"SysSystemSetting"> | string
   value?: Prisma.StringWithAggregatesFilter<"SysSystemSetting"> | string
   valueType?: Prisma.StringWithAggregatesFilter<"SysSystemSetting"> | string
+  status?: Prisma.StringWithAggregatesFilter<"SysSystemSetting"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"SysSystemSetting"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"SysSystemSetting"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"SysSystemSetting"> | Date | string
@@ -254,6 +266,7 @@ export type SysSystemSettingCreateInput = {
   key: string
   value: string
   valueType?: string
+  status?: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -264,6 +277,7 @@ export type SysSystemSettingUncheckedCreateInput = {
   key: string
   value: string
   valueType?: string
+  status?: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -274,6 +288,7 @@ export type SysSystemSettingUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   value?: Prisma.StringFieldUpdateOperationsInput | string
   valueType?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -284,6 +299,7 @@ export type SysSystemSettingUncheckedUpdateInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   value?: Prisma.StringFieldUpdateOperationsInput | string
   valueType?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -294,6 +310,7 @@ export type SysSystemSettingCreateManyInput = {
   key: string
   value: string
   valueType?: string
+  status?: string
   description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -304,6 +321,7 @@ export type SysSystemSettingUpdateManyMutationInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   value?: Prisma.StringFieldUpdateOperationsInput | string
   valueType?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -314,6 +332,7 @@ export type SysSystemSettingUncheckedUpdateManyInput = {
   key?: Prisma.StringFieldUpdateOperationsInput | string
   value?: Prisma.StringFieldUpdateOperationsInput | string
   valueType?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -324,6 +343,7 @@ export type SysSystemSettingCountOrderByAggregateInput = {
   key?: Prisma.SortOrder
   value?: Prisma.SortOrder
   valueType?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -334,6 +354,7 @@ export type SysSystemSettingMaxOrderByAggregateInput = {
   key?: Prisma.SortOrder
   value?: Prisma.SortOrder
   valueType?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -344,6 +365,7 @@ export type SysSystemSettingMinOrderByAggregateInput = {
   key?: Prisma.SortOrder
   value?: Prisma.SortOrder
   valueType?: Prisma.SortOrder
+  status?: Prisma.SortOrder
   description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -356,6 +378,7 @@ export type SysSystemSettingSelect<ExtArgs extends runtime.Types.Extensions.Inte
   key?: boolean
   value?: boolean
   valueType?: boolean
+  status?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -366,6 +389,7 @@ export type SysSystemSettingSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   key?: boolean
   value?: boolean
   valueType?: boolean
+  status?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -376,6 +400,7 @@ export type SysSystemSettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   key?: boolean
   value?: boolean
   valueType?: boolean
+  status?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -386,12 +411,13 @@ export type SysSystemSettingSelectScalar = {
   key?: boolean
   value?: boolean
   valueType?: boolean
+  status?: boolean
   description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type SysSystemSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "value" | "valueType" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["sysSystemSetting"]>
+export type SysSystemSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "value" | "valueType" | "status" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["sysSystemSetting"]>
 
 export type $SysSystemSettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SysSystemSetting"
@@ -401,6 +427,10 @@ export type $SysSystemSettingPayload<ExtArgs extends runtime.Types.Extensions.In
     key: string
     value: string
     valueType: string
+    /**
+     * active：服务端与客户端生效；inactive：忽略库中 value，公共接口不返回
+     */
+    status: string
     description: string | null
     createdAt: Date
     updatedAt: Date
@@ -831,6 +861,7 @@ export interface SysSystemSettingFieldRefs {
   readonly key: Prisma.FieldRef<"SysSystemSetting", 'String'>
   readonly value: Prisma.FieldRef<"SysSystemSetting", 'String'>
   readonly valueType: Prisma.FieldRef<"SysSystemSetting", 'String'>
+  readonly status: Prisma.FieldRef<"SysSystemSetting", 'String'>
   readonly description: Prisma.FieldRef<"SysSystemSetting", 'String'>
   readonly createdAt: Prisma.FieldRef<"SysSystemSetting", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"SysSystemSetting", 'DateTime'>
