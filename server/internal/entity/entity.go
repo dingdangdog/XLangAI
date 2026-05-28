@@ -158,6 +158,7 @@ type VoiceRole struct {
 	VoiceCode            string     `gorm:"column:voice_code;type:varchar(50)"`
 	Name                 string     `gorm:"column:name;type:varchar(100)"`
 	Gender               *string    `gorm:"column:gender;type:varchar(20)"`
+	RolePrompt           *string    `gorm:"column:role_prompt;type:text"`
 	Config               *string    `gorm:"column:config;type:text"`
 	PreviewAudioURL      *string    `gorm:"column:preview_audio_url;type:varchar(500)"`
 	PreviewLocalFilename *string    `gorm:"column:preview_local_filename;type:varchar(200)"`

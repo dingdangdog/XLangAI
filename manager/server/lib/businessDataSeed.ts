@@ -223,8 +223,10 @@ const SEED_MEMBERSHIP_TIERS = [
   },
 ] as const;
 
-/** Language-practice system prompt; Go replaces {{target_lang}} and {{voice_role_name}} */
+/** Language-practice system prompt; Go replaces {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}} */
 const LANG_PRACTICE_PROMPT_CONTENT = `You are 「{{voice_role_name}}」, a warm, natural, companion-like {{target_lang}} conversation partner. Your core job is to chat with the user in real {{target_lang}} and help them sound more natural over time; you are not a classroom teacher, drill bot, translator, or generic AI assistant.
+
+{{voice_role_prompt}}
 
 [Core behavior priority]
 - First respond like a real person to what the user just said: their content, mood, attitude, or situation.
@@ -255,6 +257,14 @@ const LANG_PRACTICE_PROMPT_CONTENT = `You are 「{{voice_role_name}}」, a warm,
 const LANG_PRACTICE_PROMPT_COMPANION_MARKER = "conversation partner";
 /** Legacy Chinese seed marker; triggers one-time upgrade to English prompt */
 const LANG_PRACTICE_PROMPT_LEGACY_COMPANION_MARKER = "对话伴侣";
+
+function patchLangPracticePromptForRolePrompt(content: string): string | null {
+  if (content.includes("{{voice_role_prompt}}")) return null;
+  const marker = "\n\n[Core behavior priority]";
+  const idx = content.indexOf(marker);
+  if (idx === -1) return null;
+  return `${content.slice(0, idx)}\n\n{{voice_role_prompt}}${content.slice(idx)}`;
+}
 
 // ---------------------------------------------------------------------------
 // Seed functions — each is idempotent
@@ -410,9 +420,21 @@ async function ensurePromptTemplate(db: AppPrismaClient) {
         where: { code: "lang_practice" },
         data: {
           content: LANG_PRACTICE_PROMPT_CONTENT,
-          variables: "target_lang,voice_role_name",
+          variables: "target_lang,voice_role_name,voice_role_prompt",
           remark:
-            "Seed/upgrade: conversation-partner prompt; Go ResolveSystemPromptForConversation injects {{target_lang}}, {{voice_role_name}}",
+            "Seed/upgrade: conversation-partner prompt; Go ResolveSystemPromptForConversation injects {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}}",
+        },
+      });
+    }
+    const patched = patchLangPracticePromptForRolePrompt(exists.content);
+    if (patched) {
+      return db.promptTemplate.update({
+        where: { code: "lang_practice" },
+        data: {
+          content: patched,
+          variables: "target_lang,voice_role_name,voice_role_prompt",
+          remark:
+            "Seed/upgrade: added {{voice_role_prompt}} placeholder for per-voice-role identity prompts",
         },
       });
     }
@@ -424,11 +446,11 @@ async function ensurePromptTemplate(db: AppPrismaClient) {
       code: "lang_practice",
       name: "Language practice system prompt",
       content: LANG_PRACTICE_PROMPT_CONTENT,
-      variables: "target_lang,voice_role_name",
+      variables: "target_lang,voice_role_name,voice_role_prompt",
       status: "active",
       sortOrder: 0,
       remark:
-        "Auto-filled at startup; Go GetDefaults JOIN code='lang_practice'; {{target_lang}}, {{voice_role_name}} replaced per conversation",
+        "Auto-filled at startup; Go GetDefaults JOIN code='lang_practice'; {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}} replaced per conversation",
     },
   });
 }

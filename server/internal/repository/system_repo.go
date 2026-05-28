@@ -71,7 +71,16 @@ func (r *SystemRepo) GetDefaults(ctx context.Context, langID string) (*Defaults,
 	return d, nil
 }
 
-// ResolveSystemPromptForConversation 解析会话系统提示：优先会话 prompt_id 对应模板，否则使用语言默认（lang_practice）；{{target_lang}} 替换为语言名称；{{voice_role_name}} 替换为当前会话 TTS 声线展示名（无则语言默认声线名，再否则「语言教练」）。
+// formatVoiceRolePromptForInjection 将角色专属提示词格式化为可注入系统提示的段落；空内容返回空字符串。
+func formatVoiceRolePromptForInjection(raw string) string {
+	s := strings.TrimSpace(raw)
+	if s == "" {
+		return ""
+	}
+	return "\n\n[Character-specific identity & style]\n" + s
+}
+
+// ResolveSystemPromptForConversation 解析会话系统提示：优先会话 prompt_id 对应模板，否则使用语言默认（lang_practice）；{{target_lang}} 替换为语言名称；{{voice_role_name}} 替换为当前会话 TTS 声线展示名（无则语言默认声线名，再否则「语言教练」）；{{voice_role_prompt}} 替换为当前语音角色的 role_prompt（无则空）。
 func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, langID string, promptID *string, voiceRoleID *string) (string, error) {
 	def, err := r.GetDefaults(ctx, langID)
 	if err != nil {
@@ -94,6 +103,7 @@ func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, lan
 	}
 
 	voiceDisplay := strings.TrimSpace(def.VoiceName)
+	voiceRolePromptRaw := ""
 	if voiceRoleID != nil {
 		vid := strings.TrimSpace(*voiceRoleID)
 		if vid != "" {
@@ -106,6 +116,9 @@ func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, lan
 				if vn != "" {
 					voiceDisplay = vn
 				}
+				if vr.RolePrompt != nil {
+					voiceRolePromptRaw = strings.TrimSpace(*vr.RolePrompt)
+				}
 			}
 		}
 	}
@@ -113,7 +126,12 @@ func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, lan
 		voiceDisplay = "语言教练"
 	}
 
+	voiceRolePromptRaw = strings.ReplaceAll(voiceRolePromptRaw, "{{target_lang}}", langName)
+	voiceRolePromptRaw = strings.ReplaceAll(voiceRolePromptRaw, "{{voice_role_name}}", voiceDisplay)
+	voiceRolePrompt := formatVoiceRolePromptForInjection(voiceRolePromptRaw)
+
 	out := strings.ReplaceAll(tpl, "{{target_lang}}", langName)
 	out = strings.ReplaceAll(out, "{{voice_role_name}}", voiceDisplay)
+	out = strings.ReplaceAll(out, "{{voice_role_prompt}}", voiceRolePrompt)
 	return appendPromptFactualContext(out), nil
 }

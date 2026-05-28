@@ -114,6 +114,7 @@ const voiceForm = reactive({
   voiceCode: "",
   name: "",
   gender: "female",
+  rolePrompt: "",
   sortOrder: 0,
   status: "active",
   remark: "",
@@ -145,6 +146,7 @@ function resetVoiceForm() {
   voiceForm.voiceCode = "";
   voiceForm.name = "";
   voiceForm.gender = "female";
+  voiceForm.rolePrompt = "";
   voiceForm.sortOrder = 0;
   voiceForm.status = "active";
   voiceForm.remark = "";
@@ -167,6 +169,7 @@ function openEdit(row: Record<string, unknown>) {
   voiceForm.voiceCode = String(r.voiceCode ?? "");
   voiceForm.name = String(r.name ?? "");
   voiceForm.gender = String(r.gender ?? "female") || "female";
+  voiceForm.rolePrompt = r.rolePrompt != null ? String(r.rolePrompt) : "";
   voiceForm.sortOrder = Number(r.sortOrder ?? 0);
   voiceForm.status = String(r.status ?? "active");
   voiceForm.remark = String(r.remark ?? "");
@@ -182,6 +185,7 @@ function buildPayload(): Record<string, unknown> {
     voiceCode: voiceForm.voiceCode.trim(),
     name: voiceForm.name.trim(),
     gender: voiceForm.gender || null,
+    rolePrompt: voiceForm.rolePrompt.trim() || null,
     sortOrder: voiceForm.sortOrder,
     status: voiceForm.status,
     remark: voiceForm.remark.trim() || null,
@@ -449,6 +453,10 @@ async function deletePreview(row: Record<string, unknown>) {
         </AdminFormField>
         <AdminFormField :label="$t('fields.voiceRoleName')" required>
           <AdminInput v-model="voiceForm.name" :placeholder="$t('pages.voiceRoles.namePlaceholder')" />
+        </AdminFormField>
+        <AdminFormField :label="$t('fields.rolePrompt')" :hint="$t('pages.voiceRoles.rolePromptHint')">
+          <AdminInput v-model="voiceForm.rolePrompt" type="textarea" :rows="5"
+            :placeholder="$t('pages.voiceRoles.rolePromptPlaceholder')" />
         </AdminFormField>
         <AdminFormField :label="$t('fields.gender')">
           <AdminSelect v-model="voiceForm.gender" :options="genderOptions"
