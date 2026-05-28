@@ -2,7 +2,8 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/vue/24/outline";
 import { SYSTEM_SETTING_GROUPS } from "~/utils/systemSettingsUi";
 
-const { t, te } = useI18n();
+const { t } = useI18n();
+const { labelForKey, hintForKey } = useSystemSettingLabels();
 const route = useRoute();
 const router = useRouter();
 const API = "/api/admin/system-settings";
@@ -51,15 +52,19 @@ const byKey = computed(() => {
   return map;
 });
 
-function labelForKey(k: string) {
-  const i18nKey = `pages.systemSettings.keys.${k}`;
-  return te(i18nKey) ? t(i18nKey) : k;
-}
-
-function hintForKey(k: string) {
-  const i18nKey = `pages.systemSettings.hints.${k}`;
-  return te(i18nKey) ? t(i18nKey) : "";
-}
+const menuGroups = computed(() =>
+  SYSTEM_SETTING_GROUPS.map((group) => ({
+    id: group.id,
+    label: t(group.labelKey),
+    description: t(group.descriptionKey),
+    items: group.keys.map((key) => ({
+      key,
+      label: labelForKey(key),
+      hint: hintForKey(key),
+      row: byKey.value.get(key) ?? null,
+    })),
+  })),
+);
 
 function displayValuePreview(row: Record<string, unknown>) {
   const value = String(row.value ?? "");
@@ -75,11 +80,13 @@ function displayValuePreview(row: Record<string, unknown>) {
   return value;
 }
 
-const selectedKey = computed({
-  get: () => String(route.query.key ?? ""),
-  set: (key: string) => {
-    router.replace({ query: { ...route.query, key: key || undefined } });
-  },
+const selectedKey = ref("");
+
+onMounted(() => {
+  if (!route.query.key) return;
+  const q = { ...route.query };
+  delete q.key;
+  router.replace({ query: q });
 });
 
 watch(
@@ -144,8 +151,17 @@ const statusOptions = computed(() => [
   { value: "inactive", label: t("status.inactive") },
 ]);
 
-const selectedRow = computed(() => byKey.value.get(selectedKey.value) ?? null);
-const hasSelection = computed(() => !!selectedRow.value && !!form.id);
+const hasSelection = computed(() => {
+  const row = byKey.value.get(selectedKey.value);
+  return !!row && !!String(row.id ?? "");
+});
+
+const missingRow = computed(
+  () => !!selectedKey.value && !loading.value && !hasSelection.value,
+);
+
+const selectedLabel = computed(() => labelForKey(selectedKey.value));
+const selectedHint = computed(() => hintForKey(selectedKey.value));
 
 async function submit() {
   if (!form.id) return;
@@ -171,57 +187,73 @@ async function submit() {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 gap-4">
-    <aside
-      class="flex w-full shrink-0 flex-col gap-2 overflow-hidden rounded-xl border border-border bg-surface lg:w-72"
+  <div class="min-h-0 flex-1 overflow-hidden">
+    <div
+      class="grid h-full min-h-0 w-full grid-cols-[minmax(260px,300px)_minmax(0,1fr)] overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
     >
-      <div class="border-b border-border px-3 py-2.5">
-        <p class="text-sm font-medium text-foreground">{{ $t("pages.systemSettings.menuTitle") }}</p>
-        <p class="mt-0.5 text-xs text-muted">{{ $t("pages.systemSettings.description") }}</p>
-      </div>
+    <!-- 左：配置列表 -->
+    <section class="flex min-h-0 flex-col overflow-hidden border-r border-border bg-surface-muted/30">
+      <header class="shrink-0 border-b border-border bg-surface px-4 py-3">
+        <h2 class="text-sm font-semibold text-foreground">
+          {{ $t("pages.systemSettings.listColumnTitle") }}
+        </h2>
+        <p class="mt-1 text-xs leading-relaxed text-muted">
+          {{ $t("pages.systemSettings.listColumnHint") }}
+        </p>
+      </header>
 
       <div v-if="loading && !list.length" class="space-y-2 p-3">
-        <AdminSkeleton v-for="i in 6" :key="i" class="h-10 rounded-lg" />
+        <AdminSkeleton v-for="i in 6" :key="i" class="h-12 rounded-lg" />
       </div>
 
       <nav v-else class="min-h-0 flex-1 overflow-y-auto p-2">
-        <div v-for="group in SYSTEM_SETTING_GROUPS" :key="group.id" class="mb-1">
+        <div v-for="group in menuGroups" :key="group.id" class="mb-2">
           <button
             type="button"
-            class="flex w-full items-start gap-1 rounded-lg px-2 py-2 text-left hover:bg-surface-muted"
+            class="flex w-full items-start gap-1 rounded-lg px-2 py-2 text-left hover:bg-surface"
             @click="toggleGroup(group.id)"
           >
             <ChevronDownIcon v-if="expandedGroups[group.id]" class="mt-0.5 h-4 w-4 shrink-0 text-muted" />
             <ChevronRightIcon v-else class="mt-0.5 h-4 w-4 shrink-0 text-muted" />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-foreground">{{ $t(group.labelKey) }}</p>
-              <p class="text-xs text-muted">{{ $t(group.descriptionKey) }}</p>
+              <p class="text-sm font-semibold text-foreground">{{ group.label }}</p>
+              <p class="text-xs text-muted">{{ group.description }}</p>
             </div>
           </button>
 
-          <ul v-show="expandedGroups[group.id]" class="ml-5 space-y-0.5 border-l border-border pl-2">
-            <li v-for="key in group.keys" :key="key">
+          <ul v-show="expandedGroups[group.id]" class="ml-4 mt-0.5 space-y-0.5 border-l-2 border-primary-200 pl-2 dark:border-primary-800">
+            <li v-for="item in group.items" :key="item.key">
               <button
                 type="button"
-                class="w-full rounded-lg px-2 py-2 text-left transition-colors"
+                class="w-full rounded-lg px-2.5 py-2 text-left transition-colors"
                 :class="
-                  selectedKey === key
-                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
-                    : 'hover:bg-surface-muted text-foreground'
+                  selectedKey === item.key
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : 'hover:bg-surface text-foreground'
                 "
-                @click="selectKey(key)"
+                @click="selectKey(item.key)"
               >
-                <p class="text-sm font-medium leading-snug">{{ labelForKey(key) }}</p>
-                <p v-if="hintForKey(key)" class="mt-0.5 line-clamp-2 text-xs text-muted">
-                  {{ hintForKey(key) }}
+                <p class="text-sm font-medium leading-snug">{{ item.label }}</p>
+                <p
+                  v-if="item.hint"
+                  class="mt-0.5 line-clamp-2 text-xs"
+                  :class="selectedKey === item.key ? 'text-primary-100' : 'text-muted'"
+                >
+                  {{ item.hint }}
                 </p>
                 <p
-                  v-if="byKey.get(key)"
-                  class="mt-1 truncate text-xs"
-                  :class="String(byKey.get(key)?.status) === 'active' ? 'text-muted' : 'text-warning-600'"
+                  v-if="item.row"
+                  class="mt-1 truncate text-xs font-medium"
+                  :class="
+                    selectedKey === item.key
+                      ? 'text-primary-100'
+                      : String(item.row.status) === 'active'
+                        ? 'text-muted'
+                        : 'text-warning-600'
+                  "
                 >
-                  {{ displayValuePreview(byKey.get(key)!) }}
-                  <span v-if="String(byKey.get(key)?.status) !== 'active'" class="ml-1">
+                  {{ displayValuePreview(item.row) }}
+                  <span v-if="String(item.row.status) !== 'active'">
                     · {{ $t("status.inactive") }}
                   </span>
                 </p>
@@ -230,54 +262,67 @@ async function submit() {
           </ul>
         </div>
       </nav>
-    </aside>
+    </section>
 
-    <main class="min-h-0 min-w-0 flex-1">
-      <AdminPanel v-if="hasSelection" class="flex min-h-0 flex-1 flex-col">
-        <div class="border-b border-border px-4 py-3">
-          <h3 class="text-base font-semibold text-foreground">{{ labelForKey(form.key) }}</h3>
-          <p v-if="hintForKey(form.key)" class="mt-1 text-sm text-muted">{{ hintForKey(form.key) }}</p>
-          <code class="mt-2 inline-block rounded bg-surface-muted px-2 py-0.5 text-xs">{{ form.key }}</code>
+    <!-- 右：编辑表单 -->
+    <section class="flex min-h-0 min-w-0 flex-col overflow-hidden bg-surface">
+      <header class="shrink-0 border-b border-border px-5 py-3">
+        <h2 class="text-sm font-semibold text-foreground">
+          {{ $t("pages.systemSettings.editorColumnTitle") }}
+        </h2>
+      </header>
+
+      <template v-if="hasSelection">
+        <div class="shrink-0 border-b border-border px-5 py-4">
+          <h3 class="text-lg font-semibold text-foreground">{{ selectedLabel }}</h3>
+          <p v-if="selectedHint" class="mt-2 text-sm leading-relaxed text-muted">{{ selectedHint }}</p>
         </div>
 
-        <div class="flex flex-1 flex-col gap-4 p-4">
-          <AdminFormField :label="$t('common.status')">
-            <AdminSelect v-model="form.status" :options="statusOptions" />
-            <p class="mt-1 text-xs text-muted">{{ $t("pages.systemSettings.statusHint") }}</p>
-          </AdminFormField>
+        <div class="min-h-0 flex-1 overflow-y-auto px-5 py-4">
+          <div class="flex flex-col gap-4">
+            <AdminFormField :label="$t('common.status')">
+              <AdminSelect v-model="form.status" :options="statusOptions" />
+              <p class="mt-1 text-xs text-muted">{{ $t("pages.systemSettings.statusHint") }}</p>
+            </AdminFormField>
 
-          <AdminFormField v-if="form.valueType === 'bool'" :label="$t('common.value')">
-            <AdminSelect v-model="form.value" :options="boolValueOptions" />
-          </AdminFormField>
-          <AdminFormField v-else-if="form.key.startsWith('media.')" :label="$t('common.value')">
-            <AdminSelect v-model="form.value" :options="storageOptionsForKey(form.key)" />
-          </AdminFormField>
-          <AdminFormField v-else :label="$t('common.value')">
-            <AdminInput v-model="form.value" />
-          </AdminFormField>
+            <AdminFormField v-if="form.valueType === 'bool'" :label="$t('common.value')">
+              <AdminSelect v-model="form.value" :options="boolValueOptions" />
+            </AdminFormField>
+            <AdminFormField v-else-if="form.key.startsWith('media.')" :label="$t('common.value')">
+              <AdminSelect v-model="form.value" :options="storageOptionsForKey(form.key)" />
+            </AdminFormField>
+            <AdminFormField v-else :label="$t('common.value')">
+              <AdminInput v-model="form.value" />
+            </AdminFormField>
 
-          <AdminFormField :label="$t('common.remark')">
-            <AdminInput v-model="form.description" type="textarea" :rows="2" />
-          </AdminFormField>
+            <AdminFormField :label="$t('common.remark')">
+              <AdminInput v-model="form.description" type="textarea" :rows="2" />
+            </AdminFormField>
 
-          <AdminFormField :label="$t('common.updatedAt')">
-            <p class="text-sm text-muted">{{ formatDateTime(form.updatedAt) }}</p>
-          </AdminFormField>
-
-          <div class="mt-auto flex justify-end border-t border-border pt-4">
-            <AdminButton variant="primary" :loading="saving" @click="submit">
-              {{ $t("common.save") }}
-            </AdminButton>
+            <AdminFormField :label="$t('common.updatedAt')">
+              <p class="text-sm text-muted">{{ formatDateTime(form.updatedAt) }}</p>
+            </AdminFormField>
           </div>
         </div>
-      </AdminPanel>
 
-      <AdminPanel
-        v-else
-        class="flex min-h-[240px] flex-1 items-center justify-center text-sm text-muted"
+        <div class="shrink-0 flex justify-end border-t border-border px-5 py-4">
+          <AdminButton variant="primary" :loading="saving" @click="submit">
+            {{ $t("common.save") }}
+          </AdminButton>
+        </div>
+      </template>
+
+      <div
+        v-else-if="missingRow"
+        class="flex min-h-0 flex-1 items-center justify-center px-8 text-center text-sm text-muted"
       >
+        {{ $t("pages.systemSettings.rowMissing") }}
+      </div>
+
+      <div v-else class="flex min-h-0 flex-1 items-center justify-center text-sm text-muted">
         {{ $t("pages.systemSettings.selectItem") }}
-      </AdminPanel>
-    </main>
+      </div>
+    </section>
+    </div>
   </div>
 </template>

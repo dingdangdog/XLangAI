@@ -596,7 +596,11 @@
       "title": "システム変数",
       "description": "ログイン・メディア保存等。ベンダー API 鍵とは別",
       "menuTitle": "設定項目",
+      "listColumnTitle": "設定一覧",
+      "listColumnHint": "項目を選んで状態と値を編集します。",
+      "editorColumnTitle": "設定を編集",
       "selectItem": "左から項目を選択して編集",
+      "rowMissing": "この設定は DB に未登録です。シードまたはマイグレーションを実行してください。",
       "statusHint": "無効にするとサーバーとアプリはこの行を参照しません（公開 API から除外、実行時はオフ扱い）。",
       "groups": {
         "auth": "認証・ログイン",
@@ -605,34 +609,72 @@
         "mediaDesc": "録音・TTS・アバターの保存先"
       },
       "hints": {
-        "auth.password.enabled": "パスワードログインを許可",
-        "auth.password.register_enabled": "パスワード登録を許可",
-        "auth.sms.enabled": "SMS OTP ログインを許可",
-        "auth.sms.register_enabled": "SMS OTP 登録を許可",
-        "auth.google.enabled": "Google ログインを表示",
-        "auth.google.register_enabled": "初回 Google ログインで自動登録",
-        "auth.apple.enabled": "Apple ログインを表示",
-        "auth.apple.register_enabled": "初回 Apple ログインで自動登録",
-        "media.user_recording.storage": "ユーザー音声メッセージの保存先",
-        "media.assistant_tts.storage": "AI 返信音声の保存先",
-        "media.avatar.storage": "ユーザーアバターの保存先"
+        "auth": {
+          "password": {
+            "enabled": "パスワードログインを許可",
+            "register_enabled": "パスワード登録を許可"
+          },
+          "sms": {
+            "enabled": "SMS OTP ログインを許可",
+            "register_enabled": "SMS OTP 登録を許可"
+          },
+          "google": {
+            "enabled": "Google ログインを表示",
+            "register_enabled": "初回 Google ログインで自動登録"
+          },
+          "apple": {
+            "enabled": "Apple ログインを表示",
+            "register_enabled": "初回 Apple ログインで自動登録"
+          }
+        },
+        "media": {
+          "user_recording": {
+            "storage": "ユーザー音声メッセージの保存先"
+          },
+          "assistant_tts": {
+            "storage": "AI 返信音声の保存先"
+          },
+          "avatar": {
+            "storage": "ユーザーアバターの保存先"
+          }
+        }
       },
       "createDialog": "新規変数",
       "editDialog": "変数編集",
       "keyPlaceholder": "例 auth.sms.enabled",
       "keys": {
-        "auth.password.enabled": "パスワードログイン",
-        "auth.password.register_enabled": "パスワード登録",
-        "auth.sms.enabled": "SMS ログイン",
-        "auth.sms.register_enabled": "SMS 登録",
-        "auth.google.enabled": "Google ログイン",
-        "auth.google.register_enabled": "Google 自動登録",
-        "auth.apple.enabled": "Apple ログイン",
-        "auth.apple.register_enabled": "Apple 自動登録",
-        "media.user_recording.storage": "ユーザー録音保存",
-        "media.assistant_tts.storage": "AI 返信音声保存",
-        "media.avatar.storage": "アバター保存",
-        "official_server_store.config": "公式サーバーストア設定"
+        "auth": {
+          "password": {
+            "enabled": "パスワードログイン",
+            "register_enabled": "パスワード登録"
+          },
+          "sms": {
+            "enabled": "SMS ログイン",
+            "register_enabled": "SMS 登録"
+          },
+          "google": {
+            "enabled": "Google ログイン",
+            "register_enabled": "Google 自動登録"
+          },
+          "apple": {
+            "enabled": "Apple ログイン",
+            "register_enabled": "Apple 自動登録"
+          }
+        },
+        "media": {
+          "user_recording": {
+            "storage": "ユーザー録音保存"
+          },
+          "assistant_tts": {
+            "storage": "AI 返信音声保存"
+          },
+          "avatar": {
+            "storage": "アバター保存"
+          }
+        },
+        "official_server_store": {
+          "config": "公式サーバーストア設定"
+        }
       },
       "storageClient": "クライアントのみ",
       "storageServer": "サーバーローカル",

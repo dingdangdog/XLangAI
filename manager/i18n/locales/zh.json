@@ -593,7 +593,11 @@
       "title": "系统变量",
       "description": "登录开关、媒体存储策略等 KEY-VALUE。与 LLM / 对象存储等厂商密钥表无关。",
       "menuTitle": "配置项",
+      "listColumnTitle": "配置列表",
+      "listColumnHint": "选择一项后，在右侧编辑状态与取值。",
+      "editorColumnTitle": "编辑配置",
       "selectItem": "请从左侧选择一项配置进行编辑",
+      "rowMissing": "该配置尚未写入数据库，请先执行数据种子或检查迁移是否已应用。",
       "statusHint": "设为「已禁用」后，服务端与 App 将不再读取该配置（公共接口不返回，运行时按关闭处理）。",
       "groups": {
         "auth": "认证与登录",
@@ -602,34 +606,72 @@
         "mediaDesc": "录音、TTS、头像等文件的存储位置策略"
       },
       "hints": {
-        "auth.password.enabled": "是否允许使用账号密码登录",
-        "auth.password.register_enabled": "是否开放账号密码注册",
-        "auth.sms.enabled": "是否允许短信验证码登录",
-        "auth.sms.register_enabled": "是否开放短信验证码注册",
-        "auth.google.enabled": "是否显示 Google 登录入口",
-        "auth.google.register_enabled": "首次 Google 登录是否自动创建账号",
-        "auth.apple.enabled": "是否显示 Apple 登录入口",
-        "auth.apple.register_enabled": "首次 Apple 登录是否自动创建账号",
-        "media.user_recording.storage": "用户发送的语音消息存放位置",
-        "media.assistant_tts.storage": "AI 回复语音的存放位置",
-        "media.avatar.storage": "用户头像文件的存放位置"
+        "auth": {
+          "password": {
+            "enabled": "是否允许使用账号密码登录",
+            "register_enabled": "是否开放账号密码注册"
+          },
+          "sms": {
+            "enabled": "是否允许短信验证码登录",
+            "register_enabled": "是否开放短信验证码注册"
+          },
+          "google": {
+            "enabled": "是否显示 Google 登录入口",
+            "register_enabled": "首次 Google 登录是否自动创建账号"
+          },
+          "apple": {
+            "enabled": "是否显示 Apple 登录入口",
+            "register_enabled": "首次 Apple 登录是否自动创建账号"
+          }
+        },
+        "media": {
+          "user_recording": {
+            "storage": "用户发送的语音消息存放位置"
+          },
+          "assistant_tts": {
+            "storage": "AI 回复语音的存放位置"
+          },
+          "avatar": {
+            "storage": "用户头像文件的存放位置"
+          }
+        }
       },
       "createDialog": "新建系统变量",
       "editDialog": "编辑系统变量",
       "keyPlaceholder": "如 auth.sms.enabled",
       "keys": {
-        "auth.password.enabled": "账号密码登录",
-        "auth.password.register_enabled": "账号密码注册",
-        "auth.sms.enabled": "短信验证码登录",
-        "auth.sms.register_enabled": "短信验证码注册",
-        "auth.google.enabled": "Google 登录",
-        "auth.google.register_enabled": "Google 自动注册",
-        "auth.apple.enabled": "Apple 登录",
-        "auth.apple.register_enabled": "Apple 自动注册",
-        "media.user_recording.storage": "用户录音存储",
-        "media.assistant_tts.storage": "AI 回复音频存储",
-        "media.avatar.storage": "头像存储",
-        "official_server_store.config": "官网服务器商店配置"
+        "auth": {
+          "password": {
+            "enabled": "账号密码登录",
+            "register_enabled": "账号密码注册"
+          },
+          "sms": {
+            "enabled": "短信验证码登录",
+            "register_enabled": "短信验证码注册"
+          },
+          "google": {
+            "enabled": "Google 登录",
+            "register_enabled": "Google 自动注册"
+          },
+          "apple": {
+            "enabled": "Apple 登录",
+            "register_enabled": "Apple 自动注册"
+          }
+        },
+        "media": {
+          "user_recording": {
+            "storage": "用户录音存储"
+          },
+          "assistant_tts": {
+            "storage": "AI 回复音频存储"
+          },
+          "avatar": {
+            "storage": "头像存储"
+          }
+        },
+        "official_server_store": {
+          "config": "官网服务器商店配置"
+        }
       },
       "storageClient": "仅客户端",
       "storageServer": "服务器本地",
