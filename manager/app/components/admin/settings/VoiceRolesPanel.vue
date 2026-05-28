@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/vue/24/solid";
 const { t } = useI18n();
 import { stripVoiceRoleVirtualFields } from "~/utils/voiceRoleUi";
 
@@ -89,8 +90,8 @@ const tableColumns = computed(() => {
     !list.value.length
       ? VOICE_ROLE_TABLE_COLUMN_KEYS
       : VOICE_ROLE_TABLE_COLUMN_KEYS.filter((c) =>
-          Object.keys(list.value[0] as object).includes(c.prop),
-        );
+        Object.keys(list.value[0] as object).includes(c.prop),
+      );
   return columns.map((c) => ({ prop: c.prop, label: t(c.labelKey) }));
 });
 
@@ -100,6 +101,11 @@ function cellValue(row: Record<string, unknown>, key: string) {
   if (isDateTimeField(key)) return formatDateTime(v);
   if (typeof v === "object") return JSON.stringify(v);
   return String(v);
+}
+
+function cellTitle(row: Record<string, unknown>, key: string): string | undefined {
+  const text = cellValue(row, key);
+  return text || undefined;
 }
 
 const dialogVisible = ref(false);
@@ -293,14 +299,6 @@ function previewPlayUrl(row: Record<string, unknown>): string | null {
   return null;
 }
 
-function previewAudioLabel(row: Record<string, unknown>): string {
-  const local = String(row.previewLocalFilename ?? "").trim();
-  if (local) return local;
-  const raw = String(row.previewAudioUrl ?? "").trim();
-  if (!raw) return "";
-  return raw.split("/").filter(Boolean).pop() ?? raw;
-}
-
 function stopPreviewPlayback() {
   const el = previewAudioEl.value;
   if (el) {
@@ -381,76 +379,75 @@ async function deletePreview(row: Record<string, unknown>) {
       <AdminTable :loading="loading">
         <template #head>
           <AdminTh v-for="col in tableColumns" :key="col.prop">{{ col.label }}</AdminTh>
-          <AdminTh width="260px" align="right">{{ $t("common.actions") }}</AdminTh>
+          <AdminTh width="300px" align="right">{{ $t("common.actions") }}</AdminTh>
         </template>
         <AdminTr v-for="row in list" :key="String(row.id)">
           <AdminTd v-for="col in tableColumns" :key="col.prop">
             <template v-if="col.prop === 'previewAudioUrl'">
-              <span v-if="row.previewAudioUrl" class="inline-flex flex-col gap-0.5">
-                <span class="text-success-600">{{ $t("common.generated") }}</span>
-                <span class="max-w-[220px] truncate text-xs text-surface-500">
-                  {{ previewAudioLabel(row) }}
-                </span>
+              <span v-if="row.previewAudioUrl" class="inline-flex" :title="$t('common.generated')">
+                <CheckCircleIcon class="h-5 w-5 text-success-600" aria-hidden="true" />
+                <span class="sr-only">{{ $t("common.generated") }}</span>
               </span>
-              <span v-else class="text-surface-500">{{ $t("common.notGenerated") }}</span>
+              <span v-else class="inline-flex" :title="$t('common.notGenerated')">
+                <XCircleIcon class="h-5 w-5 text-surface-400" aria-hidden="true" />
+                <span class="sr-only">{{ $t("common.notGenerated") }}</span>
+              </span>
             </template>
             <template v-else>
-              {{ cellValue(row, col.prop) }}
+              <span class="line-clamp-2 max-w-[220px] break-words" :title="cellTitle(row, col.prop)">
+                {{ cellValue(row, col.prop) }}
+              </span>
             </template>
           </AdminTd>
-          <AdminTd align="right" class="whitespace-nowrap">
-            <AdminButton v-if="String(row.status) !== 'active'" variant="link"
-              :loading="activatingId === String(row.id)" @click="activateRow(row)">
-              {{ $t("common.enable") }}
-            </AdminButton>
-            <AdminButton variant="link" :disabled="!row.previewAudioUrl" @click="playPreview(row)">
-              {{ $t("common.play") }}
-            </AdminButton>
-            <AdminButton variant="link" :loading="previewGeneratingId === String(row.id)" @click="generatePreview(row)">
-              {{ $t("common.generatePreview") }}
-            </AdminButton>
-            <AdminButton
-              variant="link"
-              class="!text-danger-600"
-              :disabled="!row.previewAudioUrl"
-              :loading="previewDeletingId === String(row.id)"
-              @click="deletePreview(row)"
-            >
-              {{ $t("common.deletePreview") }}
-            </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
-            <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              {{ $t("common.delete") }}
-            </AdminButton>
+          <AdminTd align="right">
+            <div class="flex w-[300px] flex-col gap-0.5">
+              <div class="flex flex-nowrap items-center justify-end gap-x-2">
+                <AdminButton v-if="String(row.status) !== 'active'" variant="link" size="sm"
+                  :loading="activatingId === String(row.id)" @click="activateRow(row)">
+                  {{ $t("common.enable") }}
+                </AdminButton>
+                <AdminButton variant="link" size="sm" :disabled="!row.previewAudioUrl" @click="playPreview(row)">
+                  {{ $t("common.play") }}
+                </AdminButton>
+                <AdminButton variant="link" size="sm" @click="openEdit(row)">
+                  {{ $t("common.edit") }}
+                </AdminButton>
+                <AdminButton variant="link" size="sm" class="!text-danger-600" @click="removeRow(row)">
+                  {{ $t("common.delete") }}
+                </AdminButton>
+              </div>
+              <div class="flex flex-nowrap items-center justify-end gap-x-2">
+                <AdminButton variant="link" size="sm" :loading="previewGeneratingId === String(row.id)"
+                  @click="generatePreview(row)">
+                  {{ $t("common.generatePreview") }}
+                </AdminButton>
+                <AdminButton variant="link" size="sm" class="!text-danger-600" :disabled="!row.previewAudioUrl"
+                  :loading="previewDeletingId === String(row.id)" @click="deletePreview(row)">
+                  {{ $t("common.deletePreview") }}
+                </AdminButton>
+              </div>
+            </div>
           </AdminTd>
         </AdminTr>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
 
-    <AdminDialog
-      v-model="dialogVisible"
+    <AdminDialog v-model="dialogVisible"
       :title="dialogMode === 'create' ? $t('pages.voiceRoles.createDialog') : $t('pages.voiceRoles.editDialog')"
-      width="lg"
-    >
+      width="lg">
       <AdminSkeleton v-if="optionsLoading" :rows="6" />
       <template v-else>
         <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
           <AdminInput v-model="voiceForm.id" disabled />
         </AdminFormField>
         <AdminFormField :label="$t('fields.language')" required>
-          <AdminSelect
-            v-model="voiceForm.languageId"
-            :options="langSelectOptions"
-            :placeholder="$t('pages.voiceRoles.selectLanguage')"
-          />
+          <AdminSelect v-model="voiceForm.languageId" :options="langSelectOptions"
+            :placeholder="$t('pages.voiceRoles.selectLanguage')" />
         </AdminFormField>
         <AdminFormField :label="$t('fields.ttsConfig')" required>
-          <AdminSelect
-            v-model="voiceForm.ttsServiceConfigId"
-            :options="ttsSelectOptions"
-            :placeholder="$t('pages.voiceRoles.selectTts')"
-          />
+          <AdminSelect v-model="voiceForm.ttsServiceConfigId" :options="ttsSelectOptions"
+            :placeholder="$t('pages.voiceRoles.selectTts')" />
         </AdminFormField>
         <AdminFormField :label="$t('fields.voiceCode')" required :hint="voiceCodeHint">
           <AdminInput v-model="voiceForm.voiceCode" :placeholder="$t('pages.voiceRoles.voiceCodePlaceholder')" />
@@ -459,11 +456,8 @@ async function deletePreview(row: Record<string, unknown>) {
           <AdminInput v-model="voiceForm.name" :placeholder="$t('pages.voiceRoles.namePlaceholder')" />
         </AdminFormField>
         <AdminFormField :label="$t('fields.gender')">
-          <AdminSelect
-            v-model="voiceForm.gender"
-            :options="genderOptions"
-            :placeholder="$t('pages.voiceRoles.genderPlaceholder')"
-          />
+          <AdminSelect v-model="voiceForm.gender" :options="genderOptions"
+            :placeholder="$t('pages.voiceRoles.genderPlaceholder')" />
         </AdminFormField>
         <AdminFormField :label="$t('common.sort')">
           <AdminInput v-model="voiceForm.sortOrder" type="number" />

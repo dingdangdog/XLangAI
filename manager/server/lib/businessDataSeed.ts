@@ -2,7 +2,7 @@ import type { AppPrismaClient } from "./prisma";
 
 /**
  * Startup seed data: written via Prisma models into sys_languages, sys_tts_service_configs, sys_voice_roles,
- * sys_llm_service_configs, sys_stt_service_configs, sys_prompt_templates, sys_membership_tiers, usr_users
+ * sys_llm_service_configs, sys_prompt_templates, sys_membership_tiers, usr_users
  * (see schema @@map). Idempotent: insert only when missing.
  */
 
@@ -398,50 +398,6 @@ async function ensureLlmServiceConfig(db: AppPrismaClient) {
   });
 }
 
-async function ensureTranslateServiceConfig(db: AppPrismaClient) {
-  const exists = await db.sysTranslateServiceConfig.findFirst({
-    where: { status: "active" },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
-  if (exists) return exists;
-
-  return db.sysTranslateServiceConfig.create({
-    data: {
-      code: "translate_openai_default",
-      name: "OpenAI LLM Translate (default)",
-      protocol: "openai",
-      baseUrl: null,
-      apiKey: null,
-      modelCode: "gpt-4o-mini",
-      status: "active",
-      sortOrder: 0,
-      remark: "Auto-filled at startup; set API key and enable in admin",
-    },
-  });
-}
-
-async function ensureSttServiceConfig(db: AppPrismaClient) {
-  const exists = await db.sysSttServiceConfig.findFirst({
-    where: { status: "active" },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
-  if (exists) return exists;
-
-  return db.sysSttServiceConfig.create({
-    data: {
-      code: "whisper_default",
-      name: "OpenAI Whisper (default)",
-      protocol: "openai",
-      baseUrl: null,
-      apiKey: null,
-      modelCode: "whisper-1",
-      status: "active",
-      sortOrder: 0,
-      remark: "Auto-filled at startup; set API key in admin; Go Azure STT requires ffmpeg",
-    },
-  });
-}
-
 async function ensurePromptTemplate(db: AppPrismaClient) {
   const exists = await db.promptTemplate.findUnique({ where: { code: "lang_practice" } });
   if (exists) {
@@ -514,7 +470,8 @@ export async function ensureTestSeedUser(db: AppPrismaClient) {
 
 /**
  * Ensures base business seed data for the Go server:
- * languages, Azure TTS + voice roles, LLM/STT/translate configs, lang_practice prompt, membership tiers.
+ * languages, Azure TTS + voice roles, LLM config, lang_practice prompt, membership tiers.
+ * STT and translate are not seeded — configure in admin when needed.
  * Test account is created by plugin `01-business-data.seed.ts` via ensureTestSeedUser, not here.
  * Idempotent: insert only when missing.
  */
@@ -570,7 +527,5 @@ export async function runBusinessDataSeed(db: AppPrismaClient): Promise<void> {
 
   await ensureMembershipTiers(db);
   await ensureLlmServiceConfig(db);
-  await ensureSttServiceConfig(db);
-  await ensureTranslateServiceConfig(db);
   await ensurePromptTemplate(db);
 }
