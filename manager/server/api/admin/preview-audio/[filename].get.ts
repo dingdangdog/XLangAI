@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { getAudioDir } from "../../../utils/audioDir";
+import { getAudioDir } from "~~/server/utils/audioDir";
 
 function previewAudioMimeType(filename: string): string {
   const ext = filename.slice(filename.lastIndexOf(".")).toLowerCase();

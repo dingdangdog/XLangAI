@@ -1,5 +1,5 @@
-import { adminCreateHandler } from "../../../utils/adminCrudHandlers";
-import type { ResourceSlug } from "../../../utils/adminResource";
+import { adminCreateHandler } from "~~/server/utils/adminCrudHandlers";
+import type { ResourceSlug } from "~~/server/utils/adminResource";
 
 const SLUG: ResourceSlug = "languages";
 

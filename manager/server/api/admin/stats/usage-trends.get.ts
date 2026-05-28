@@ -1,4 +1,4 @@
-import { fetchDashboardUsageTrends } from "../../../utils/dashboardUsageTrends";
+import { fetchDashboardUsageTrends } from "~~/server/utils/dashboardUsageTrends";
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event);

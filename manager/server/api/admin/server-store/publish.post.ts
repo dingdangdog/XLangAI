@@ -1,4 +1,4 @@
-import { publishServerStoreConfig } from "../../../utils/serverStoreConfig";
+import { publishServerStoreConfig } from "~~/server/utils/serverStoreConfig";
 
 export default defineEventHandler(async (event) => {
   const body = (await readBody(event)) as Record<string, unknown> | null;

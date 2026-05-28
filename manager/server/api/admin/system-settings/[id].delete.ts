@@ -1,5 +1,5 @@
-import { adminDeleteHandler } from "../../../utils/adminCrudHandlers";
-import type { ResourceSlug } from "../../../utils/adminResource";
+import { adminDeleteHandler } from "~~/server/utils/adminCrudHandlers";
+import type { ResourceSlug } from "~~/server/utils/adminResource";
 
 const SLUG: ResourceSlug = "system-settings";
 

@@ -4,7 +4,7 @@ import {
   importDatabaseBackup,
   parseDatabaseBackupPayload,
   type DbBackupImportMode,
-} from "../../../utils/databaseBackup";
+} from "~~/server/utils/databaseBackup";
 
 type ImportBody = {
   mode?: DbBackupImportMode;

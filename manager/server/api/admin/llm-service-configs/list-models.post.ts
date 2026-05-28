@@ -1,7 +1,7 @@
-import prisma from "../../../lib/prisma";
-import { listOpenAiCompatibleModels } from "../../../lib/llmModelsList";
-import { getLlmVendorPreset, isOpenAiCompatPreset } from "../../../lib/llmVendorPresets";
-import { isLlmOpenAiCompatibleProtocol } from "../../../lib/serverServiceCatalog";
+import prisma from "~~/server/lib/prisma";
+import { listOpenAiCompatibleModels } from "~~/server/lib/llmModelsList";
+import { getLlmVendorPreset, isOpenAiCompatPreset } from "~~/server/lib/llmVendorPresets";
+import { isLlmOpenAiCompatibleProtocol } from "~~/server/lib/serverServiceCatalog";
 
 export default defineEventHandler(async (event) => {
   const body = (await readBody(event).catch(() => ({}))) as Record<string, unknown>;

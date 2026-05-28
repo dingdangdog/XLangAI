@@ -2,7 +2,7 @@ import prisma from "~~/server/lib/prisma";
 import {
   buildBackupDownloadFilename,
   exportDatabaseBackup,
-} from "../../../utils/databaseBackup";
+} from "~~/server/utils/databaseBackup";
 
 export default defineEventHandler(async (event) => {
   const backup = await exportDatabaseBackup(prisma);

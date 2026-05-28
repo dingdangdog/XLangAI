@@ -1,3 +1,3 @@
-import { sendServerStoreHeartbeat } from "../../../utils/serverStoreConfig";
+import { sendServerStoreHeartbeat } from "~~/server/utils/serverStoreConfig";
 
 export default defineEventHandler(() => sendServerStoreHeartbeat());

@@ -1,3 +1,3 @@
-import { getServerStoreAdminState } from "../../../utils/serverStoreConfig";
+import { getServerStoreAdminState } from "~~/server/utils/serverStoreConfig";
 
 export default defineEventHandler(() => getServerStoreAdminState());

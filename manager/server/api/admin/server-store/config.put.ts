@@ -1,4 +1,4 @@
-import { getServerStoreAdminState, saveLocalServerStoreConfig } from "../../../utils/serverStoreConfig";
+import { getServerStoreAdminState, saveLocalServerStoreConfig } from "~~/server/utils/serverStoreConfig";
 
 export default defineEventHandler(async (event) => {
   const body = (await readBody(event)) as Record<string, unknown> | null;
