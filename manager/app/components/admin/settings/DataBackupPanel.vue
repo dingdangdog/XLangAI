@@ -139,21 +139,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col gap-4">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <AdminAlert :title="$t('pages.dataBackup.alertTitle')">
       {{ $t("pages.dataBackup.alertBody") }}
     </AdminAlert>
 
     <AdminSkeleton v-if="loading" :rows="10" />
 
-    <div
-      v-else
-      class="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden xl:flex-row"
-    >
+    <div v-else class="flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden xl:flex-row">
       <AdminPanel class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div
-          class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border p-4 md:px-5 md:py-4"
-        >
+          class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border p-4 md:px-5 md:py-4">
           <div>
             <h2 class="text-base font-semibold text-foreground">
               {{ $t("pages.dataBackup.currentData") }}
@@ -227,32 +223,19 @@ onMounted(() => {
             </AdminFormField>
 
             <AdminFormField :label="$t('pages.dataBackup.selectFile')">
-              <input
-                ref="fileInputRef"
-                type="file"
-                accept="application/json,.json"
+              <input ref="fileInputRef" type="file" accept="application/json,.json"
                 class="block w-full text-sm text-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
-                @change="onFileChange"
-              />
+                @change="onFileChange" />
               <p v-if="selectedFile" class="mt-2 text-xs text-muted">
                 {{ selectedFile.name }} ({{ Math.ceil(selectedFile.size / 1024) }} KB)
               </p>
             </AdminFormField>
 
             <div class="flex flex-wrap gap-3">
-              <AdminButton
-                variant="primary"
-                :loading="importing"
-                :disabled="!selectedFile"
-                @click="importBackup"
-              >
+              <AdminButton variant="primary" :loading="importing" :disabled="!selectedFile" @click="importBackup">
                 {{ $t("pages.dataBackup.import") }}
               </AdminButton>
-              <AdminButton
-                variant="secondary"
-                :disabled="!selectedFile || importing"
-                @click="clearFile"
-              >
+              <AdminButton variant="secondary" :disabled="!selectedFile || importing" @click="clearFile">
                 {{ $t("common.clear") }}
               </AdminButton>
             </div>

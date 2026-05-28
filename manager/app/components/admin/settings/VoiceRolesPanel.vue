@@ -421,7 +421,7 @@ async function deletePreview(row: Record<string, unknown>) {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col gap-4">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="flex justify-end">
       <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
     </div>

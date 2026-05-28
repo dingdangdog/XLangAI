@@ -9,15 +9,12 @@ withDefaults(
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col gap-4">
+  <div class="flex min-h-0 flex-1 flex-col gap-2">
     <div v-if="$slots.header" class="shrink-0 space-y-4">
-      <slot name="header" />
+      <slot name="header"></slot>
     </div>
-    <div
-      class="min-h-0 flex-1"
-      :class="fill ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'"
-    >
-      <slot />
+    <div class="min-h-0 flex-1" :class="fill ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'">
+      <slot></slot>
     </div>
   </div>
 </template>

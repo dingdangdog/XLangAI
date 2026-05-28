@@ -239,15 +239,12 @@ const loading = computed(() => statsPending.value || trendsPending.value);
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader
-        :title="$t('pages.dashboard.title')"
-        :description="$t('pages.dashboard.description')"
-      />
+      <AdminPageHeader :title="$t('pages.dashboard.title')" :description="$t('pages.dashboard.description')" />
     </template>
 
     <AdminSkeleton v-if="loading" :rows="10" />
 
-    <div v-else class="flex flex-col gap-4 pb-1">
+    <div v-else class="flex flex-col gap-2 pb-1">
       <AdminPanel :fill="false">
         <div class="border-b border-border px-4 py-2 md:px-5">
           <h2 class="text-sm text-foreground">{{ $t("pages.dashboard.entitySection") }}</h2>
@@ -256,14 +253,8 @@ const loading = computed(() => statsPending.value || trendsPending.value);
           <section v-for="group in entityGroups" :key="group.title" class="mb-2 last:mb-0">
             <p class="mb-1 text-xs text-muted">{{ group.title }}</p>
             <div class="grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              <AdminDashboardStatCard
-                v-for="card in group.cards"
-                :key="card.label"
-                :label="card.label"
-                :value="card.value"
-                :to="card.to"
-                :icon="card.icon"
-              />
+              <AdminDashboardStatCard class="cursor-pointer" v-for="card in group.cards" :key="card.label"
+                :label="card.label" :value="card.value" :to="card.to" :icon="card.icon" />
             </div>
           </section>
         </div>
@@ -278,51 +269,28 @@ const loading = computed(() => statsPending.value || trendsPending.value);
               <span v-if="trends">· {{ trends.from }} — {{ trends.to }} (UTC)</span>
             </p>
           </div>
-          <div
-            class="inline-flex rounded-md border border-border bg-surface p-0.5 text-xs"
-            role="group"
-            :aria-label="$t('pages.dashboard.periodLabel')"
-          >
-            <button
-              type="button"
-              class="rounded px-2 py-1 transition-colors"
-              :class="
-                trendDays === 7
-                  ? 'bg-primary-500 text-white'
-                  : 'text-muted hover:text-foreground'
-              "
-              @click="trendDays = 7"
-            >
+          <div class="inline-flex rounded-md border border-border bg-surface p-0.5 text-xs" role="group"
+            :aria-label="$t('pages.dashboard.periodLabel')">
+            <button type="button" class="rounded px-2 py-1 transition-colors" :class="trendDays === 7
+              ? 'bg-primary-500 text-white'
+              : 'text-muted hover:text-foreground'
+              " @click="trendDays = 7">
               {{ $t("pages.dashboard.last7Days") }}
             </button>
-            <button
-              type="button"
-              class="rounded px-2 py-1 transition-colors"
-              :class="
-                trendDays === 30
-                  ? 'bg-primary-500 text-white'
-                  : 'text-muted hover:text-foreground'
-              "
-              @click="trendDays = 30"
-            >
+            <button type="button" class="rounded px-2 py-1 transition-colors" :class="trendDays === 30
+              ? 'bg-primary-500 text-white'
+              : 'text-muted hover:text-foreground'
+              " @click="trendDays = 30">
               {{ $t("pages.dashboard.last30Days") }}
             </button>
           </div>
         </div>
-        <div class="grid gap-4 p-4 md:grid-cols-2 md:p-5 xl:grid-cols-3">
-          <AdminUsageTrendChart
-            v-for="chart in usageCharts"
-            :key="chart.key"
-            :title="chart.title"
-            :subtitle="chart.subtitle"
-            :icon="chart.icon"
-            :points="chart.points"
-            :unit-label="chart.unitLabel"
+        <div class="grid gap-2 p-1 md:grid-cols-2 md:p-2 xl:grid-cols-3">
+          <AdminUsageTrendChart v-for="chart in usageCharts" :key="chart.key" :title="chart.title"
+            :subtitle="chart.subtitle" :icon="chart.icon" :points="chart.points" :unit-label="chart.unitLabel"
             :show-units="chart.showUnits !== false"
             :request-legend="chart.requestLegend ?? $t('pages.dashboard.legendRequests')"
-            :unit-legend="$t('pages.dashboard.legendUnits')"
-            :format-unit="chart.formatUnit"
-          />
+            :unit-legend="$t('pages.dashboard.legendUnits')" :format-unit="chart.formatUnit" />
         </div>
       </AdminPanel>
     </div>

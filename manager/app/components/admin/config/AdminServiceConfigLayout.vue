@@ -36,20 +36,12 @@ const inactiveCount = computed(() => Math.max(0, props.total - activeCount.value
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col gap-4">
+  <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="grid gap-3 sm:grid-cols-3">
       <AdminServiceConfigStat :label="$t('serviceConfig.statsTotal')" :value="total" />
-      <AdminServiceConfigStat
-        :label="$t('serviceConfig.statsActive')"
-        :value="activeCount"
-        tone="success"
-        :hint="$t('serviceConfig.statsActiveHint')"
-      />
-      <AdminServiceConfigStat
-        :label="$t('serviceConfig.statsInactive')"
-        :value="inactiveCount"
-        tone="default"
-      />
+      <AdminServiceConfigStat :label="$t('serviceConfig.statsActive')" :value="activeCount" tone="success"
+        :hint="$t('serviceConfig.statsActiveHint')" />
+      <AdminServiceConfigStat :label="$t('serviceConfig.statsInactive')" :value="inactiveCount" tone="default" />
     </div>
 
     <div class="flex min-h-0 flex-1 gap-4">
@@ -73,27 +65,16 @@ const inactiveCount = computed(() => Math.max(0, props.total - activeCount.value
         </div>
 
         <div v-else class="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-          <AdminServiceConfigCard
-            v-for="row in items"
-            :key="String(row.id)"
-            :name="getTitle(row)"
-            :subtitle="getSubtitle(row)"
-            :meta="getMeta?.(row)"
+          <AdminServiceConfigCard v-for="row in items" :key="String(row.id)" :name="getTitle(row)"
+            :subtitle="getSubtitle(row)" :meta="getMeta?.(row)"
             :badge="getBadge?.(row)?.text ?? (String(row.status) === 'active' ? activeLabel : inactiveLabel)"
             :badge-variant="getBadge?.(row)?.variant ?? (String(row.status) === 'active' ? 'success' : 'muted')"
-            :active="String(row.status) === 'active'"
-            :selected="selectedId === String(row.id)"
-            @select="emit('select', row)"
-          />
+            :active="String(row.status) === 'active'" :selected="selectedId === String(row.id)"
+            @select="emit('select', row)" />
         </div>
 
-        <AdminPagination
-          v-if="total > pageSizeModel"
-          v-model:page="pageModel"
-          v-model:page-size="pageSizeModel"
-          :total="total"
-          class="shrink-0"
-        />
+        <AdminPagination v-if="total > pageSizeModel" v-model:page="pageModel" v-model:page-size="pageSizeModel"
+          :total="total" class="shrink-0" />
       </aside>
 
       <main class="min-h-0 min-w-0 flex-1">
