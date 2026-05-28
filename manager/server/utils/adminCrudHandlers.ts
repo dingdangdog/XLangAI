@@ -13,6 +13,8 @@ import { attachUserListFields, prepareUserAdminWriteData, redactUserRecord } fro
 import { attachServiceConfigUsageFields } from "./serviceUsageAdmin";
 import { prepareObjectStorageServiceConfigWrite } from "./objectStorageServiceConfigAdmin";
 import { prepareSmsServiceConfigWrite } from "./smsServiceConfigAdmin";
+import { prepareLlmServiceConfigWrite } from "./llmServiceConfigAdmin";
+import { prepareTtsServiceConfigWrite } from "./ttsServiceConfigAdmin";
 import { prepareTranslateServiceConfigWrite } from "./translateServiceConfigAdmin";
 import { prepareSttServiceConfigWrite } from "./sttServiceConfigAdmin";
 import { assertEditableSystemSettingKey, prepareSystemSettingWrite } from "./systemSettingsAdmin";
@@ -177,6 +179,12 @@ export async function adminCreateHandler(event: H3Event, resource: ResourceSlug)
   if (resource === "sms-service-configs") {
     data = await prepareSmsServiceConfigWrite(data);
   }
+  if (resource === "llm-service-configs") {
+    data = await prepareLlmServiceConfigWrite(data);
+  }
+  if (resource === "tts-service-configs") {
+    data = await prepareTtsServiceConfigWrite(data);
+  }
   if (resource === "system-settings") {
     data = prepareSystemSettingWrite(data, "create");
   }
@@ -217,6 +225,12 @@ export async function adminUpdateHandler(event: H3Event, resource: ResourceSlug)
   }
   if (resource === "sms-service-configs") {
     data = await prepareSmsServiceConfigWrite(data, id);
+  }
+  if (resource === "llm-service-configs") {
+    data = await prepareLlmServiceConfigWrite(data);
+  }
+  if (resource === "tts-service-configs") {
+    data = await prepareTtsServiceConfigWrite(data);
   }
   if (resource === "system-settings") {
     const existing = (await prisma.sysSystemSetting.findUnique({ where: { id } })) as {

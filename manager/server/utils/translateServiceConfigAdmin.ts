@@ -1,21 +1,8 @@
 import { createError } from "h3";
 import prisma from "../lib/prisma";
+import { isSupportedTranslateProtocol, LLM_OPENAI_COMPAT_STORED_PROTOCOLS } from "../lib/serverServiceCatalog";
 
-const OPENAI_COMPAT_PROTOCOLS = new Set([
-  "",
-  "openai",
-  "azure_openai",
-  "ollama",
-  "deepseek",
-  "openrouter",
-  "groq",
-  "together",
-  "zhipu",
-  "moonshot",
-  "siliconflow",
-  "nvidia_nim",
-  "mistral",
-]);
+const OPENAI_COMPAT_PROTOCOLS = new Set<string>(["", ...LLM_OPENAI_COMPAT_STORED_PROTOCOLS]);
 
 /** 库表 code 唯一、Go 不按 code 查；新建时由协议自动生成。 */
 export function autoTranslateConfigCode(protocol: string): string {
@@ -41,6 +28,13 @@ export async function prepareTranslateServiceConfigWrite(
 ): Promise<Record<string, unknown>> {
   const next = { ...data };
   const protocol = String(next.protocol ?? "openai").trim().toLowerCase();
+
+  if (!isSupportedTranslateProtocol(protocol)) {
+    throw createError({
+      statusCode: 400,
+      message: `不支持的翻译协议: ${protocol}`,
+    });
+  }
 
   if (!String(next.code ?? "").trim()) {
     next.code = autoTranslateConfigCode(protocol);

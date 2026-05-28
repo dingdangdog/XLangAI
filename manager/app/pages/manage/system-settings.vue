@@ -56,8 +56,6 @@ const { activeTab, setTab } = useAdminTabRoute<TabKey>({
   defaultTab: "variables",
 });
 
-const tabDescription = computed(() => t(TAB_META[activeTab.value].descriptionKey));
-
 const TAB_PANEL = {
   variables: SystemVariablesPanel,
   sms: SmsServiceConfigsPanel,
@@ -69,14 +67,11 @@ const TAB_PANEL = {
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader
-        :title="$t('pages.systemSettingsHub.title')"
-        :description="tabDescription"
-      />
+      <AdminPageHeader :title="$t('pages.systemSettingsHub.title')" />
 
-      <AdminTabBar
-        :tabs="tabs"
-        :active-tab="activeTab"
+      <AgentSegmentNav
+        :items="tabs"
+        :active="activeTab"
         @change="setTab($event as TabKey)"
       />
     </template>

@@ -77,8 +77,6 @@ const { activeTab, setTab } = useAdminTabRoute<TabKey>({
   defaultTab: "llm",
 });
 
-const tabDescription = computed(() => t(TAB_META[activeTab.value].descriptionKey));
-
 const TAB_PANEL = {
   llm: LlmConfigsPanel,
   stt: SttConfigsPanel,
@@ -92,14 +90,11 @@ const TAB_PANEL = {
 <template>
   <AdminListPage>
     <template #header>
-      <AdminPageHeader
-        :title="$t('pages.aiSettings.title')"
-        :description="tabDescription"
-      />
+      <AdminPageHeader :title="$t('pages.aiSettings.title')" />
 
-      <AdminTabBar
-        :tabs="tabs"
-        :active-tab="activeTab"
+      <AgentSegmentNav
+        :items="tabs"
+        :active="activeTab"
         @change="setTab($event as TabKey)"
       />
     </template>

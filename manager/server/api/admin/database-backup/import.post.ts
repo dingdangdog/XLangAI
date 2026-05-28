@@ -1,5 +1,5 @@
 import { createError } from "h3";
-import prisma from "../../../lib/prisma";
+import prisma from "~~/server/lib/prisma";
 import {
   importDatabaseBackup,
   parseDatabaseBackupPayload,

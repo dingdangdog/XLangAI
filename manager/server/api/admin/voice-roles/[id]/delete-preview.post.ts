@@ -1,4 +1,4 @@
-import { deleteVoiceRolePreview } from "../../../../lib/voicePreview/delete";
+import { deleteVoiceRolePreview } from "~~/server/lib/voicePreview/delete";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");

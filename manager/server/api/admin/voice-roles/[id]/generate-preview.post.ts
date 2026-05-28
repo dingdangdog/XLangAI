@@ -1,4 +1,4 @@
-import { generateVoiceRolePreview } from "../../../../lib/voicePreview/generate";
+import { generateVoiceRolePreview } from "~~/server/lib/voicePreview/generate";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");

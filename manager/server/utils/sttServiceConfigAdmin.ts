@@ -1,4 +1,6 @@
 import prisma from "../lib/prisma";
+import { createError } from "h3";
+import { isSupportedSttProtocol } from "../lib/serverServiceCatalog";
 
 /** 启用一条 STT 配置时，将其余活跃配置设为 inactive（与 Go GetActive 单条语义一致）。 */
 export async function deactivateOtherSttConfigs(excludeId?: string) {
@@ -17,6 +19,13 @@ export async function prepareSttServiceConfigWrite(
   id?: string,
 ): Promise<Record<string, unknown>> {
   const next = { ...data };
+  const protocol = String(next.protocol ?? "openai").trim().toLowerCase();
+  if (!isSupportedSttProtocol(protocol)) {
+    throw createError({
+      statusCode: 400,
+      message: `不支持的 STT 协议: ${protocol}（仅 openai / azure_speech_rest）`,
+    });
+  }
   if (next.status === "active") {
     await deactivateOtherSttConfigs(id);
   }

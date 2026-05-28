@@ -1,5 +1,5 @@
-import prisma from "../../../lib/prisma";
-import { probeTtsConfig } from "../../../lib/serviceProbe/ttsProbe";
+import prisma from "~~/server/lib/prisma";
+import { probeTtsConfig } from "~~/server/lib/serviceProbe/ttsProbe";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");

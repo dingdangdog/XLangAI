@@ -1,5 +1,5 @@
-import prisma from "../../../lib/prisma";
-import { probeSmsConfig } from "../../../lib/serviceProbe/smsProbe";
+import prisma from "~~/server/lib/prisma";
+import { probeSmsConfig } from "~~/server/lib/serviceProbe/smsProbe";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");

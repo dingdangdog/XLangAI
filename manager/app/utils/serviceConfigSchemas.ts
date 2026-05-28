@@ -286,8 +286,17 @@ export const SMS_CONFIG_SCHEMAS: Record<string, ConfigFieldSchema[]> = {
   ],
 };
 
-export function getConfigSchema(kind: "llm" | "tts" | "sms", key: string): ConfigFieldSchema[] {
-  if (kind === "llm") return LLM_CONFIG_SCHEMAS[key] ?? [];
+export function getConfigSchema(
+  kind: "llm" | "tts" | "sms",
+  key: string,
+  options?: { llmOpenAiFlavor?: "generic" | "azure" },
+): ConfigFieldSchema[] {
+  if (kind === "llm") {
+    if (key === "openai" && options?.llmOpenAiFlavor === "azure") {
+      return LLM_CONFIG_SCHEMAS.azure_openai ?? [];
+    }
+    return LLM_CONFIG_SCHEMAS[key] ?? [];
+  }
   if (kind === "tts") return TTS_CONFIG_SCHEMAS[key] ?? [];
   return SMS_CONFIG_SCHEMAS[key] ?? [];
 }
