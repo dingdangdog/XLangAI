@@ -1,49 +1,38 @@
 <script setup lang="ts">
-const { t } = useI18n();
+import {
+  configObjectFromSchemaFields,
+  getConfigSchema,
+  parseConfigObject,
+  schemaFieldsFromConfigObject,
+  stringifyConfigObject,
+} from "~/utils/serviceConfigSchemas";
 
+const { t } = useI18n();
 const { serviceUsageMonthLine, serviceUsageTodayLine } = useUsageDisplay();
 
 const API = "/api/admin/tts-service-configs";
 const api = useAdminResourceApi(API);
 const toast = useToast();
 const { confirm } = useConfirm();
+const { probe, probing, lastResult, clearProbe } = useServiceConfigProbe(API);
 
-/** 全球主流 TTS；与 server/internal/ai/tts_providers.go NormalizeTTSProvider 对齐 */
 const PROVIDERS = [
-  { value: "openai_rest", label: "OpenAI（/v1/audio/speech）" },
-  { value: "azure_speech_rest", label: "Microsoft Azure 语音" },
-  { value: "google_cloud_tts", label: "Google Cloud Text-to-Speech" },
-  { value: "gemini_tts", label: "Google Gemini TTS（AUDIO）" },
-  { value: "aws_polly", label: "Amazon Polly" },
-  { value: "elevenlabs", label: "ElevenLabs" },
-  { value: "deepgram", label: "Deepgram Speak" },
-  { value: "ibm_watson", label: "IBM Watson TTS" },
-  { value: "tencent_tts", label: "腾讯云语音合成" },
-  { value: "aliyun_nls", label: "阿里云 NLS TTS" },
-  { value: "baidu_tts", label: "百度语音合成" },
-  { value: "xunfei", label: "讯飞开放平台（iFlytek）" },
-  { value: "minimax", label: "MiniMax 语音" },
-  { value: "volcengine", label: "火山引擎 / 豆包 OpenSpeech" },
-  { value: "playht", label: "PlayHT" },
+  { value: "openai_rest", label: "OpenAI", group: "Global" },
+  { value: "azure_speech_rest", label: "Microsoft Azure", group: "Global" },
+  { value: "google_cloud_tts", label: "Google Cloud TTS", group: "Global" },
+  { value: "gemini_tts", label: "Google Gemini TTS", group: "Global" },
+  { value: "aws_polly", label: "Amazon Polly", group: "Global" },
+  { value: "elevenlabs", label: "ElevenLabs", group: "Global" },
+  { value: "deepgram", label: "Deepgram", group: "Global" },
+  { value: "ibm_watson", label: "IBM Watson", group: "Global" },
+  { value: "playht", label: "PlayHT", group: "Global" },
+  { value: "tencent_tts", label: "腾讯云", group: "China" },
+  { value: "aliyun_nls", label: "阿里云 NLS", group: "China" },
+  { value: "baidu_tts", label: "百度", group: "China" },
+  { value: "xunfei", label: "讯飞", group: "China" },
+  { value: "minimax", label: "MiniMax", group: "China" },
+  { value: "volcengine", label: "火山引擎", group: "China" },
 ] as const;
-
-const CONFIG_HINTS: Record<string, string> = {
-  openai_rest: "{}",
-  azure_speech_rest: '{"output_format":"audio-16khz-128kbitrate-mono-mp3","region":"eastus"}',
-  google_cloud_tts: '{"language_code":"en-US","audio_encoding":"MP3"}',
-  gemini_tts: "{}",
-  aws_polly: '{"secret_id":"AWS_ACCESS_KEY_ID","api_secret":"AWS_SECRET","region":"us-east-1"}',
-  elevenlabs: '{"model_id":"eleven_multilingual_v2"}',
-  deepgram: '{"model_id":"aura-asteria-en"}',
-  ibm_watson: "{}",
-  tencent_tts: '{"secret_id":"SecretId","codec":"mp3","region":"ap-guangzhou"}',
-  aliyun_nls: '{"app_key":"AppKey","format":"mp3","region":"cn-shanghai"}',
-  baidu_tts: '{"cuid":"xlangai","spd":5,"pit":5,"vol":5}',
-  xunfei: '{"app_id":"APPID","api_secret":"APISecret"}',
-  minimax: "{}",
-  volcengine: '{"app_id":"AppId","cluster":"volcano_tts"}',
-  playht: '{"user_id":"PlayHT用户ID"}',
-};
 
 const DEFAULT_MODEL: Record<string, string> = {
   openai_rest: "tts-1",
@@ -68,26 +57,12 @@ const pageSize = ref(20);
 const total = ref(0);
 const list = ref<Record<string, unknown>[]>([]);
 const loading = ref(false);
-
-async function load() {
-  loading.value = true;
-  try {
-    const res = await api.list({ page: page.value, pageSize: pageSize.value });
-    list.value = res.items;
-    total.value = res.total;
-  } catch (e) {
-    toast.error(t("toast.loadFailed"));
-    console.error(e);
-  } finally {
-    loading.value = false;
-  }
-}
-
-watch([page, pageSize], () => void load(), { immediate: true });
-
-const dialogVisible = ref(false);
-const dialogMode = ref<"create" | "edit">("create");
+const selectedId = ref<string | null>(null);
+const editorMode = ref<"idle" | "create" | "edit">("idle");
+const editorTab = ref<"connection" | "advanced" | "raw">("connection");
 const saving = ref(false);
+const deleting = ref(false);
+const probeVoiceCode = ref("alloy");
 
 const form = reactive({
   id: "",
@@ -104,6 +79,38 @@ const form = reactive({
   remark: "",
 });
 
+const schemaFields = ref<Record<string, string | number | boolean>>({});
+const snapshot = ref("");
+
+const providerOptions = computed(() => PROVIDERS.map((p) => ({ ...p })));
+const configSchema = computed(() => getConfigSchema("tts", form.provider));
+
+function autoTtsCode(provider: string) {
+  const p = (provider || "openai_rest").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+  return `${p}-${Date.now()}`;
+}
+
+function regionRequired(): boolean {
+  return ["azure_speech_rest", "aliyun_nls", "tencent_tts", "aws_polly"].includes(form.provider);
+}
+
+function serializeFormSnapshot() {
+  return JSON.stringify({ ...form, schemaFields: schemaFields.value, probeVoiceCode: probeVoiceCode.value });
+}
+
+function syncSchemaFromConfig() {
+  schemaFields.value = schemaFieldsFromConfigObject(
+    configSchema.value,
+    parseConfigObject(form.config),
+  );
+}
+
+function syncConfigFromSchema() {
+  const base = parseConfigObject(form.config);
+  const fromSchema = configObjectFromSchemaFields(configSchema.value, schemaFields.value);
+  form.config = stringifyConfigObject({ ...base, ...fromSchema });
+}
+
 function resetForm() {
   form.id = "";
   form.code = "";
@@ -111,32 +118,19 @@ function resetForm() {
   form.provider = "azure_speech_rest";
   form.baseUrl = "";
   form.apiKey = "";
-  form.region = "";
-  form.modelCode = "-";
-  form.config = CONFIG_HINTS.azure_speech_rest ?? "{}";
+  form.region = "eastus";
+  form.modelCode = DEFAULT_MODEL.azure_speech_rest ?? "-";
+  form.config = "{}";
   form.status = "active";
   form.sortOrder = 0;
   form.remark = "";
+  probeVoiceCode.value = form.provider === "azure_speech_rest" ? "en-US-JennyNeural" : "alloy";
+  syncSchemaFromConfig();
+  snapshot.value = serializeFormSnapshot();
+  clearProbe();
 }
 
-function onProviderChange(v: string) {
-  form.config = CONFIG_HINTS[v] ?? "{}";
-  const def = DEFAULT_MODEL[v];
-  if (def) form.modelCode = def;
-  if (v === "azure_speech_rest" && !form.region.trim()) form.region = "eastus";
-  if (v === "tencent_tts" && !form.region.trim()) form.region = "ap-guangzhou";
-}
-
-watch(() => form.provider, onProviderChange);
-
-function openCreate() {
-  dialogMode.value = "create";
-  resetForm();
-  dialogVisible.value = true;
-}
-
-function openEdit(row: Record<string, unknown>) {
-  dialogMode.value = "edit";
+function loadFormFromRow(row: Record<string, unknown>) {
   form.id = String(row.id ?? "");
   form.code = String(row.code ?? "");
   form.name = String(row.name ?? "");
@@ -149,25 +143,69 @@ function openEdit(row: Record<string, unknown>) {
   form.status = String(row.status ?? "active");
   form.sortOrder = Number(row.sortOrder ?? 0);
   form.remark = String(row.remark ?? "");
-  dialogVisible.value = true;
+  probeVoiceCode.value = form.provider === "azure_speech_rest" ? "en-US-JennyNeural" : "alloy";
+  syncSchemaFromConfig();
+  snapshot.value = serializeFormSnapshot();
+  clearProbe();
 }
 
-function regionRequired(): boolean {
-  return ["azure_speech_rest", "aliyun_nls", "tencent_tts", "aws_polly"].includes(form.provider);
+async function load() {
+  loading.value = true;
+  try {
+    const res = await api.list({ page: page.value, pageSize: pageSize.value });
+    list.value = res.items;
+    total.value = res.total;
+    if (selectedId.value && !res.items.some((r) => String(r.id) === selectedId.value)) {
+      selectedId.value = null;
+      editorMode.value = "idle";
+    }
+  } catch (e) {
+    toast.error(t("toast.loadFailed"));
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
 }
 
-function apiKeyHint(): string {
-  return t("pages.ttsConfigs.defaultApiKeyHint");
+watch([page, pageSize], () => void load(), { immediate: true });
+
+watch(
+  () => form.provider,
+  (v) => {
+    const def = DEFAULT_MODEL[v];
+    if (def) form.modelCode = def;
+    if (v === "azure_speech_rest" && !form.region.trim()) form.region = "eastus";
+    if (v === "tencent_tts" && !form.region.trim()) form.region = "ap-guangzhou";
+    probeVoiceCode.value = v === "azure_speech_rest" ? "en-US-JennyNeural" : "alloy";
+    syncSchemaFromConfig();
+  },
+);
+
+const dirty = computed(() => serializeFormSnapshot() !== snapshot.value);
+const selectedRow = computed(() => list.value.find((r) => String(r.id) === selectedId.value) ?? null);
+
+function openCreate() {
+  editorMode.value = "create";
+  selectedId.value = null;
+  editorTab.value = "connection";
+  resetForm();
 }
 
-function voiceHint(): string {
-  return t("pages.ttsConfigs.defaultVoiceHint");
+function selectRow(row: Record<string, unknown>) {
+  selectedId.value = String(row.id);
+  editorMode.value = "edit";
+  editorTab.value = "connection";
+  loadFormFromRow(row);
 }
 
-/** 库表 code 唯一；Go 按 id 查 TTS 配置，不按 code 查。新建时自动生成。 */
-function autoTtsCode(provider: string) {
-  const p = (provider || "openai_rest").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
-  return `${p}-${Date.now()}`;
+function cancelEdit() {
+  if (editorMode.value === "create") {
+    editorMode.value = "idle";
+    selectedId.value = null;
+    resetForm();
+    return;
+  }
+  if (selectedRow.value) loadFormFromRow(selectedRow.value);
 }
 
 async function submitForm() {
@@ -179,44 +217,45 @@ async function submitForm() {
     toast.warning(t("validation.regionRequired"));
     return;
   }
+  syncConfigFromSchema();
   let configStr = (form.config ?? "").trim();
-  if (configStr) {
-    try {
-      JSON.parse(configStr);
-    } catch {
-      toast.error(t("validation.invalidJson", { field: t("fields.extJson") }));
-      return;
-    }
-  } else {
-    configStr = "{}";
+  try {
+    JSON.parse(configStr);
+  } catch {
+    toast.error(t("validation.invalidJson", { field: t("fields.extJson") }));
+    editorTab.value = "raw";
+    return;
   }
   const body = {
-    code:
-      dialogMode.value === "create"
-        ? autoTtsCode(form.provider)
-        : form.code.trim(),
+    code: editorMode.value === "create" ? autoTtsCode(form.provider) : form.code.trim(),
     name: form.name.trim(),
     provider: form.provider,
     baseUrl: form.baseUrl.trim() || null,
     apiKey: form.apiKey.trim() || null,
     region: form.region.trim() || null,
     modelCode: form.modelCode.trim() || "-",
-    config: configStr,
+    config: configStr || "{}",
     status: form.status,
     sortOrder: form.sortOrder,
     remark: form.remark.trim() || null,
   };
   saving.value = true;
   try {
-    if (dialogMode.value === "create") {
-      await api.create(body);
+    if (editorMode.value === "create") {
+      const created = (await api.create(body)) as Record<string, unknown>;
       toast.success(t("toast.created"));
+      await load();
+      if (created?.id) {
+        selectedId.value = String(created.id);
+        editorMode.value = "edit";
+      }
     } else {
       await api.update(form.id, { id: form.id, ...body });
       toast.success(t("toast.saved"));
+      await load();
+      const row = list.value.find((r) => String(r.id) === form.id);
+      if (row) loadFormFromRow(row);
     }
-    dialogVisible.value = false;
-    await load();
   } catch (e) {
     toast.error(t("toast.saveFailed"));
     console.error(e);
@@ -225,29 +264,52 @@ async function submitForm() {
   }
 }
 
-async function removeRow(row: Record<string, unknown>) {
+async function removeCurrent() {
+  if (!form.id) return;
   const ok = await confirm({
     message: t("confirm.deleteTtsConfig"),
     danger: true,
     confirmLabel: t("common.delete"),
   });
   if (!ok) return;
+  deleting.value = true;
   try {
-    await api.remove(String(row.id));
+    await api.remove(form.id);
     toast.success(t("toast.deleted"));
+    selectedId.value = null;
+    editorMode.value = "idle";
     await load();
   } catch (e) {
     toast.error(t("toast.deleteFailed"));
     console.error(e);
+  } finally {
+    deleting.value = false;
   }
 }
 
-const statusOptions = [
-  { value: "active", label: "active" },
-  { value: "inactive", label: "inactive" },
-];
-
-const providerOptions = PROVIDERS.map((p) => ({ value: p.value, label: p.label }));
+async function runProbe() {
+  if (!form.id) {
+    toast.warning(t("serviceConfig.probeNeedSave"));
+    return;
+  }
+  syncConfigFromSchema();
+  try {
+    const result = await probe(form.id, {
+      provider: form.provider,
+      baseUrl: form.baseUrl,
+      apiKey: form.apiKey,
+      region: form.region,
+      modelCode: form.modelCode,
+      config: form.config,
+      voiceCode: probeVoiceCode.value,
+    });
+    if (result.ok) toast.success(t("serviceConfig.probeOk"));
+    else toast.error(result.message);
+  } catch (e) {
+    toast.error(t("serviceConfig.probeFailed"));
+    console.error(e);
+  }
+}
 
 const { activateRow, activatingId } = useActivateConfigRow({
   api,
@@ -255,117 +317,121 @@ const { activateRow, activatingId } = useActivateConfigRow({
   exclusivity: "multi-active",
   reload: load,
 });
+
+const statusOptions = [
+  { value: "active", label: "active" },
+  { value: "inactive", label: "inactive" },
+];
 </script>
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col gap-4">
-    <div class="flex justify-end">
-      <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
-    </div>
-
     <AdminAlert :title="$t('pages.ttsConfigs.providersCount')">
       <p class="text-sm">{{ $t("pages.ttsConfigs.providersAlert") }}</p>
     </AdminAlert>
 
-    <AdminPanel>
-      <AdminTable :loading="loading">
-        <template #head>
-          <AdminTh>{{ $t("common.code") }}</AdminTh>
-          <AdminTh>{{ $t("common.name") }}</AdminTh>
-          <AdminTh width="160px">{{ $t("common.provider") }}</AdminTh>
-          <AdminTh width="96px">{{ $t("common.region") }}</AdminTh>
-          <AdminTh>{{ $t("common.model") }}</AdminTh>
-          <AdminTh>{{ $t("fields.apiKey") }}</AdminTh>
-          <AdminTh width="80px">{{ $t("common.status") }}</AdminTh>
-          <AdminTh width="120px">{{ $t("common.todayUsage") }}</AdminTh>
-          <AdminTh width="120px">{{ $t("common.monthUsage") }}</AdminTh>
-          <AdminTh width="64px">{{ $t("common.sort") }}</AdminTh>
-          <AdminTh>{{ $t("common.updatedAt") }}</AdminTh>
-          <AdminTh width="200px" align="right">{{ $t("common.actions") }}</AdminTh>
-        </template>
-        <AdminTr v-for="row in list" :key="String(row.id)">
-          <AdminTd nowrap>{{ row.code }}</AdminTd>
-          <AdminTd>{{ row.name }}</AdminTd>
-          <AdminTd>{{ row.provider }}</AdminTd>
-          <AdminTd>{{ row.region ?? t("common.emDash") }}</AdminTd>
-          <AdminTd>{{ row.modelCode }}</AdminTd>
-          <AdminTd><AdminMaskedKey :value="row.apiKey as string | null" /></AdminTd>
-          <AdminTd><AdminBadge>{{ row.status }}</AdminBadge></AdminTd>
-          <AdminTd class="text-sm tabular-nums">
-            <div>{{ serviceUsageTodayLine(row.usage as Record<string, unknown> | undefined) }}</div>
-          </AdminTd>
-          <AdminTd class="text-sm tabular-nums">
-            <div>{{ serviceUsageMonthLine(row.usage as Record<string, unknown> | undefined) }}</div>
-          </AdminTd>
-          <AdminTd>{{ row.sortOrder }}</AdminTd>
-          <AdminTd nowrap>{{ formatDateTime(row.updatedAt) }}</AdminTd>
-          <AdminTd align="right" class="whitespace-nowrap">
-            <AdminButton
-              v-if="String(row.status) !== 'active'"
-              variant="link"
-              :loading="activatingId === String(row.id)"
-              @click="activateRow(row)"
-            >
-              {{ $t("common.enable") }}
-            </AdminButton>
-            <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
-            <AdminButton variant="link" class="!text-danger-600" @click="removeRow(row)">
-              {{ $t("common.delete") }}
-            </AdminButton>
-          </AdminTd>
-        </AdminTr>
-      </AdminTable>
-      <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
-    </AdminPanel>
-
-    <AdminDialog
-      v-model="dialogVisible"
-      :title="dialogMode === 'create' ? $t('pages.ttsConfigs.createDialog') : $t('pages.ttsConfigs.editDialog')"
-      width="lg"
+    <AdminServiceConfigLayout
+      :items="list"
+      :selected-id="selectedId"
+      :loading="loading"
+      :total="total"
+      v-model:page="page"
+      v-model:page-size="pageSize"
+      :get-title="(row) => String(row.name ?? row.code ?? '')"
+      :get-subtitle="(row) => String(row.provider ?? '')"
+      :get-meta="
+        (row) =>
+          `${String(row.modelCode ?? '')} · ${serviceUsageMonthLine(row.usage as Record<string, unknown> | undefined)}`
+      "
+      @create="openCreate"
+      @select="selectRow"
     >
-      <AdminFormField v-if="dialogMode === 'edit'" :label="$t('common.id')">
-        <AdminInput v-model="form.id" disabled />
-      </AdminFormField>
-      <AdminFormField :label="$t('common.name')" required>
-        <AdminInput v-model="form.name" />
-      </AdminFormField>
-      <AdminFormField :label="$t('common.provider')" required>
-        <AdminSelect v-model="form.provider" :options="providerOptions" />
-      </AdminFormField>
-      <AdminFormField :label="$t('fields.baseUrl')" :hint="$t('pages.ttsConfigs.baseUrlHint')">
-        <AdminInput v-model="form.baseUrl" />
-      </AdminFormField>
-      <AdminFormField :label="$t('fields.apiKeySecret')" :hint="apiKeyHint()">
-        <AdminInput v-model="form.apiKey" type="password" />
-      </AdminFormField>
-      <AdminFormField
-        :label="$t('common.region')"
-        :hint="regionRequired() ? $t('pages.ttsConfigs.regionRequired') : $t('pages.ttsConfigs.regionOptional')"
+      <AdminPanel v-if="editorMode === 'idle'" :fill="false" class="flex h-full min-h-[520px] items-center justify-center">
+        <div class="max-w-sm px-6 text-center">
+          <p class="text-sm text-muted">{{ $t("serviceConfig.selectOrCreate") }}</p>
+          <AdminButton class="mt-4" variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
+        </div>
+      </AdminPanel>
+
+      <AdminConfigEditorShell
+        v-else
+        :title="editorMode === 'create' ? $t('pages.ttsConfigs.createDialog') : form.name"
+        :subtitle="editorMode === 'edit' ? `${form.provider} · ${form.region || t('common.emDash')}` : $t('serviceConfig.createHint')"
+        v-model:editor-tab="editorTab"
+        :saving="saving"
+        :deleting="deleting"
+        :activating="activatingId === form.id"
+        :can-activate="editorMode === 'edit' && form.status !== 'active'"
+        :can-delete="editorMode === 'edit'"
+        :dirty="dirty"
+        @save="submitForm"
+        @cancel="cancelEdit"
+        @delete="removeCurrent"
+        @activate="selectedRow && activateRow(selectedRow)"
       >
-        <AdminInput v-model="form.region" placeholder="eastus / ap-guangzhou / us-east-1" />
-      </AdminFormField>
-      <AdminFormField :label="$t('fields.modelCode')" :hint="$t('pages.ttsConfigs.modelHint')">
-        <AdminInput v-model="form.modelCode" />
-      </AdminFormField>
-      <AdminFormField :label="$t('fields.extJson')" :hint="CONFIG_HINTS[form.provider]">
-        <AdminInput v-model="form.config" type="textarea" :rows="4" class="font-mono text-sm" />
-      </AdminFormField>
-      <AdminFormField :label="$t('pages.ttsConfigs.voiceDescription')">
-        <p class="text-sm text-gray-500">{{ voiceHint() }}</p>
-      </AdminFormField>
-      <AdminFormField :label="$t('common.status')">
-        <AdminSelect v-model="form.status" :options="statusOptions" />
-      </AdminFormField>
-      <AdminFormField :label="$t('common.sort')">
-        <AdminInput v-model="form.sortOrder" type="number" />
-      </AdminFormField>
-      <AdminFormField :label="$t('common.remark')">
-        <AdminInput v-model="form.remark" type="textarea" :rows="2" />
-      </AdminFormField>
-      <template #footer>
-        <AdminButton @click="dialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
-        <AdminButton variant="primary" :loading="saving" @click="submitForm">{{ $t("common.save") }}</AdminButton>
-      </template>
-    </AdminDialog>
+        <template #connection>
+          <div v-if="editorMode === 'create'" class="mb-4">
+            <AdminFormField :label="$t('common.provider')" required>
+              <AdminProviderPicker v-model="form.provider" :options="providerOptions" />
+            </AdminFormField>
+          </div>
+          <AdminFormField v-else :label="$t('common.provider')" required>
+            <AdminSelect v-model="form.provider" :options="providerOptions.map((p) => ({ value: p.value, label: p.label }))" />
+          </AdminFormField>
+          <AdminFormField :label="$t('common.name')" required>
+            <AdminInput v-model="form.name" />
+          </AdminFormField>
+          <AdminFormField :label="$t('fields.baseUrl')" :hint="$t('pages.ttsConfigs.baseUrlHint')">
+            <AdminInput v-model="form.baseUrl" />
+          </AdminFormField>
+          <AdminFormField :label="$t('fields.apiKeySecret')" :hint="$t('pages.ttsConfigs.defaultApiKeyHint')">
+            <AdminInput v-model="form.apiKey" type="password" />
+          </AdminFormField>
+          <AdminFormField
+            :label="$t('common.region')"
+            :hint="regionRequired() ? $t('pages.ttsConfigs.regionRequired') : $t('pages.ttsConfigs.regionOptional')"
+          >
+            <AdminInput v-model="form.region" placeholder="eastus / ap-guangzhou / us-east-1" />
+          </AdminFormField>
+          <AdminFormField :label="$t('fields.modelCode')" :hint="$t('pages.ttsConfigs.modelHint')">
+            <AdminInput v-model="form.modelCode" />
+          </AdminFormField>
+          <div class="grid gap-1 sm:grid-cols-2">
+            <AdminFormField :label="$t('common.status')">
+              <AdminSelect v-model="form.status" :options="statusOptions" />
+            </AdminFormField>
+            <AdminFormField :label="$t('common.sort')">
+              <AdminInput v-model="form.sortOrder" type="number" />
+            </AdminFormField>
+          </div>
+          <AdminFormField :label="$t('common.remark')">
+            <AdminInput v-model="form.remark" type="textarea" :rows="2" />
+          </AdminFormField>
+        </template>
+
+        <template #advanced>
+          <AdminConfigSchemaFields v-model="schemaFields" :schema="configSchema" />
+          <AdminFormField :label="$t('serviceConfig.probeVoiceCode')" :hint="$t('serviceConfig.probeVoiceHint')">
+            <AdminInput v-model="probeVoiceCode" placeholder="alloy / en-US-JennyNeural" />
+          </AdminFormField>
+        </template>
+
+        <template #raw>
+          <AdminFormField :label="$t('fields.extJson')">
+            <AdminInput v-model="form.config" type="textarea" :rows="12" class="font-mono text-sm" />
+          </AdminFormField>
+        </template>
+
+        <template #probe>
+          <AdminConfigProbePanel
+            :loading="probing"
+            :result="lastResult"
+            :disabled="!form.id"
+            :hint="$t('serviceConfig.ttsProbeHint')"
+            @probe="runProbe"
+          />
+        </template>
+      </AdminConfigEditorShell>
+    </AdminServiceConfigLayout>
   </div>
 </template>
