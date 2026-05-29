@@ -650,14 +650,6 @@
           "sms": {
             "enabled": "SMS OTP ログインを許可",
             "register_enabled": "SMS OTP 登録を許可"
-          },
-          "google": {
-            "enabled": "Google ログインを表示",
-            "register_enabled": "初回 Google ログインで自動登録"
-          },
-          "apple": {
-            "enabled": "Apple ログインを表示",
-            "register_enabled": "初回 Apple ログインで自動登録"
           }
         },
         "media": {
@@ -684,14 +676,6 @@
           "sms": {
             "enabled": "SMS ログイン",
             "register_enabled": "SMS 登録"
-          },
-          "google": {
-            "enabled": "Google ログイン",
-            "register_enabled": "Google 自動登録"
-          },
-          "apple": {
-            "enabled": "Apple ログイン",
-            "register_enabled": "Apple 自動登録"
           }
         },
         "media": {

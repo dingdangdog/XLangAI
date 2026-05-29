@@ -508,10 +508,6 @@ const SEED_SYSTEM_SETTINGS: {
     { key: "auth.password.register_enabled", value: "false", valueType: "bool", status: "active", description: "Password registration" },
     { key: "auth.sms.enabled", value: "true", valueType: "bool", status: "active", description: "SMS OTP login" },
     { key: "auth.sms.register_enabled", value: "false", valueType: "bool", status: "active", description: "SMS OTP registration" },
-    { key: "auth.google.enabled", value: "false", valueType: "bool", status: "active", description: "Google sign-in" },
-    { key: "auth.google.register_enabled", value: "false", valueType: "bool", status: "active", description: "Auto-register on first Google sign-in" },
-    { key: "auth.apple.enabled", value: "false", valueType: "bool", status: "active", description: "Apple sign-in" },
-    { key: "auth.apple.register_enabled", value: "false", valueType: "bool", status: "active", description: "Auto-register on first Apple sign-in" },
     {
       key: "media.user_recording.storage",
       value: "server",

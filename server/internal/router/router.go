@@ -25,8 +25,6 @@ func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *han
 	r.POST("/api/v1/auth/login/sms", uh.LoginWithSms)
 	r.POST("/api/v1/auth/register/sms/send", uh.SendRegisterSms)
 	r.POST("/api/v1/auth/register/sms", uh.RegisterWithSms)
-	r.POST("/api/v1/auth/login/google", uh.LoginGoogle)
-	r.POST("/api/v1/auth/login/apple", uh.LoginApple)
 
 	// 公开：音频文件（TTS 生成）
 	r.GET("/api/v1/audio/:filename", ah.ServeAudio)

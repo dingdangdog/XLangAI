@@ -1,16 +1,12 @@
 // Package settings 定义 sys_system_settings 的 key 约定与默认值（与 manager 种子、后台说明一致）。
 package settings
 
-// 认证：是否允许该方式登录 / 注册（与 OAuth 环境变量、短信网关配置无关）。
+// 认证：是否允许该方式登录 / 注册（与短信网关配置无关）。
 const (
 	AuthPasswordEnabled         = "auth.password.enabled"
 	AuthPasswordRegisterEnabled = "auth.password.register_enabled"
 	AuthSmsEnabled              = "auth.sms.enabled"
 	AuthSmsRegisterEnabled      = "auth.sms.register_enabled"
-	AuthGoogleEnabled           = "auth.google.enabled"
-	AuthGoogleRegisterEnabled   = "auth.google.register_enabled"
-	AuthAppleEnabled            = "auth.apple.enabled"
-	AuthAppleRegisterEnabled    = "auth.apple.register_enabled"
 )
 
 // 媒体存储策略：client | server | cloud（与 sys_object_storage_configs 无关）。
@@ -31,10 +27,6 @@ var Defaults = map[string]string{
 	AuthPasswordRegisterEnabled: "true",
 	AuthSmsEnabled:              "true",
 	AuthSmsRegisterEnabled:      "false",
-	AuthGoogleEnabled:           "true",
-	AuthGoogleRegisterEnabled:   "true",
-	AuthAppleEnabled:            "true",
-	AuthAppleRegisterEnabled:    "true",
 	MediaUserRecordingStorage:   "server",
 	MediaAssistantTtsStorage:    "server",
 	MediaAvatarStorage:          "server",
@@ -46,10 +38,6 @@ var PublicKeys = []string{
 	AuthPasswordRegisterEnabled,
 	AuthSmsEnabled,
 	AuthSmsRegisterEnabled,
-	AuthGoogleEnabled,
-	AuthGoogleRegisterEnabled,
-	AuthAppleEnabled,
-	AuthAppleRegisterEnabled,
 	MediaUserRecordingStorage,
 	MediaAssistantTtsStorage,
 	MediaAvatarStorage,

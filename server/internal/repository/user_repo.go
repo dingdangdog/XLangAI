@@ -21,14 +21,6 @@ type CreateUserParams struct {
 	Nickname string
 }
 
-// CreateOAuthUserParams 使用 Google / Apple 的 sub 创建无密码用户（password_hash 为 NULL）。
-type CreateOAuthUserParams struct {
-	GoogleSub *string
-	AppleSub  *string
-	Email     *string
-	Nickname  *string
-}
-
 type UserRepo struct {
 	db *gorm.DB
 }
@@ -199,95 +191,6 @@ func (r *UserRepo) GetByPhoneOrEmail(ctx context.Context, phone, email string) (
 		return r.GetByEmail(ctx, email)
 	}
 	return nil, errors.New("phone or email required")
-}
-
-func (r *UserRepo) GetByGoogleSub(ctx context.Context, sub string) (*model.User, error) {
-	sub = strings.TrimSpace(sub)
-	if sub == "" {
-		return nil, errors.New("empty google_sub")
-	}
-	var row entity.User
-	err := r.activeUserQuery().WithContext(ctx).Where("google_sub = ?", sub).First(&row).Error
-	if err != nil {
-		return nil, err
-	}
-	return userToModel(&row), nil
-}
-
-func (r *UserRepo) GetByAppleSub(ctx context.Context, sub string) (*model.User, error) {
-	sub = strings.TrimSpace(sub)
-	if sub == "" {
-		return nil, errors.New("empty apple_sub")
-	}
-	var row entity.User
-	err := r.activeUserQuery().WithContext(ctx).Where("apple_sub = ?", sub).First(&row).Error
-	if err != nil {
-		return nil, err
-	}
-	return userToModel(&row), nil
-}
-
-func (r *UserRepo) CreateOAuthUser(ctx context.Context, p CreateOAuthUserParams) (*model.User, error) {
-	hasGoogle := p.GoogleSub != nil && strings.TrimSpace(*p.GoogleSub) != ""
-	hasApple := p.AppleSub != nil && strings.TrimSpace(*p.AppleSub) != ""
-	if !hasGoogle && !hasApple {
-		return nil, errors.New("google_sub or apple_sub required")
-	}
-	var gPtr, aPtr *string
-	if hasGoogle {
-		v := strings.TrimSpace(*p.GoogleSub)
-		gPtr = &v
-	}
-	if hasApple {
-		v := strings.TrimSpace(*p.AppleSub)
-		aPtr = &v
-	}
-	var emPtr *string
-	if p.Email != nil {
-		e := strings.TrimSpace(strings.ToLower(*p.Email))
-		if e != "" {
-			emPtr = &e
-		}
-	}
-	var nickPtr *string
-	if p.Nickname != nil {
-		n := strings.TrimSpace(*p.Nickname)
-		if n != "" {
-			if len([]rune(n)) > 32 {
-				n = string([]rune(n)[:32])
-			}
-			nickPtr = &n
-		}
-	}
-	if nickPtr == nil {
-		base := "用户"
-		if emPtr != nil {
-			local := *emPtr
-			if i := strings.IndexByte(local, '@'); i > 0 {
-				local = local[:i]
-			}
-			if local != "" {
-				base = local
-			}
-		}
-		if len([]rune(base)) > 32 {
-			base = string([]rune(base)[:32])
-		}
-		nickPtr = &base
-	}
-	row := entity.User{
-		ID:        uuid.New().String(),
-		Email:     emPtr,
-		Nickname:  nickPtr,
-		TierID:    r.freeTierID(ctx),
-		GoogleSub: gPtr,
-		AppleSub:  aPtr,
-		Status:    "active",
-	}
-	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
-		return nil, err
-	}
-	return userToModel(&row), nil
 }
 
 // UpdateProfile 按非 nil 指针更新字段；nickname / avatarURL / languageID（母语）为 "" 时写入 NULL。

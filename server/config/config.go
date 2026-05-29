@@ -62,10 +62,6 @@ type Config struct {
 	AppleEnvironment             string // sandbox | production
 	GooglePlayPackageName        string
 	GooglePlayServiceAccountJSON string // 服务账号 JSON 文件路径或内联 JSON
-	// GoogleOAuthClientIDs：校验 Google id_token 时允许的 OAuth Client ID（逗号分隔，可含 Android / iOS / Web）。
-	GoogleOAuthClientIDs []string
-	// AppleSignInClientIDs：校验 Apple identityToken 时允许的 aud（逗号分隔，一般为 App Bundle ID 与/或 Services ID）。
-	AppleSignInClientIDs []string
 }
 
 func Load() *Config {
@@ -120,11 +116,6 @@ func Load() *Config {
 	if gpPkg == "" {
 		gpPkg = "com.xlangai.android"
 	}
-	googleAuds := splitComma(os.Getenv("XLANGAI_GOOGLE_OAUTH_CLIENT_IDS"))
-	appleAuds := splitComma(os.Getenv("XLANGAI_APPLE_SIGN_IN_CLIENT_IDS"))
-	if len(appleAuds) == 0 && appleBundle != "" {
-		appleAuds = []string{appleBundle}
-	}
 	return &Config{
 		Port:                         port,
 		DBURL:                        dbURL,
@@ -146,8 +137,6 @@ func Load() *Config {
 		AppleEnvironment:             appleEnv,
 		GooglePlayPackageName:        gpPkg,
 		GooglePlayServiceAccountJSON: strings.TrimSpace(os.Getenv("XLANGAI_GOOGLE_PLAY_SERVICE_ACCOUNT_JSON")),
-		GoogleOAuthClientIDs:         googleAuds,
-		AppleSignInClientIDs:         appleAuds,
 	}
 }
 

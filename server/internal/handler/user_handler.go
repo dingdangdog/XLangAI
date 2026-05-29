@@ -19,7 +19,6 @@ import (
 	"xlangai/server/internal/loginotp"
 	"xlangai/server/internal/media"
 	"xlangai/server/internal/model"
-	"xlangai/server/internal/oauth"
 	"xlangai/server/internal/objectstore"
 	"xlangai/server/internal/repository"
 	"xlangai/server/internal/settings"
@@ -366,10 +365,10 @@ func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 		return
 	}
 	cleanup()
-	h.oauthSessionJSON(c, u)
+	h.authSessionJSON(c, u)
 }
 
-func (h *UserHandler) oauthSessionJSON(c *gin.Context, u *model.User) {
+func (h *UserHandler) authSessionJSON(c *gin.Context, u *model.User) {
 	role := u.Role
 	if role == "" {
 		role = authz.RoleUser
@@ -380,104 +379,6 @@ func (h *UserHandler) oauthSessionJSON(c *gin.Context, u *model.User) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token, "user": toUserResp(c.Request.Context(), h.langRepo, u)})
-}
-
-// LoginGoogle 使用 Google id_token 登录或注册（首次自动建号）。
-func (h *UserHandler) LoginGoogle(c *gin.Context) {
-	if !h.authEnabled(c, settings.AuthGoogleEnabled) {
-		return
-	}
-	if len(h.cfg.GoogleOAuthClientIDs) == 0 {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "google login not configured"})
-		return
-	}
-	var req struct {
-		IDToken string `json:"id_token" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	ctx := c.Request.Context()
-	sub, emailPtr, err := oauth.VerifyGoogleIDToken(ctx, req.IDToken, h.cfg.GoogleOAuthClientIDs)
-	if err != nil {
-		if h.cfg.VerboseLogs {
-			log.Printf("[auth] google id_token invalid: %v\n", err)
-		}
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid google token"})
-		return
-	}
-	u, err := h.repo.GetByGoogleSub(ctx, sub)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if !h.settings.Bool(ctx, settings.AuthGoogleRegisterEnabled) {
-				c.JSON(http.StatusForbidden, gin.H{"error": "registration disabled"})
-				return
-			}
-			u, err = h.repo.CreateOAuthUser(ctx, repository.CreateOAuthUserParams{
-				GoogleSub: &sub,
-				Email:     emailPtr,
-				Nickname:  nil,
-			})
-		}
-	}
-	if err != nil {
-		if h.cfg.VerboseLogs {
-			log.Printf("[auth] google login db: %v\n", err)
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "login failed"})
-		return
-	}
-	h.oauthSessionJSON(c, u)
-}
-
-// LoginApple 使用 Apple identityToken（JWT）登录或注册。
-func (h *UserHandler) LoginApple(c *gin.Context) {
-	if !h.authEnabled(c, settings.AuthAppleEnabled) {
-		return
-	}
-	if len(h.cfg.AppleSignInClientIDs) == 0 {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "apple login not configured"})
-		return
-	}
-	var req struct {
-		IdentityToken string `json:"identity_token" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	ctx := c.Request.Context()
-	sub, emailPtr, err := oauth.VerifyAppleIDToken(ctx, req.IdentityToken, h.cfg.AppleSignInClientIDs)
-	if err != nil {
-		if h.cfg.VerboseLogs {
-			log.Printf("[auth] apple identity_token invalid: %v\n", err)
-		}
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid apple token"})
-		return
-	}
-	u, err := h.repo.GetByAppleSub(ctx, sub)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			if !h.settings.Bool(ctx, settings.AuthAppleRegisterEnabled) {
-				c.JSON(http.StatusForbidden, gin.H{"error": "registration disabled"})
-				return
-			}
-			u, err = h.repo.CreateOAuthUser(ctx, repository.CreateOAuthUserParams{
-				AppleSub: &sub,
-				Email:    emailPtr,
-				Nickname: nil,
-			})
-		}
-	}
-	if err != nil {
-		if h.cfg.VerboseLogs {
-			log.Printf("[auth] apple login db: %v\n", err)
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "login failed"})
-		return
-	}
-	h.oauthSessionJSON(c, u)
 }
 
 func (h *UserHandler) Me(c *gin.Context) {
@@ -597,7 +498,7 @@ func (h *UserHandler) PatchMe(c *gin.Context) {
 	h.Me(c)
 }
 
-// ChangePassword 修改当前用户密码（需已设置密码；OAuth/短信注册用户无密码时不可用）。
+// ChangePassword 修改当前用户密码（需已设置密码；短信注册用户无密码时不可用）。
 func (h *UserHandler) ChangePassword(c *gin.Context) {
 	if !h.authEnabled(c, settings.AuthPasswordEnabled) {
 		return

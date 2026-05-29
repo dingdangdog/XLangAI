@@ -652,14 +652,6 @@
           "sms": {
             "enabled": "Allow SMS OTP sign-in",
             "register_enabled": "Allow SMS OTP registration"
-          },
-          "google": {
-            "enabled": "Show Google sign-in",
-            "register_enabled": "Auto-register on first Google sign-in"
-          },
-          "apple": {
-            "enabled": "Show Apple sign-in",
-            "register_enabled": "Auto-register on first Apple sign-in"
           }
         },
         "media": {
@@ -686,14 +678,6 @@
           "sms": {
             "enabled": "SMS login",
             "register_enabled": "SMS registration"
-          },
-          "google": {
-            "enabled": "Google login",
-            "register_enabled": "Google auto-register"
-          },
-          "apple": {
-            "enabled": "Apple login",
-            "register_enabled": "Apple auto-register"
           }
         },
         "media": {

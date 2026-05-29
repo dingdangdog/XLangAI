@@ -649,14 +649,6 @@
           "sms": {
             "enabled": "是否允许短信验证码登录",
             "register_enabled": "是否开放短信验证码注册"
-          },
-          "google": {
-            "enabled": "是否显示 Google 登录入口",
-            "register_enabled": "首次 Google 登录是否自动创建账号"
-          },
-          "apple": {
-            "enabled": "是否显示 Apple 登录入口",
-            "register_enabled": "首次 Apple 登录是否自动创建账号"
           }
         },
         "media": {
@@ -683,14 +675,6 @@
           "sms": {
             "enabled": "短信验证码登录",
             "register_enabled": "短信验证码注册"
-          },
-          "google": {
-            "enabled": "Google 登录",
-            "register_enabled": "Google 自动注册"
-          },
-          "apple": {
-            "enabled": "Apple 登录",
-            "register_enabled": "Apple 自动注册"
           }
         },
         "media": {

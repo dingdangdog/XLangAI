@@ -10,10 +10,6 @@ export const SYSTEM_SETTING_GROUPS = [
       "auth.password.register_enabled",
       "auth.sms.enabled",
       "auth.sms.register_enabled",
-      "auth.google.enabled",
-      "auth.google.register_enabled",
-      "auth.apple.enabled",
-      "auth.apple.register_enabled",
     ],
   },
   {
