@@ -25,6 +25,7 @@ export const LLM_OPENAI_COMPAT_STORED_PROTOCOLS = [
   "siliconflow",
   "nvidia_nim",
   "mistral",
+  "volcengine",
 ] as const;
 
 export type LlmOpenAiCompatStored = (typeof LLM_OPENAI_COMPAT_STORED_PROTOCOLS)[number];

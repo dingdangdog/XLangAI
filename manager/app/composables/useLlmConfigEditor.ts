@@ -84,7 +84,10 @@ export function useLlmConfigEditor() {
   const configSchema = computed(() => {
     const family = llmProtocolToFamily(form.storedProtocol);
     const flavor = form.storedProtocol === "azure_openai" ? "azure" : "generic";
-    return getConfigSchema("llm", family, { llmOpenAiFlavor: flavor });
+    return getConfigSchema("llm", family, {
+      llmOpenAiFlavor: flavor,
+      llmStoredProtocol: form.storedProtocol,
+    });
   });
 
   const setupStepNumber = computed(() => (setupPhase.value === "vendor" ? 1 : 2));

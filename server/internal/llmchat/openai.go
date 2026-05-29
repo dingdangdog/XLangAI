@@ -14,12 +14,23 @@ func chatOpenAI(ctx context.Context, in ServiceInput, systemPrompt string, messa
 	}
 	baseURL := in.BaseURL
 	if baseURL == "" {
-		baseURL = "https://api.openai.com"
+		if strings.EqualFold(strings.TrimSpace(in.Protocol), "volcengine") {
+			baseURL = "https://ark.cn-beijing.volces.com/api/v3"
+		} else {
+			baseURL = "https://api.openai.com"
+		}
 	}
 	client := ai.NewOpenAIClient(apiKey, in.ModelCode, baseURL)
 	msgs := make([]struct{ Role, Content string }, len(messages))
 	for i, m := range messages {
 		msgs[i] = struct{ Role, Content string }{Role: m.Role, Content: m.Content}
 	}
-	return client.Chat(ctx, systemPrompt, msgs)
+	opts := &ai.ChatOptions{
+		MaxTokens:           in.Config.MaxTokens,
+		MaxCompletionTokens: in.Config.MaxCompletionTokens,
+		Temperature:         in.Config.Temperature,
+		TopP:                in.Config.TopP,
+		ThinkingJSON:        in.Config.Thinking,
+	}
+	return client.ChatWithOptions(ctx, systemPrompt, msgs, opts)
 }

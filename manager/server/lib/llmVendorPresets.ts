@@ -149,6 +149,17 @@ export const LLM_VENDOR_PRESETS: LlmVendorPreset[] = [
     groupKey: "serverCatalog.group.global",
   },
   {
+    id: "volcengine",
+    storedProtocol: "volcengine",
+    kind: "openai_compat",
+    labelKey: "serverCatalog.llm.vendors.volcengine",
+    descriptionKey: "serverCatalog.llm.vendors.volcengineDesc",
+    baseUrl: "https://ark.cn-beijing.volces.com/api/v3",
+    defaultModel: "doubao-1-5-pro-32k-250115",
+    modelsApi: true,
+    groupKey: "serverCatalog.group.china",
+  },
+  {
     id: "claude",
     storedProtocol: "claude",
     kind: "claude",

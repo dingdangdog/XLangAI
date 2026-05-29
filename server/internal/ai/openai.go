@@ -67,14 +67,21 @@ type chatResponse struct {
 }
 
 func (c *Client) Chat(ctx context.Context, systemPrompt string, messages []struct{ Role, Content string }) (string, *ChatUsage, error) {
+	return c.ChatWithOptions(ctx, systemPrompt, messages, nil)
+}
+
+func (c *Client) ChatWithOptions(ctx context.Context, systemPrompt string, messages []struct{ Role, Content string }, opts *ChatOptions) (string, *ChatUsage, error) {
 	msgs := make([]chatMessage, 0, len(messages)+1)
 	msgs = append(msgs, chatMessage{Role: "system", Content: systemPrompt})
 	for _, m := range messages {
 		msgs = append(msgs, chatMessage{Role: m.Role, Content: m.Content})
 	}
 
-	body, _ := json.Marshal(chatRequest{Model: c.model, Messages: msgs})
-	url := strings.TrimRight(c.baseURL, "/") + "/v1/chat/completions"
+	body, err := BuildChatCompletionBody(c.model, msgs, opts, c.baseURL)
+	if err != nil {
+		return "", nil, err
+	}
+	url := OpenAIChatCompletionsURL(c.baseURL)
 	req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewReader(body))
 	if err != nil {
 		return "", nil, err

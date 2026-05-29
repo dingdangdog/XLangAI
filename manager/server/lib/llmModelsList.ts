@@ -8,7 +8,20 @@ function normalizeOpenAiRoot(baseUrl: string | null | undefined): string {
   return root.endsWith("/v1") ? root.slice(0, -3) : root;
 }
 
-/** OpenAI 兼容 GET /v1/models */
+function isVolcengineArkBaseUrl(baseUrl: string): boolean {
+  const u = baseUrl.trim().toLowerCase();
+  return u.includes("volces.com") || u.includes("volcengine.com");
+}
+
+function openAiModelsUrl(baseUrl: string | null | undefined): string {
+  const root = normalizeOpenAiRoot(baseUrl);
+  if (isVolcengineArkBaseUrl(root)) {
+    return `${root}/models`;
+  }
+  return `${root}/v1/models`;
+}
+
+/** OpenAI 兼容 GET /v1/models（方舟为 /api/v3/models） */
 export async function listOpenAiCompatibleModels(args: {
   baseUrl: string | null;
   apiKey: string | null;
@@ -17,9 +30,9 @@ export async function listOpenAiCompatibleModels(args: {
   if (!key) {
     return { models: [], error: "缺少 API Key" };
   }
-  const root = normalizeOpenAiRoot(args.baseUrl);
+  const url = openAiModelsUrl(args.baseUrl);
   try {
-    const res = await fetch(`${root}/v1/models`, {
+    const res = await fetch(url, {
       headers: { Authorization: `Bearer ${key}` },
     });
     const text = await res.text();

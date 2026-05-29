@@ -139,10 +139,41 @@ const LLM_AZURE: ConfigFieldSchema[] = [
   },
 ];
 
+const LLM_VOLCENGINE: ConfigFieldSchema[] = [
+  {
+    key: "max_completion_tokens",
+    type: "number",
+    labelKey: "serviceConfig.schema.maxCompletionTokens",
+    hintKey: "serviceConfig.schema.maxCompletionTokensHint",
+    default: 4096,
+    min: 16,
+    max: 32000,
+  },
+  {
+    key: "temperature",
+    type: "number",
+    labelKey: "serviceConfig.schema.temperature",
+    default: 0.7,
+    min: 0,
+    max: 2,
+    step: 0.1,
+  },
+  {
+    key: "top_p",
+    type: "number",
+    labelKey: "serviceConfig.schema.topP",
+    default: 0.95,
+    min: 0,
+    max: 1,
+    step: 0.05,
+  },
+];
+
 export const LLM_CONFIG_SCHEMAS: Record<string, ConfigFieldSchema[]> = {
   claude: LLM_CLAUDE,
   gemini: LLM_GEMINI,
   azure_openai: LLM_AZURE,
+  volcengine: LLM_VOLCENGINE,
 };
 
 export const TTS_CONFIG_SCHEMAS: Record<string, ConfigFieldSchema[]> = {
@@ -289,9 +320,13 @@ export const SMS_CONFIG_SCHEMAS: Record<string, ConfigFieldSchema[]> = {
 export function getConfigSchema(
   kind: "llm" | "tts" | "sms",
   key: string,
-  options?: { llmOpenAiFlavor?: "generic" | "azure" },
+  options?: { llmOpenAiFlavor?: "generic" | "azure"; llmStoredProtocol?: string },
 ): ConfigFieldSchema[] {
   if (kind === "llm") {
+    const stored = options?.llmStoredProtocol?.trim().toLowerCase();
+    if (stored && LLM_CONFIG_SCHEMAS[stored]) {
+      return LLM_CONFIG_SCHEMAS[stored] ?? [];
+    }
     if (key === "openai" && options?.llmOpenAiFlavor === "azure") {
       return LLM_CONFIG_SCHEMAS.azure_openai ?? [];
     }

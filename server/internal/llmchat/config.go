@@ -7,10 +7,12 @@ import (
 
 // ProviderConfig 从 sys_llm_service_configs.config JSON 解析。
 type ProviderConfig struct {
-	AnthropicVersion string  `json:"anthropic_version"`
-	MaxTokens        int     `json:"max_tokens"`
-	Temperature      float64 `json:"temperature"`
-	TopP             float64 `json:"top_p"`
+	AnthropicVersion    string          `json:"anthropic_version"`
+	MaxTokens           int             `json:"max_tokens"`
+	MaxCompletionTokens int             `json:"max_completion_tokens"`
+	Temperature         float64         `json:"temperature"`
+	TopP                float64         `json:"top_p"`
+	Thinking            json.RawMessage `json:"thinking"`
 }
 
 // ServiceInput 对话 Chat 路由参数。
@@ -36,7 +38,7 @@ func ParseProviderConfig(raw string) ProviderConfig {
 func IsOpenAICompatible(protocol string) bool {
 	switch strings.TrimSpace(strings.ToLower(protocol)) {
 	case "", "openai", "azure_openai", "ollama", "deepseek", "openrouter", "groq",
-		"together", "zhipu", "moonshot", "siliconflow", "nvidia_nim", "mistral":
+		"together", "zhipu", "moonshot", "siliconflow", "nvidia_nim", "mistral", "volcengine":
 		return true
 	default:
 		return false
