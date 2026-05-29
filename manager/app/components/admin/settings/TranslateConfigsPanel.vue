@@ -27,6 +27,7 @@ const {
   apiKeyLabel,
   apiSecretLabel,
   needsApiSecret,
+  needsBaseUrl,
   configHints,
   openCreate,
   openEdit,
@@ -142,11 +143,28 @@ const theme = (id: string) => vendorTheme(id);
 
         <template v-else>
           <AgentField
-            v-if="form.protocol === 'azure_translator' || form.protocol === 'deepl'"
+            v-if="needsBaseUrl(form.protocol)"
             :label="t('fields.baseUrl')"
-            :hint="t('pages.translateConfigs.customEndpointHint')"
+            :hint="
+              form.protocol === 'libretranslate'
+                ? t('pages.translateConfigs.libreBaseUrlHint')
+                : t('pages.translateConfigs.customEndpointHint')
+            "
+            :required="form.protocol === 'libretranslate'"
           >
-            <AdminInput v-model="form.baseUrl" :placeholder="t('pages.llmConfigs.optionalPlaceholder')" />
+            <AdminInput
+              v-model="form.baseUrl"
+              :placeholder="
+                form.protocol === 'libretranslate' ? 'http://localhost:5000' : t('pages.llmConfigs.optionalPlaceholder')
+              "
+            />
+          </AgentField>
+          <AgentField
+            v-if="form.protocol === 'ibm_watson_translate'"
+            :label="`${t('fields.modelCode')} (${t('common.optional')})`"
+            :hint="t('pages.translateConfigs.ibmModelHint')"
+          >
+            <AdminInput v-model="form.modelCode" placeholder="en-zh" />
           </AgentField>
           <AgentField :label="apiKeyLabel(form.protocol)">
             <AdminInput v-model="form.apiKey" type="password" autocomplete="off" />

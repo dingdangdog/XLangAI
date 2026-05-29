@@ -41,6 +41,20 @@ func Translate(ctx context.Context, in ServiceInput, text, targetLocale string) 
 		return translateTencent(ctx, in, text, targetLocale)
 	case "aliyun_translate":
 		return translateAliyun(ctx, in, text, targetLocale)
+	case "aws_translate":
+		return translateAWS(ctx, in, text, targetLocale)
+	case "youdao_translate":
+		return translateYoudao(ctx, in, text, targetLocale)
+	case "papago_translate":
+		return translatePapago(ctx, in, text, targetLocale)
+	case "ibm_watson_translate":
+		return translateIBM(ctx, in, text, targetLocale)
+	case "libretranslate":
+		return translateLibre(ctx, in, text, targetLocale)
+	case "xunfei_translate":
+		return translateXunfei(ctx, in, text, targetLocale)
+	case "volcengine_translate":
+		return translateVolcengine(ctx, in, text, targetLocale)
 	default:
 		return "", fmt.Errorf("%w: %s", ErrUnsupportedProtocol, protocol)
 	}

@@ -185,6 +185,13 @@ export const TRANSLATE_SUPPORTED_PROTOCOLS = [
   "baidu_translate",
   "tencent_translate",
   "aliyun_translate",
+  "aws_translate",
+  "youdao_translate",
+  "papago_translate",
+  "ibm_watson_translate",
+  "libretranslate",
+  "xunfei_translate",
+  "volcengine_translate",
 ] as const;
 
 export function isSupportedTranslateProtocol(protocol: string): boolean {

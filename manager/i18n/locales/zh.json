@@ -827,10 +827,12 @@
       "modelOverride": "可选覆盖",
       "modelOverrideHint": "留空则使用关联 LLM 的 model_code",
       "customEndpointHint": "可选；厂商自定义端点",
+      "libreBaseUrlHint": "LibreTranslate 服务地址，如 http://localhost:5000",
+      "ibmModelHint": "IBM 模型 ID，如 en-zh；留空则按目标语言自动推断",
       "statusActive": "active（启用，将自动停用其它配置）",
       "subscriptionKey": "订阅密钥",
       "secretKey": "密钥（Secret Key）",
-      "protocolAlertDetails": "openai（LLM 翻译）：可关联「LLM 服务配置」中已启用的 OpenAI 兼容项，复用 Base URL / API Key / 模型；也可单独自定义。\nazure_translator：config 中配置 region；订阅密钥填在 API Key。\ndeepl：Auth Key；use_free_api 可选。\ngoogle_translate：Google API Key。\nbaidu_translate：App ID + 密钥（双字段）。\ntencent_translate：SecretId + SecretKey；region 写在扩展 JSON。\naliyun_translate：AccessKey ID + AccessKey Secret；region 写在扩展 JSON。"
+      "protocolAlertDetails": "openai（LLM 翻译）：可关联「LLM 服务配置」中已启用的 OpenAI 兼容项，复用 Base URL / API Key / 模型；也可单独自定义。\nazure_translator：config 中配置 region；订阅密钥填在 API Key。\ndeepl：Auth Key；use_free_api 可选。\ngoogle_translate：Google API Key。\naws_translate：Access Key ID + Secret Access Key；region 写在扩展 JSON。\nibm_watson_translate：IBM Cloud API Key；region / api_version 写在扩展 JSON；可选 model_code 作为 model_id。\npapago_translate：NCP Client ID + Client Secret。\nlibretranslate：填写自托管 Base URL；API Key 可选。\nbaidu_translate：App ID + 密钥（双字段）。\nyoudao_translate：App Key + App Secret。\ntencent_translate：SecretId + SecretKey；region 写在扩展 JSON。\naliyun_translate：AccessKey ID + AccessKey Secret；region 写在扩展 JSON。\nxunfei_translate：config.app_id + API Key + API Secret。\nvolcengine_translate：Access Key ID + Secret Access Key；region 写在扩展 JSON。"
     },
     "objectStorage": {
       "title": "对象存储 / 图床",
@@ -909,9 +911,16 @@
       "azure": "Azure 翻译",
       "deepl": "DeepL",
       "google": "Google Cloud Translation",
+      "aws": "AWS Translate",
+      "ibm": "IBM Watson 语言翻译",
+      "papago": "Naver Papago",
+      "libre": "LibreTranslate（自托管）",
       "baidu": "百度翻译",
+      "youdao": "有道翻译",
       "tencent": "腾讯云翻译",
-      "aliyun": "阿里云机器翻译"
+      "aliyun": "阿里云机器翻译",
+      "xunfei": "讯飞机器翻译",
+      "volcengine": "火山引擎机器翻译"
     }
   },
   "serverCatalog": {

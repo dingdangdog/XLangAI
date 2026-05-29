@@ -5,9 +5,16 @@ const CONFIG_HINTS: Record<string, string> = {
   azure_translator: '{"region":"eastasia","api_version":"3.0"}',
   deepl: '{"use_free_api":true}',
   google_translate: "{}",
+  aws_translate: '{"region":"us-east-1"}',
+  ibm_watson_translate: '{"region":"us-south","api_version":"2018-05-01"}',
+  papago_translate: "{}",
+  libretranslate: "{}",
   baidu_translate: "{}",
+  youdao_translate: "{}",
   tencent_translate: '{"region":"ap-guangzhou"}',
   aliyun_translate: '{"region":"cn-hangzhou"}',
+  xunfei_translate: '{"app_id":"your_app_id"}',
+  volcengine_translate: '{"region":"cn-north-1"}',
 };
 
 const OPENAI_COMPAT = new Set([
@@ -30,7 +37,20 @@ function isOpenAICompatible(protocol: string): boolean {
 }
 
 function needsApiSecret(protocol: string): boolean {
-  return ["tencent_translate", "baidu_translate", "aliyun_translate"].includes(protocol);
+  return [
+    "tencent_translate",
+    "baidu_translate",
+    "aliyun_translate",
+    "aws_translate",
+    "youdao_translate",
+    "papago_translate",
+    "xunfei_translate",
+    "volcengine_translate",
+  ].includes(protocol);
+}
+
+function needsBaseUrl(protocol: string): boolean {
+  return ["azure_translator", "deepl", "libretranslate", "ibm_watson_translate"].includes(protocol);
 }
 
 export function useTranslateConfigEditor() {
@@ -89,14 +109,26 @@ export function useTranslateConfigEditor() {
         return "SecretId";
       case "baidu_translate":
         return "App ID";
+      case "youdao_translate":
+        return "App Key";
       case "aliyun_translate":
+      case "aws_translate":
+      case "volcengine_translate":
         return hub.t("fields.accessKeyId");
+      case "papago_translate":
+        return "Client ID";
       case "google_translate":
         return hub.t("fields.apiKey");
       case "deepl":
         return "Auth Key";
       case "azure_translator":
         return hub.t("pages.translateConfigs.subscriptionKey");
+      case "ibm_watson_translate":
+        return "IBM API Key";
+      case "libretranslate":
+        return `${hub.t("fields.apiKey")} (${hub.t("common.optional")})`;
+      case "xunfei_translate":
+        return "API Key";
       default:
         return hub.t("fields.apiKey");
     }
@@ -108,8 +140,16 @@ export function useTranslateConfigEditor() {
         return "SecretKey";
       case "baidu_translate":
         return hub.t("pages.translateConfigs.secretKey");
+      case "youdao_translate":
+        return "App Secret";
       case "aliyun_translate":
+      case "aws_translate":
+      case "volcengine_translate":
         return hub.t("fields.secretAccessKey");
+      case "papago_translate":
+        return "Client Secret";
+      case "xunfei_translate":
+        return "API Secret";
       default:
         return "API Secret";
     }
@@ -145,6 +185,7 @@ export function useTranslateConfigEditor() {
     }
     if (hub.editorMode.value === "create") {
       form.config = CONFIG_HINTS[p.storedValue] ?? "{}";
+      if (p.baseUrl) form.baseUrl = p.baseUrl;
     }
     if (p.storedValue === "openai") {
       if (!useLlmLink.value && (hub.editorMode.value === "create" || !form.modelCode.trim())) {
@@ -362,6 +403,7 @@ export function useTranslateConfigEditor() {
     apiKeyLabel,
     apiSecretLabel,
     needsApiSecret,
+    needsBaseUrl,
     modelRequired,
     openCreate,
     openEdit,

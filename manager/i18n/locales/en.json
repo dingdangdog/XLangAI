@@ -830,10 +830,12 @@
       "modelOverride": "Optional override",
       "modelOverrideHint": "Uses linked LLM model_code if empty",
       "customEndpointHint": "Optional vendor endpoint",
+      "libreBaseUrlHint": "LibreTranslate service URL, e.g. http://localhost:5000",
+      "ibmModelHint": "IBM model_id such as en-zh; auto-inferred from target locale if empty",
       "statusActive": "active (disables others)",
       "subscriptionKey": "Subscription key",
       "secretKey": "Secret key",
-      "protocolAlertDetails": "openai (LLM translate): link an active OpenAI-compatible LLM config to reuse Base URL / API Key / model, or customize separately.\nazure_translator: set region in config; subscription key in API Key.\ndeepl: Auth Key; optional use_free_api.\ngoogle_translate: Google API Key.\nbaidu_translate: App ID + secret (two fields).\ntencent_translate: SecretId + SecretKey; region in JSON.\naliyun_translate: AccessKey ID + Secret; region in JSON."
+      "protocolAlertDetails": "openai (LLM translate): link an active OpenAI-compatible LLM config to reuse Base URL / API Key / model, or customize separately.\nazure_translator: set region in config; subscription key in API Key.\ndeepl: Auth Key; optional use_free_api.\ngoogle_translate: Google API Key.\naws_translate: Access Key ID + Secret Access Key; region in JSON.\nibm_watson_translate: IBM Cloud API Key; region / api_version in JSON; optional model_code as model_id.\npapago_translate: NCP Client ID + Client Secret.\nlibretranslate: self-hosted Base URL; API Key optional.\nbaidu_translate: App ID + secret (two fields).\nyoudao_translate: App Key + App Secret.\ntencent_translate: SecretId + SecretKey; region in JSON.\naliyun_translate: AccessKey ID + Secret; region in JSON.\nxunfei_translate: config.app_id + API Key + API Secret.\nvolcengine_translate: Access Key ID + Secret Access Key; region in JSON."
     },
     "objectStorage": {
       "title": "Object storage",
@@ -912,9 +914,16 @@
       "azure": "Azure Translator",
       "deepl": "DeepL",
       "google": "Google Cloud Translation",
+      "aws": "AWS Translate",
+      "ibm": "IBM Watson Language Translator",
+      "papago": "Naver Papago",
+      "libre": "LibreTranslate (self-hosted)",
       "baidu": "Baidu Translate",
+      "youdao": "Youdao Translate",
       "tencent": "Tencent Cloud TMT",
-      "aliyun": "Aliyun Machine Translation"
+      "aliyun": "Aliyun Machine Translation",
+      "xunfei": "iFlytek Machine Translation",
+      "volcengine": "Volcengine Machine Translation"
     }
   },
   "serverCatalog": {

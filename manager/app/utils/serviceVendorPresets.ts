@@ -62,9 +62,16 @@ export const TRANSLATE_PRESETS: ServicePreset[] = [
   { id: "azure_translator", storedValue: "azure_translator", labelKey: "agentHub.translate.azure", groupKey: G.global },
   { id: "deepl", storedValue: "deepl", labelKey: "agentHub.translate.deepl", groupKey: G.global },
   { id: "google_translate", storedValue: "google_translate", labelKey: "agentHub.translate.google", groupKey: G.global },
+  { id: "aws_translate", storedValue: "aws_translate", labelKey: "agentHub.translate.aws", groupKey: G.global, region: "us-east-1" },
+  { id: "ibm_watson_translate", storedValue: "ibm_watson_translate", labelKey: "agentHub.translate.ibm", groupKey: G.global, region: "us-south" },
+  { id: "papago_translate", storedValue: "papago_translate", labelKey: "agentHub.translate.papago", groupKey: G.global },
+  { id: "libretranslate", storedValue: "libretranslate", labelKey: "agentHub.translate.libre", groupKey: G.global, baseUrl: "http://localhost:5000" },
   { id: "baidu_translate", storedValue: "baidu_translate", labelKey: "agentHub.translate.baidu", groupKey: G.china },
-  { id: "tencent_translate", storedValue: "tencent_translate", labelKey: "agentHub.translate.tencent", groupKey: G.china },
-  { id: "aliyun_translate", storedValue: "aliyun_translate", labelKey: "agentHub.translate.aliyun", groupKey: G.china },
+  { id: "youdao_translate", storedValue: "youdao_translate", labelKey: "agentHub.translate.youdao", groupKey: G.china },
+  { id: "tencent_translate", storedValue: "tencent_translate", labelKey: "agentHub.translate.tencent", groupKey: G.china, region: "ap-guangzhou" },
+  { id: "aliyun_translate", storedValue: "aliyun_translate", labelKey: "agentHub.translate.aliyun", groupKey: G.china, region: "cn-hangzhou" },
+  { id: "xunfei_translate", storedValue: "xunfei_translate", labelKey: "agentHub.translate.xunfei", groupKey: G.china },
+  { id: "volcengine_translate", storedValue: "volcengine_translate", labelKey: "agentHub.translate.volcengine", groupKey: G.china, region: "cn-north-1" },
 ];
 
 export const SMS_PRESETS: ServicePreset[] = [
