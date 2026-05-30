@@ -71,6 +71,44 @@ func (r *SystemRepo) GetDefaults(ctx context.Context, langID string) (*Defaults,
 	return d, nil
 }
 
+// ResolvePromptIDForScenario 按场景 code 解析 prompt 模板 ID；空或 free 时回退 lang_practice。
+func (r *SystemRepo) ResolvePromptIDForScenario(ctx context.Context, scenarioCode string) (string, error) {
+	code := strings.TrimSpace(scenarioCode)
+	if code == "" || code == "free" {
+		var prompt entity.PromptTemplate
+		if err := r.db.WithContext(ctx).
+			Where("code = ? AND status = ?", "lang_practice", "active").
+			First(&prompt).Error; err != nil {
+			return "", err
+		}
+		return prompt.ID, nil
+	}
+	var scenario entity.PracticeScenario
+	if err := r.db.WithContext(ctx).
+		Where("code = ? AND status = ?", code, "active").
+		First(&scenario).Error; err != nil {
+		return "", err
+	}
+	if scenario.PromptTemplateID != nil {
+		pid := strings.TrimSpace(*scenario.PromptTemplateID)
+		if pid != "" {
+			var pt entity.PromptTemplate
+			if err := r.db.WithContext(ctx).
+				Where("id = ? AND status = ?", pid, "active").
+				First(&pt).Error; err == nil {
+				return pt.ID, nil
+			}
+		}
+	}
+	var fallback entity.PromptTemplate
+	if err := r.db.WithContext(ctx).
+		Where("code = ? AND status = ?", "scenario_"+code, "active").
+		First(&fallback).Error; err != nil {
+		return "", err
+	}
+	return fallback.ID, nil
+}
+
 // formatVoiceRolePromptForInjection 将角色专属提示词格式化为可注入系统提示的段落；空内容返回空字符串。
 func formatVoiceRolePromptForInjection(raw string) string {
 	s := strings.TrimSpace(raw)
@@ -80,8 +118,8 @@ func formatVoiceRolePromptForInjection(raw string) string {
 	return "\n\n[Character-specific identity & style]\n" + s
 }
 
-// ResolveSystemPromptForConversation 解析会话系统提示：优先会话 prompt_id 对应模板，否则使用语言默认（lang_practice）；{{target_lang}} 替换为语言名称；{{voice_role_name}} 替换为当前会话 TTS 声线展示名（无则语言默认声线名，再否则「语言教练」）；{{voice_role_prompt}} 替换为当前语音角色的 role_prompt（无则空）。
-func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, langID string, promptID *string, voiceRoleID *string) (string, error) {
+// ResolveSystemPromptForConversation 解析会话系统提示：优先会话 prompt_id 对应模板，否则使用语言默认（lang_practice）；{{target_lang}}、{{voice_role_name}}、{{voice_role_prompt}}、{{scenario_name}} 替换。
+func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, langID string, promptID *string, voiceRoleID *string, scenarioCode *string) (string, error) {
 	def, err := r.GetDefaults(ctx, langID)
 	if err != nil {
 		return "", err
@@ -98,6 +136,22 @@ func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, lan
 				First(&custom).Error
 			if err == nil && strings.TrimSpace(custom.Content) != "" {
 				tpl = custom.Content
+			}
+		}
+	}
+
+	scenarioName := "自由对话"
+	if scenarioCode != nil {
+		sc := strings.TrimSpace(*scenarioCode)
+		if sc != "" && sc != "free" {
+			var scenario entity.PracticeScenario
+			if err := r.db.WithContext(ctx).
+				Where("code = ? AND status = ?", sc, "active").
+				First(&scenario).Error; err == nil {
+				n := strings.TrimSpace(scenario.Name)
+				if n != "" {
+					scenarioName = n
+				}
 			}
 		}
 	}
@@ -133,5 +187,6 @@ func (r *SystemRepo) ResolveSystemPromptForConversation(ctx context.Context, lan
 	out := strings.ReplaceAll(tpl, "{{target_lang}}", langName)
 	out = strings.ReplaceAll(out, "{{voice_role_name}}", voiceDisplay)
 	out = strings.ReplaceAll(out, "{{voice_role_prompt}}", voiceRolePrompt)
+	out = strings.ReplaceAll(out, "{{scenario_name}}", scenarioName)
 	return appendPromptFactualContext(out), nil
 }

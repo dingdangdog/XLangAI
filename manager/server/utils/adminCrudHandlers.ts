@@ -113,6 +113,9 @@ export async function adminListHandler(event: H3Event, resource: ResourceSlug) {
   if (resource === "conversations" && q.userId) {
     where.userId = String(q.userId);
   }
+  if (resource === "conversations" && q.scenarioCode) {
+    where.scenarioCode = String(q.scenarioCode);
+  }
   if (resource === "user-usage" && q.userId) {
     where.userId = String(q.userId);
   }

@@ -42,16 +42,17 @@ func convToModel(c *entity.Conversation) *model.Conversation {
 		title = strings.TrimSpace(*c.Title)
 	}
 	return &model.Conversation{
-		ID:          c.ID,
-		UserID:      c.UserID,
-		LanguageID:  c.LanguageID,
-		VoiceRoleID: c.VoiceRoleID,
-		LLMConfigID: c.LlmConfigID,
-		PromptID:    c.PromptID,
-		Title:       title,
-		Status:      c.Status,
-		CreatedAt:   c.CreatedAt,
-		UpdatedAt:   c.UpdatedAt,
+		ID:           c.ID,
+		UserID:       c.UserID,
+		LanguageID:   c.LanguageID,
+		VoiceRoleID:  c.VoiceRoleID,
+		LLMConfigID:  c.LlmConfigID,
+		PromptID:     c.PromptID,
+		ScenarioCode: strVal(c.ScenarioCode),
+		Title:        title,
+		Status:       c.Status,
+		CreatedAt:    c.CreatedAt,
+		UpdatedAt:    c.UpdatedAt,
 	}
 }
 

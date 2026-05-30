@@ -24,11 +24,12 @@ func (r *ConvRepo) notDeleted() *gorm.DB {
 	return r.db.Where("deleted_at IS NULL")
 }
 
-func (r *ConvRepo) Create(ctx context.Context, userID, langID, voiceRoleID, llmConfigID, promptID, title string) (*model.Conversation, error) {
+func (r *ConvRepo) Create(ctx context.Context, userID, langID, voiceRoleID, llmConfigID, promptID, scenarioCode, title string) (*model.Conversation, error) {
 	t := strings.TrimSpace(title)
 	if t == "" {
 		t = "New Chat"
 	}
+	sc := strings.TrimSpace(scenarioCode)
 	row := entity.Conversation{
 		ID:          uuid.New().String(),
 		UserID:      userID,
@@ -36,8 +37,14 @@ func (r *ConvRepo) Create(ctx context.Context, userID, langID, voiceRoleID, llmC
 		VoiceRoleID: strPtr(voiceRoleID),
 		LlmConfigID: strPtr(llmConfigID),
 		PromptID:    strPtr(promptID),
-		Title:       &t,
-		Status:      "active",
+		ScenarioCode: func() *string {
+			if sc == "" {
+				return nil
+			}
+			return &sc
+		}(),
+		Title:  &t,
+		Status: "active",
 	}
 	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
 		return nil, err

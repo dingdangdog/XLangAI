@@ -8,12 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler, captchaH *handler.CaptchaHandler) *gin.Engine {
+func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, sch *handler.ScenarioHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler, captchaH *handler.CaptchaHandler) *gin.Engine {
 	r := gin.Default()
 	r.Use(handler.HTTPErrorLogMiddleware())
 
 	// Public
 	r.GET("/api/v1/languages", lh.List)
+	r.GET("/api/v1/scenarios", sch.List)
 	r.GET("/api/v1/public/settings", sth.PublicSettings)
 	r.GET("/api/v1/membership/tiers", mh.ListTiers)
 	r.GET("/api/v1/billing/catalog", bh.Catalog)

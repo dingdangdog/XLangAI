@@ -14,12 +14,14 @@ const list = ref<Record<string, unknown>[]>([]);
 const loading = ref(false);
 const showDeleted = ref(false);
 const filterUserId = ref("");
+const filterScenarioCode = ref("");
 
 const userOptions = ref<Opt[]>([]);
 const langOptions = ref<Opt[]>([]);
 const voiceOptions = ref<Opt[]>([]);
 const aiOptions = ref<Opt[]>([]);
 const promptOptions = ref<Opt[]>([]);
+const scenarioOptions = ref<Opt[]>([]);
 const optionsLoading = ref(false);
 
 function buildUserLabel(r: Record<string, unknown>): string | null {
@@ -59,10 +61,18 @@ function voiceRoleDisplayLabel(id: unknown): string {
   return refDisplayLabel(voiceLabelById.value, id, "pages.conversations.unknownVoiceRole");
 }
 
+function scenarioDisplayLabel(code: unknown): string {
+  const key = String(code ?? "").trim();
+  if (!key) return t("common.emDash");
+  return scenarioLabelById.value.get(key) ?? key;
+}
+
+const scenarioLabelById = computed(() => new Map(scenarioOptions.value.map((o) => [o.id, o.label])));
+
 async function loadRefs() {
   optionsLoading.value = true;
   try {
-    const [ur, lr, vr, ar, pr] = await Promise.all([
+    const [ur, lr, vr, ar, pr, sr] = await Promise.all([
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/users", {
         query: { page: 1, pageSize: 500, includeDeleted: 1 },
       }),
@@ -76,6 +86,9 @@ async function loadRefs() {
         query: { page: 1, pageSize: 200 },
       }),
       $fetch<{ items: Record<string, unknown>[] }>("/api/admin/prompt-templates", {
+        query: { page: 1, pageSize: 200 },
+      }),
+      $fetch<{ items: Record<string, unknown>[] }>("/api/admin/practice-scenarios", {
         query: { page: 1, pageSize: 200 },
       }),
     ]);
@@ -99,6 +112,10 @@ async function loadRefs() {
       id: String(r.id),
       label: `${r.code} · ${r.name}`,
     }));
+    scenarioOptions.value = sr.items.map((r) => ({
+      id: String(r.code),
+      label: String(r.name ?? r.code),
+    }));
   } catch (e) {
     toast.error(t("toast.loadRefsFailed"));
     console.error(e);
@@ -118,6 +135,7 @@ async function load() {
     };
     if (showDeleted.value) q.includeDeleted = 1;
     if (filterUserId.value.trim()) q.userId = filterUserId.value.trim();
+    if (filterScenarioCode.value.trim()) q.scenarioCode = filterScenarioCode.value.trim();
     const res = await api.list(q);
     list.value = res.items;
     total.value = res.total;
@@ -129,7 +147,7 @@ async function load() {
   }
 }
 
-watch([page, pageSize, showDeleted, filterUserId], () => void load(), { immediate: true });
+watch([page, pageSize, showDeleted, filterUserId, filterScenarioCode], () => void load(), { immediate: true });
 
 const dialogVisible = ref(false);
 const dialogMode = ref<"create" | "edit">("create");
@@ -142,6 +160,7 @@ const form = reactive({
   voiceRoleId: "",
   llmConfigId: "",
   promptId: "",
+  scenarioCode: "free",
   title: "",
   status: "active",
   remark: "",
@@ -154,6 +173,7 @@ function resetForm() {
   form.voiceRoleId = "";
   form.llmConfigId = "";
   form.promptId = "";
+  form.scenarioCode = "free";
   form.title = t("pages.conversations.defaultTitle");
   form.status = "active";
   form.remark = "";
@@ -174,6 +194,7 @@ function openEdit(row: Record<string, unknown>) {
   form.voiceRoleId = String(row.voiceRoleId ?? "");
   form.llmConfigId = String(row.llmConfigId ?? "");
   form.promptId = String(row.promptId ?? "");
+  form.scenarioCode = String(row.scenarioCode ?? "free");
   form.title = String(row.title ?? t("pages.conversations.defaultTitle"));
   form.status = String(row.status ?? "active");
   form.remark = String(row.remark ?? "");
@@ -196,6 +217,7 @@ async function submit() {
     voiceRoleId: form.voiceRoleId.trim() || null,
     llmConfigId: form.llmConfigId.trim() || null,
     promptId: form.promptId.trim() || null,
+    scenarioCode: form.scenarioCode.trim() || "free",
     title: form.title.trim() || t("pages.conversations.defaultTitle"),
     status: form.status,
     remark: form.remark.trim() || null,
@@ -255,6 +277,11 @@ const userFilterOptions = computed(() => [
 const langSelectOptions = computed(() => langOptions.value.map((l) => ({ value: l.id, label: l.label })));
 const voiceSelectOptions = computed(() => optionalSelect(voiceOptions.value));
 const aiSelectOptions = computed(() => optionalSelect(aiOptions.value));
+const scenarioFilterOptions = computed(() => [
+  { value: "", label: t("pages.conversations.filterAllScenarios") },
+  ...scenarioOptions.value.map((o) => ({ value: o.id, label: o.label })),
+]);
+const scenarioSelectOptions = computed(() => scenarioOptions.value.map((o) => ({ value: o.id, label: o.label })));
 const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
 </script>
 
@@ -270,6 +297,9 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
           <div class="w-56">
             <AdminSelect v-model="filterUserId" :options="userFilterOptions" />
           </div>
+          <div class="w-44">
+            <AdminSelect v-model="filterScenarioCode" :options="scenarioFilterOptions" />
+          </div>
           <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
         </template>
       </AdminPageHeader>
@@ -280,6 +310,7 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
         <template #head>
           <AdminTh>{{ $t("fields.title") }}</AdminTh>
           <AdminTh>{{ $t("nav.items.users") }}</AdminTh>
+          <AdminTh>{{ $t("pages.practiceScenarios.title") }}</AdminTh>
           <AdminTh>{{ $t("fields.language") }}</AdminTh>
           <AdminTh>{{ $t("fields.voiceRole") }}</AdminTh>
           <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
@@ -296,6 +327,11 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
           <AdminTd>
             <AdminCellText :title="userDisplayLabel(row.userId)">
               {{ userDisplayLabel(row.userId) }}
+            </AdminCellText>
+          </AdminTd>
+          <AdminTd>
+            <AdminCellText :title="scenarioDisplayLabel(row.scenarioCode)">
+              {{ scenarioDisplayLabel(row.scenarioCode) }}
             </AdminCellText>
           </AdminTd>
           <AdminTd>
@@ -349,6 +385,13 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
             v-model="form.languageId"
             :options="langSelectOptions"
             :placeholder="$t('pages.conversations.selectLanguage')"
+          />
+        </AdminFormField>
+        <AdminFormField :label="$t('pages.practiceScenarios.title')" required>
+          <AdminSelect
+            v-model="form.scenarioCode"
+            :options="scenarioSelectOptions"
+            :placeholder="$t('pages.conversations.selectScenario')"
           />
         </AdminFormField>
         <AdminFormField :label="$t('fields.voiceRole')">

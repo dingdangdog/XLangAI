@@ -223,7 +223,7 @@ const SEED_MEMBERSHIP_TIERS = [
   },
 ] as const;
 
-/** Language-practice system prompt; Go replaces {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}} */
+/** Language-practice system prompt; Go replaces {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}}, {{scenario_name}} */
 const LANG_PRACTICE_PROMPT_CONTENT = `You are 「{{voice_role_name}}」, a warm, natural, companion-like {{target_lang}} conversation partner. Your core job is to chat with the user in real {{target_lang}} and help them sound more natural over time; you are not a classroom teacher, drill bot, translator, or generic AI assistant.
 
 {{voice_role_prompt}}
@@ -257,6 +257,185 @@ const LANG_PRACTICE_PROMPT_CONTENT = `You are 「{{voice_role_name}}」, a warm,
 const LANG_PRACTICE_PROMPT_COMPANION_MARKER = "conversation partner";
 /** Legacy Chinese seed marker; triggers one-time upgrade to English prompt */
 const LANG_PRACTICE_PROMPT_LEGACY_COMPANION_MARKER = "对话伴侣";
+
+/** Bump when scenario prompt bodies change; triggers idempotent upgrade on startup. */
+const SCENARIO_PROMPT_SEED_VERSION = 2;
+const SCENARIO_PROMPT_SEED_TAG = `seed_v${SCENARIO_PROMPT_SEED_VERSION}`;
+const SCENARIO_PROMPT_SETTING_MARKER = "[Scenario setting]";
+
+const SCENARIO_PROMPT_VARIABLES =
+  "target_lang,voice_role_name,voice_role_prompt,scenario_name";
+
+function buildScenarioPrompt(openingRole: string, scenarioSections: string): string {
+  const coreMarker = "\n\n[Core behavior priority]";
+  const coreIdx = LANG_PRACTICE_PROMPT_CONTENT.indexOf(coreMarker);
+  const sharedTail =
+    coreIdx >= 0 ? LANG_PRACTICE_PROMPT_CONTENT.slice(coreIdx) : LANG_PRACTICE_PROMPT_CONTENT;
+  return `${scenarioOpeningLine(openingRole)}
+
+{{voice_role_prompt}}
+
+${SCENARIO_PROMPT_SETTING_MARKER}
+${scenarioSections.trim()}${sharedTail}`;
+}
+
+function scenarioPromptRemark(code: string): string {
+  return `Seed: ${code} practice scenario prompt; ${SCENARIO_PROMPT_SEED_TAG}`;
+}
+
+function scenarioPromptNeedsUpgrade(
+  exists: { content: string; remark: string | null },
+  expectedContent: string,
+): boolean {
+  if (!exists.content.includes(SCENARIO_PROMPT_SETTING_MARKER)) return true;
+  if (!exists.remark?.includes(SCENARIO_PROMPT_SEED_TAG)) return true;
+  if (exists.content.trim() !== expectedContent.trim()) return true;
+  return false;
+}
+
+/** Shared opening line for scenario prompts (replaces generic “conversation partner” line). */
+function scenarioOpeningLine(roleDescription: string): string {
+  return `You are 「{{voice_role_name}}」, ${roleDescription} in a {{target_lang}} 「{{scenario_name}}」 practice scene. Your job is to roleplay naturally in {{target_lang}} so the user can practice real spoken dialogue in this setting; you are not a classroom teacher, drill bot, translator, or generic AI assistant.`;
+}
+
+const SEED_PRACTICE_SCENARIOS = [
+  {
+    code: "free",
+    name: "自由对话",
+    nameEn: "Free conversation",
+    icon: "chat_bubble_outline",
+    description: "无特定场景，随意聊天练习",
+    descriptionEn: "Open-ended chat without a fixed scenario",
+    promptCode: "lang_practice",
+    sortOrder: 0,
+  },
+  {
+    code: "shopping",
+    name: "购物",
+    nameEn: "Shopping",
+    icon: "shopping_bag_outlined",
+    description: "商场、超市、服装店等购物场景",
+    descriptionEn: "Malls, supermarkets, clothing stores, etc.",
+    promptCode: "scenario_shopping",
+    openingRole: "a friendly shop assistant or sales associate",
+    scenarioBlock: `[Setting]
+- You and the user are in a {{target_lang}}-speaking shop: a mall store, boutique, supermarket, or market stall.
+- The user is a customer browsing, comparing, or checking out—not your student in a classroom.
+
+[In-scene priorities]
+- Ground every reply in shopping: products, sizes, colors, price, stock, fitting room, payment, bags, receipt, returns.
+- React to what they want to find or buy; offer one natural follow-up (another size, color, or nearby item).
+- If the conversation just started, greet like a clerk ("Welcome—can I help you find something?") in {{target_lang}} only.
+- If they drift off-topic, answer briefly then steer back with a light shopping question.
+
+[Typical threads]
+- Locating items, asking price/discount, trying on, recommending alternatives, checkout, card/cash, exchange policy, gift wrapping.
+
+[Scenario tone]
+- Helpful and patient, slightly upbeat retail manner—never pushy, never robotic inventory lists.`,
+    sortOrder: 10,
+  },
+  {
+    code: "hotel",
+    name: "酒店",
+    nameEn: "Hotel",
+    icon: "hotel_outlined",
+    description: "入住、退房、客房服务等酒店场景",
+    descriptionEn: "Check-in, check-out, room service, etc.",
+    promptCode: "scenario_hotel",
+    openingRole: "professional hotel front-desk or concierge staff",
+    scenarioBlock: `[Setting]
+- You and the user are at a {{target_lang}}-speaking hotel: lobby, front desk, or guest floor.
+- The user is a guest checking in, staying, or asking for service.
+
+[In-scene priorities]
+- Keep dialogue in hospitality context: reservation, ID, room type, key card, Wi‑Fi, breakfast hours, luggage, wake-up call, room issue, checkout.
+- If the chat just started, welcome the guest and ask how you can help with their stay—in {{target_lang}} only.
+- Stay polite and efficient like real front-desk staff; confirm details briefly instead of long monologues.
+
+[Typical threads]
+- Booking under a name, upgrade request, room number/directions, amenities (gym, pool), extra towels, noise complaint, late checkout, taxi call.
+
+[Scenario tone]
+- Warm, professional hospitality—calm, respectful, service-oriented, not overly casual.`,
+    sortOrder: 20,
+  },
+  {
+    code: "restaurant",
+    name: "餐厅",
+    nameEn: "Restaurant",
+    icon: "restaurant_outlined",
+    description: "点餐、订位、特殊要求等餐厅场景",
+    descriptionEn: "Ordering, reservations, dietary requests, etc.",
+    promptCode: "scenario_restaurant",
+    openingRole: "a restaurant host or waiter",
+    scenarioBlock: `[Setting]
+- You and the user are in a {{target_lang}}-speaking restaurant during service hours.
+- The user is a diner seated or waiting to be seated.
+
+[In-scene priorities]
+- Stay in dining service flow: greeting, table/seating, menu, specials, ordering, allergies, spice level, refills, bill, tip (if culturally relevant), reservation.
+- If the conversation just started, greet and ask party size or whether they have a reservation—in {{target_lang}} only.
+- Describe dishes briefly in spoken language; do not dump the entire menu at once.
+
+[Typical threads]
+- Recommendations, customizing a dish, sharing plates, waiting time, wrong order, packing leftovers, split bill, birthday/special occasion.
+
+[Scenario tone]
+- Attentive service style—friendly but not chatty to the point of ignoring other tables; natural dining-room pace.`,
+    sortOrder: 30,
+  },
+  {
+    code: "cafe",
+    name: "咖啡厅",
+    nameEn: "Café",
+    icon: "local_cafe_outlined",
+    description: "点咖啡、轻食、闲聊等咖啡厅场景",
+    descriptionEn: "Coffee orders, light meals, casual café chat",
+    promptCode: "scenario_cafe",
+    openingRole: "a barista at a neighborhood café",
+    scenarioBlock: `[Setting]
+- You and the user are in a {{target_lang}}-speaking café: counter service or a small table.
+- The user is ordering drinks/food or making casual small talk while they wait.
+
+[In-scene priorities]
+- Focus on café life: drink names, size (small/large), hot/iced, milk options, sugar, pastries, sandwich, take-away vs for-here, loyalty card, total price.
+- If the chat just started, greet casually ("Hi—what can I get started for you?") in {{target_lang}} only.
+- Allow light small talk, but tie it to the café moment (busy morning, new seasonal drink).
+
+[Typical threads]
+- Pronouncing menu items, customizations, waiting for a table, Wi‑Fi password, recommendation for something sweet, wrong drink remake.
+
+[Scenario tone]
+- Relaxed, easy-going barista energy—shorter sentences, friendly but not formal like fine dining.`,
+    sortOrder: 40,
+  },
+  {
+    code: "office",
+    name: "办公室",
+    nameEn: "Office",
+    icon: "work_outline",
+    description: "会议、协作、汇报等职场沟通场景",
+    descriptionEn: "Meetings, collaboration, workplace updates",
+    promptCode: "scenario_office",
+    openingRole: "a colleague or manager in the same workplace",
+    scenarioBlock: `[Setting]
+- You and the user are in a {{target_lang}}-speaking office: hallway, desk area, or meeting room.
+- The user is a coworker discussing work tasks, schedules, or projects.
+
+[In-scene priorities]
+- Keep talk workplace-relevant: meetings, deadlines, handoffs, status updates, asking for feedback, scheduling, email follow-up, client deliverables.
+- If the chat just started, open with a natural work opener ("Do you have a minute about the project?") in {{target_lang}} only.
+- Stay professional but conversational—like real colleagues, not a HR training video.
+
+[Typical threads]
+- Clarifying requirements, agreeing on next steps, rescheduling, brief stand-up update, polite disagreement, thanking for help, remote/hybrid logistics.
+
+[Scenario tone]
+- Clear, cooperative, business-appropriate—warm but not overly personal unless the user leads there.`,
+    sortOrder: 50,
+  },
+] as const;
 
 function patchLangPracticePromptForRolePrompt(content: string): string | null {
   if (content.includes("{{voice_role_prompt}}")) return null;
@@ -420,9 +599,9 @@ async function ensurePromptTemplate(db: AppPrismaClient) {
         where: { code: "lang_practice" },
         data: {
           content: LANG_PRACTICE_PROMPT_CONTENT,
-          variables: "target_lang,voice_role_name,voice_role_prompt",
+          variables: "target_lang,voice_role_name,voice_role_prompt,scenario_name",
           remark:
-            "Seed/upgrade: conversation-partner prompt; Go ResolveSystemPromptForConversation injects {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}}",
+            "Seed/upgrade: conversation-partner prompt; Go ResolveSystemPromptForConversation injects {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}}, {{scenario_name}}",
         },
       });
     }
@@ -432,7 +611,7 @@ async function ensurePromptTemplate(db: AppPrismaClient) {
         where: { code: "lang_practice" },
         data: {
           content: patched,
-          variables: "target_lang,voice_role_name,voice_role_prompt",
+          variables: SCENARIO_PROMPT_VARIABLES,
           remark:
             "Seed/upgrade: added {{voice_role_prompt}} placeholder for per-voice-role identity prompts",
         },
@@ -446,13 +625,94 @@ async function ensurePromptTemplate(db: AppPrismaClient) {
       code: "lang_practice",
       name: "Language practice system prompt",
       content: LANG_PRACTICE_PROMPT_CONTENT,
-      variables: "target_lang,voice_role_name,voice_role_prompt",
+      variables: SCENARIO_PROMPT_VARIABLES,
       status: "active",
       sortOrder: 0,
       remark:
-        "Auto-filled at startup; Go GetDefaults JOIN code='lang_practice'; {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}} replaced per conversation",
+        "Auto-filled at startup; Go GetDefaults JOIN code='lang_practice'; {{target_lang}}, {{voice_role_name}}, {{voice_role_prompt}}, {{scenario_name}} replaced per conversation",
     },
   });
+}
+
+async function ensureScenarioPrompts(db: AppPrismaClient) {
+  for (const row of SEED_PRACTICE_SCENARIOS) {
+    if (row.code === "free") continue;
+    if (!("openingRole" in row) || !("scenarioBlock" in row)) continue;
+    const content = buildScenarioPrompt(row.openingRole, row.scenarioBlock);
+    const exists = await db.promptTemplate.findUnique({ where: { code: row.promptCode } });
+    if (!exists) {
+      await db.promptTemplate.create({
+        data: {
+          code: row.promptCode,
+          name: `Scenario: ${row.nameEn}`,
+          content,
+          variables: SCENARIO_PROMPT_VARIABLES,
+          status: "active",
+          sortOrder: row.sortOrder,
+          remark: scenarioPromptRemark(row.code),
+        },
+      });
+      console.info(`[data-seed] prompt template ${row.promptCode}`);
+      continue;
+    }
+    if (scenarioPromptNeedsUpgrade(exists, content)) {
+      await db.promptTemplate.update({
+        where: { code: row.promptCode },
+        data: {
+          content,
+          variables: SCENARIO_PROMPT_VARIABLES,
+          remark: scenarioPromptRemark(row.code),
+        },
+      });
+      console.info(`[data-seed] upgraded prompt template ${row.promptCode} (${SCENARIO_PROMPT_SEED_TAG})`);
+    }
+  }
+}
+
+async function ensurePracticeScenarios(db: AppPrismaClient) {
+  await ensureScenarioPrompts(db);
+  const langPractice = await db.promptTemplate.findUnique({ where: { code: "lang_practice" } });
+
+  for (const row of SEED_PRACTICE_SCENARIOS) {
+    let promptId: string | null = null;
+    if (row.code === "free") {
+      promptId = langPractice?.id ?? null;
+    } else {
+      const pt = await db.promptTemplate.findUnique({ where: { code: row.promptCode } });
+      promptId = pt?.id ?? null;
+    }
+    const exists = await db.practiceScenario.findUnique({ where: { code: row.code } });
+    if (exists) {
+      const patch: Record<string, unknown> = {};
+      if (!exists.promptTemplateId && promptId) patch.promptTemplateId = promptId;
+      if (exists.name !== row.name) patch.name = row.name;
+      if (exists.nameEn !== row.nameEn) patch.nameEn = row.nameEn;
+      if (exists.description !== row.description) patch.description = row.description;
+      if (exists.descriptionEn !== row.descriptionEn) patch.descriptionEn = row.descriptionEn;
+      if (exists.icon !== row.icon) patch.icon = row.icon;
+      if (exists.sortOrder !== row.sortOrder) patch.sortOrder = row.sortOrder;
+      if (Object.keys(patch).length > 0) {
+        await db.practiceScenario.update({ where: { code: row.code }, data: patch });
+        console.info(`[data-seed] updated practice scenario ${row.code}`);
+      }
+      continue;
+    }
+    await db.practiceScenario.create({
+      data: {
+        code: row.code,
+        name: row.name,
+        nameEn: row.nameEn,
+        icon: row.icon,
+        description: row.description,
+        descriptionEn: row.descriptionEn,
+        promptTemplateId: promptId,
+        sortOrder: row.sortOrder,
+        status: "active",
+        remark: scenarioPromptRemark(row.code),
+      },
+    });
+    console.info(`[data-seed] practice scenario ${row.code}`);
+  }
 }
 
 export async function ensureTestSeedUser(db: AppPrismaClient) {
@@ -550,4 +810,5 @@ export async function runBusinessDataSeed(db: AppPrismaClient): Promise<void> {
   await ensureMembershipTiers(db);
   await ensureLlmServiceConfig(db);
   await ensurePromptTemplate(db);
+  await ensurePracticeScenarios(db);
 }

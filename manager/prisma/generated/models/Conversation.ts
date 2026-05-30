@@ -31,6 +31,7 @@ export type ConversationMinAggregateOutputType = {
   voiceRoleId: string | null
   llmConfigId: string | null
   promptId: string | null
+  scenarioCode: string | null
   title: string | null
   status: string | null
   remark: string | null
@@ -46,6 +47,7 @@ export type ConversationMaxAggregateOutputType = {
   voiceRoleId: string | null
   llmConfigId: string | null
   promptId: string | null
+  scenarioCode: string | null
   title: string | null
   status: string | null
   remark: string | null
@@ -61,6 +63,7 @@ export type ConversationCountAggregateOutputType = {
   voiceRoleId: number
   llmConfigId: number
   promptId: number
+  scenarioCode: number
   title: number
   status: number
   remark: number
@@ -78,6 +81,7 @@ export type ConversationMinAggregateInputType = {
   voiceRoleId?: true
   llmConfigId?: true
   promptId?: true
+  scenarioCode?: true
   title?: true
   status?: true
   remark?: true
@@ -93,6 +97,7 @@ export type ConversationMaxAggregateInputType = {
   voiceRoleId?: true
   llmConfigId?: true
   promptId?: true
+  scenarioCode?: true
   title?: true
   status?: true
   remark?: true
@@ -108,6 +113,7 @@ export type ConversationCountAggregateInputType = {
   voiceRoleId?: true
   llmConfigId?: true
   promptId?: true
+  scenarioCode?: true
   title?: true
   status?: true
   remark?: true
@@ -196,6 +202,7 @@ export type ConversationGroupByOutputType = {
   voiceRoleId: string | null
   llmConfigId: string | null
   promptId: string | null
+  scenarioCode: string | null
   title: string | null
   status: string
   remark: string | null
@@ -232,6 +239,7 @@ export type ConversationWhereInput = {
   voiceRoleId?: Prisma.StringNullableFilter<"Conversation"> | string | null
   llmConfigId?: Prisma.StringNullableFilter<"Conversation"> | string | null
   promptId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  scenarioCode?: Prisma.StringNullableFilter<"Conversation"> | string | null
   title?: Prisma.StringNullableFilter<"Conversation"> | string | null
   status?: Prisma.StringFilter<"Conversation"> | string
   remark?: Prisma.StringNullableFilter<"Conversation"> | string | null
@@ -247,6 +255,7 @@ export type ConversationOrderByWithRelationInput = {
   voiceRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
   llmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   promptId?: Prisma.SortOrderInput | Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -265,6 +274,7 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   voiceRoleId?: Prisma.StringNullableFilter<"Conversation"> | string | null
   llmConfigId?: Prisma.StringNullableFilter<"Conversation"> | string | null
   promptId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  scenarioCode?: Prisma.StringNullableFilter<"Conversation"> | string | null
   title?: Prisma.StringNullableFilter<"Conversation"> | string | null
   status?: Prisma.StringFilter<"Conversation"> | string
   remark?: Prisma.StringNullableFilter<"Conversation"> | string | null
@@ -280,6 +290,7 @@ export type ConversationOrderByWithAggregationInput = {
   voiceRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
   llmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   promptId?: Prisma.SortOrderInput | Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -301,6 +312,7 @@ export type ConversationScalarWhereWithAggregatesInput = {
   voiceRoleId?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   llmConfigId?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   promptId?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  scenarioCode?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   title?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Conversation"> | string
   remark?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
@@ -316,6 +328,7 @@ export type ConversationCreateInput = {
   voiceRoleId?: string | null
   llmConfigId?: string | null
   promptId?: string | null
+  scenarioCode?: string | null
   title?: string | null
   status?: string
   remark?: string | null
@@ -331,6 +344,7 @@ export type ConversationUncheckedCreateInput = {
   voiceRoleId?: string | null
   llmConfigId?: string | null
   promptId?: string | null
+  scenarioCode?: string | null
   title?: string | null
   status?: string
   remark?: string | null
@@ -346,6 +360,7 @@ export type ConversationUpdateInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -361,6 +376,7 @@ export type ConversationUncheckedUpdateInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -376,6 +392,7 @@ export type ConversationCreateManyInput = {
   voiceRoleId?: string | null
   llmConfigId?: string | null
   promptId?: string | null
+  scenarioCode?: string | null
   title?: string | null
   status?: string
   remark?: string | null
@@ -391,6 +408,7 @@ export type ConversationUpdateManyMutationInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -406,6 +424,7 @@ export type ConversationUncheckedUpdateManyInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -421,6 +440,7 @@ export type ConversationCountOrderByAggregateInput = {
   voiceRoleId?: Prisma.SortOrder
   llmConfigId?: Prisma.SortOrder
   promptId?: Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrder
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrder
@@ -436,6 +456,7 @@ export type ConversationMaxOrderByAggregateInput = {
   voiceRoleId?: Prisma.SortOrder
   llmConfigId?: Prisma.SortOrder
   promptId?: Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrder
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrder
@@ -451,6 +472,7 @@ export type ConversationMinOrderByAggregateInput = {
   voiceRoleId?: Prisma.SortOrder
   llmConfigId?: Prisma.SortOrder
   promptId?: Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrder
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrder
@@ -468,6 +490,7 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -483,6 +506,7 @@ export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -498,6 +522,7 @@ export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -513,6 +538,7 @@ export type ConversationSelectScalar = {
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -521,7 +547,7 @@ export type ConversationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "languageId" | "voiceRoleId" | "llmConfigId" | "promptId" | "title" | "status" | "remark" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "languageId" | "voiceRoleId" | "llmConfigId" | "promptId" | "scenarioCode" | "title" | "status" | "remark" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["conversation"]>
 
 export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Conversation"
@@ -533,6 +559,7 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     voiceRoleId: string | null
     llmConfigId: string | null
     promptId: string | null
+    scenarioCode: string | null
     title: string | null
     status: string
     remark: string | null
@@ -968,6 +995,7 @@ export interface ConversationFieldRefs {
   readonly voiceRoleId: Prisma.FieldRef<"Conversation", 'String'>
   readonly llmConfigId: Prisma.FieldRef<"Conversation", 'String'>
   readonly promptId: Prisma.FieldRef<"Conversation", 'String'>
+  readonly scenarioCode: Prisma.FieldRef<"Conversation", 'String'>
   readonly title: Prisma.FieldRef<"Conversation", 'String'>
   readonly status: Prisma.FieldRef<"Conversation", 'String'>
   readonly remark: Prisma.FieldRef<"Conversation", 'String'>

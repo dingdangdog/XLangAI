@@ -36,6 +36,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       { to: "/manage/membership-tiers", labelKey: "nav.items.membershipTiers", icon: UserGroupIcon },
       { to: "/manage/languages", labelKey: "nav.items.languages", icon: GlobeAltIcon },
       { to: "/manage/prompt-templates", labelKey: "nav.items.promptTemplates", icon: DocumentTextIcon },
+      { to: "/manage/practice-scenarios", labelKey: "nav.items.practiceScenarios", icon: DocumentTextIcon },
     ],
   },
   {

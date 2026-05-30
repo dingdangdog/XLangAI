@@ -68,6 +68,11 @@ export type VoiceRole = Prisma.VoiceRoleModel
  */
 export type PromptTemplate = Prisma.PromptTemplateModel
 /**
+ * Model PracticeScenario
+ * 口语练习场景（购物、酒店等），关联提示词模板
+ */
+export type PracticeScenario = Prisma.PracticeScenarioModel
+/**
  * Model MembershipTier
  * 
  */

@@ -15,17 +15,18 @@ import (
 )
 
 type ConvHandler struct {
-	convRepo   *repository.ConvRepo
-	msgRepo    *repository.MessageRepo
-	systemRepo *repository.SystemRepo
-	userRepo   *repository.UserRepo
-	voiceRepo  *repository.VoiceRepo
-	langRepo   *repository.LangRepo
-	verbose    bool
+	convRepo     *repository.ConvRepo
+	msgRepo      *repository.MessageRepo
+	systemRepo   *repository.SystemRepo
+	scenarioRepo *repository.ScenarioRepo
+	userRepo     *repository.UserRepo
+	voiceRepo    *repository.VoiceRepo
+	langRepo     *repository.LangRepo
+	verbose      bool
 }
 
-func NewConvHandler(convRepo *repository.ConvRepo, msgRepo *repository.MessageRepo, systemRepo *repository.SystemRepo, userRepo *repository.UserRepo, voiceRepo *repository.VoiceRepo, langRepo *repository.LangRepo, verbose bool) *ConvHandler {
-	return &ConvHandler{convRepo: convRepo, msgRepo: msgRepo, systemRepo: systemRepo, userRepo: userRepo, voiceRepo: voiceRepo, langRepo: langRepo, verbose: verbose}
+func NewConvHandler(convRepo *repository.ConvRepo, msgRepo *repository.MessageRepo, systemRepo *repository.SystemRepo, scenarioRepo *repository.ScenarioRepo, userRepo *repository.UserRepo, voiceRepo *repository.VoiceRepo, langRepo *repository.LangRepo, verbose bool) *ConvHandler {
+	return &ConvHandler{convRepo: convRepo, msgRepo: msgRepo, systemRepo: systemRepo, scenarioRepo: scenarioRepo, userRepo: userRepo, voiceRepo: voiceRepo, langRepo: langRepo, verbose: verbose}
 }
 
 func (h *ConvHandler) Create(c *gin.Context) {
@@ -35,9 +36,10 @@ func (h *ConvHandler) Create(c *gin.Context) {
 		return
 	}
 	var req struct {
-		LangID      string  `json:"lang_id" binding:"required"`
-		VoiceRoleID *string `json:"voice_role_id"`
-		Title       *string `json:"title"`
+		LangID       string  `json:"lang_id" binding:"required"`
+		VoiceRoleID  *string `json:"voice_role_id"`
+		ScenarioCode *string `json:"scenario_code"`
+		Title        *string `json:"title"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -83,7 +85,27 @@ func (h *ConvHandler) Create(c *gin.Context) {
 		voiceID = *req.VoiceRoleID
 	}
 
-	titleVal := "New Chat"
+	scenarioCode := "free"
+	if req.ScenarioCode != nil {
+		sc := strings.TrimSpace(*req.ScenarioCode)
+		if sc != "" {
+			scenarioCode = sc
+		}
+	}
+	if h.scenarioRepo != nil {
+		if _, err := h.scenarioRepo.GetByCode(c.Request.Context(), scenarioCode); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid scenario_code"})
+			return
+		}
+	}
+
+	promptID, err := h.systemRepo.ResolvePromptIDForScenario(c.Request.Context(), scenarioCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to resolve scenario prompt"})
+		return
+	}
+
+	titleVal := ""
 	if req.Title != nil {
 		t := strings.TrimSpace(*req.Title)
 		if t != "" {
@@ -94,6 +116,12 @@ func (h *ConvHandler) Create(c *gin.Context) {
 			titleVal = t
 		}
 	}
+	if titleVal == "" && h.scenarioRepo != nil {
+		titleVal = h.scenarioRepo.NameByCode(c.Request.Context(), scenarioCode)
+	}
+	if titleVal == "" {
+		titleVal = "New Chat"
+	}
 
 	llmConfigID := def.LLMConfigID
 	if h.userRepo != nil {
@@ -102,12 +130,13 @@ func (h *ConvHandler) Create(c *gin.Context) {
 		}
 	}
 
-	conv, err := h.convRepo.Create(c.Request.Context(), uid, req.LangID, voiceID, llmConfigID, def.PromptID, titleVal)
+	conv, err := h.convRepo.Create(c.Request.Context(), uid, req.LangID, voiceID, llmConfigID, promptID, scenarioCode, titleVal)
 	if err != nil {
 		log.Printf("ConvHandler.Create: user_id=%s lang_id=%s: %v", uid, req.LangID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	enrichConversationScenario(c, h.scenarioRepo, conv)
 	c.JSON(http.StatusOK, conv)
 }
 
@@ -127,6 +156,9 @@ func (h *ConvHandler) List(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	for _, conv := range convs {
+		enrichConversationScenario(c, h.scenarioRepo, conv)
 	}
 	c.JSON(http.StatusOK, convs)
 }
@@ -152,6 +184,7 @@ func (h *ConvHandler) Get(c *gin.Context) {
 			conv.LanguageCode = strings.TrimSpace(code)
 		}
 	}
+	enrichConversationScenario(c, h.scenarioRepo, conv)
 	c.JSON(http.StatusOK, conv)
 }
 

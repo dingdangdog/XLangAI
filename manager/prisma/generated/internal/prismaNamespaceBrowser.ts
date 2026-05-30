@@ -61,6 +61,7 @@ export const ModelName = {
   TtsServiceConfig: 'TtsServiceConfig',
   VoiceRole: 'VoiceRole',
   PromptTemplate: 'PromptTemplate',
+  PracticeScenario: 'PracticeScenario',
   MembershipTier: 'MembershipTier',
   User: 'User',
   BillingProduct: 'BillingProduct',
@@ -284,6 +285,25 @@ export const PromptTemplateScalarFieldEnum = {
 export type PromptTemplateScalarFieldEnum = (typeof PromptTemplateScalarFieldEnum)[keyof typeof PromptTemplateScalarFieldEnum]
 
 
+export const PracticeScenarioScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  nameEn: 'nameEn',
+  icon: 'icon',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  promptTemplateId: 'promptTemplateId',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PracticeScenarioScalarFieldEnum = (typeof PracticeScenarioScalarFieldEnum)[keyof typeof PracticeScenarioScalarFieldEnum]
+
+
 export const MembershipTierScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -398,6 +418,7 @@ export const ConversationScalarFieldEnum = {
   voiceRoleId: 'voiceRoleId',
   llmConfigId: 'llmConfigId',
   promptId: 'promptId',
+  scenarioCode: 'scenarioCode',
   title: 'title',
   status: 'status',
   remark: 'remark',
@@ -455,6 +476,7 @@ export const ConversationsBackupScalarFieldEnum = {
   voiceRoleId: 'voiceRoleId',
   llmConfigId: 'llmConfigId',
   promptId: 'promptId',
+  scenarioCode: 'scenarioCode',
   title: 'title',
   status: 'status',
   remark: 'remark',

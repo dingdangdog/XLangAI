@@ -421,7 +421,7 @@ func (h *AIHandler) runConversationTurn(
 		}, nil
 	}
 
-	systemPrompt, err := h.sys.ResolveSystemPromptForConversation(ctx, conv.LanguageID, conv.PromptID, conv.VoiceRoleID)
+	systemPrompt, err := h.sys.ResolveSystemPromptForConversation(ctx, conv.LanguageID, conv.PromptID, conv.VoiceRoleID, scenarioCodePtr(conv.ScenarioCode))
 	if err != nil {
 		return h.failUserTurn(ctx, userMsg, err)
 	}

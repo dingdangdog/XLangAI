@@ -22,6 +22,7 @@ export const RESOURCE_SLUGS = [
   "tts-service-configs",
   "voice-roles",
   "prompt-templates",
+  "practice-scenarios",
   "membership-tiers",
   "users",
   "user-usage",
@@ -51,6 +52,7 @@ type DelegateKey =
   | "ttsServiceConfig"
   | "voiceRole"
   | "promptTemplate"
+  | "practiceScenario"
   | "membershipTier"
   | "user"
   | "userUsage"
@@ -116,6 +118,11 @@ export const RESOURCE_META: Record<
   },
   "prompt-templates": {
     delegate: "promptTemplate",
+    softListFilter: false,
+    orderBy: orderBySortOrderCode(),
+  },
+  "practice-scenarios": {
+    delegate: "practiceScenario",
     softListFilter: false,
     orderBy: orderBySortOrderCode(),
   },

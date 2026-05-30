@@ -394,6 +394,7 @@ export const ModelName = {
   TtsServiceConfig: 'TtsServiceConfig',
   VoiceRole: 'VoiceRole',
   PromptTemplate: 'PromptTemplate',
+  PracticeScenario: 'PracticeScenario',
   MembershipTier: 'MembershipTier',
   User: 'User',
   BillingProduct: 'BillingProduct',
@@ -421,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "language" | "sysLlmServiceConfig" | "sysSttServiceConfig" | "sysTranslateServiceConfig" | "sysObjectStorageConfig" | "sysSmsServiceConfig" | "sysSystemSetting" | "ttsServiceConfig" | "voiceRole" | "promptTemplate" | "membershipTier" | "user" | "billingProduct" | "storeTransaction" | "userUsage" | "sysServiceUsageDaily" | "conversation" | "message" | "usersBackup" | "conversationsBackup" | "messagesBackup" | "userUsageBackup"
+    modelProps: "language" | "sysLlmServiceConfig" | "sysSttServiceConfig" | "sysTranslateServiceConfig" | "sysObjectStorageConfig" | "sysSmsServiceConfig" | "sysSystemSetting" | "ttsServiceConfig" | "voiceRole" | "promptTemplate" | "practiceScenario" | "membershipTier" | "user" | "billingProduct" | "storeTransaction" | "userUsage" | "sysServiceUsageDaily" | "conversation" | "message" | "usersBackup" | "conversationsBackup" | "messagesBackup" | "userUsageBackup"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1162,6 +1163,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PromptTemplateCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PromptTemplateCountAggregateOutputType> | number
+        }
+      }
+    }
+    PracticeScenario: {
+      payload: Prisma.$PracticeScenarioPayload<ExtArgs>
+      fields: Prisma.PracticeScenarioFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PracticeScenarioFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PracticeScenarioFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>
+        }
+        findFirst: {
+          args: Prisma.PracticeScenarioFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PracticeScenarioFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>
+        }
+        findMany: {
+          args: Prisma.PracticeScenarioFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>[]
+        }
+        create: {
+          args: Prisma.PracticeScenarioCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>
+        }
+        createMany: {
+          args: Prisma.PracticeScenarioCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PracticeScenarioCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>[]
+        }
+        delete: {
+          args: Prisma.PracticeScenarioDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>
+        }
+        update: {
+          args: Prisma.PracticeScenarioUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>
+        }
+        deleteMany: {
+          args: Prisma.PracticeScenarioDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PracticeScenarioUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PracticeScenarioUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>[]
+        }
+        upsert: {
+          args: Prisma.PracticeScenarioUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PracticeScenarioPayload>
+        }
+        aggregate: {
+          args: Prisma.PracticeScenarioAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePracticeScenario>
+        }
+        groupBy: {
+          args: Prisma.PracticeScenarioGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PracticeScenarioGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PracticeScenarioCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PracticeScenarioCountAggregateOutputType> | number
         }
       }
     }
@@ -2285,6 +2360,25 @@ export const PromptTemplateScalarFieldEnum = {
 export type PromptTemplateScalarFieldEnum = (typeof PromptTemplateScalarFieldEnum)[keyof typeof PromptTemplateScalarFieldEnum]
 
 
+export const PracticeScenarioScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  nameEn: 'nameEn',
+  icon: 'icon',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  promptTemplateId: 'promptTemplateId',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PracticeScenarioScalarFieldEnum = (typeof PracticeScenarioScalarFieldEnum)[keyof typeof PracticeScenarioScalarFieldEnum]
+
+
 export const MembershipTierScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -2399,6 +2493,7 @@ export const ConversationScalarFieldEnum = {
   voiceRoleId: 'voiceRoleId',
   llmConfigId: 'llmConfigId',
   promptId: 'promptId',
+  scenarioCode: 'scenarioCode',
   title: 'title',
   status: 'status',
   remark: 'remark',
@@ -2456,6 +2551,7 @@ export const ConversationsBackupScalarFieldEnum = {
   voiceRoleId: 'voiceRoleId',
   llmConfigId: 'llmConfigId',
   promptId: 'promptId',
+  scenarioCode: 'scenarioCode',
   title: 'title',
   status: 'status',
   remark: 'remark',
@@ -2720,6 +2816,7 @@ export type GlobalOmitConfig = {
   ttsServiceConfig?: Prisma.TtsServiceConfigOmit
   voiceRole?: Prisma.VoiceRoleOmit
   promptTemplate?: Prisma.PromptTemplateOmit
+  practiceScenario?: Prisma.PracticeScenarioOmit
   membershipTier?: Prisma.MembershipTierOmit
   user?: Prisma.UserOmit
   billingProduct?: Prisma.BillingProductOmit

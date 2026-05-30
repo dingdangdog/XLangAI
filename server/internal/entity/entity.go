@@ -190,6 +190,24 @@ type PromptTemplate struct {
 
 func (PromptTemplate) TableName() string { return "sys_prompt_templates" }
 
+type PracticeScenario struct {
+	ID               string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	Code             string    `gorm:"column:code;type:varchar(32);uniqueIndex"`
+	Name             string    `gorm:"column:name;type:varchar(100)"`
+	NameEn           *string   `gorm:"column:name_en;type:varchar(100)"`
+	Icon             *string   `gorm:"column:icon;type:varchar(50)"`
+	Description      *string   `gorm:"column:description;type:varchar(500)"`
+	DescriptionEn    *string   `gorm:"column:description_en;type:varchar(500)"`
+	PromptTemplateID *string   `gorm:"column:prompt_template_id;type:varchar(36)"`
+	SortOrder        int       `gorm:"column:sort_order"`
+	Status           string    `gorm:"column:status;type:varchar(20)"`
+	Remark           *string   `gorm:"column:remark;type:varchar(500)"`
+	CreatedAt        time.Time `gorm:"column:created_at"`
+	UpdatedAt        time.Time `gorm:"column:updated_at"`
+}
+
+func (PracticeScenario) TableName() string { return "sys_practice_scenarios" }
+
 type MembershipTier struct {
 	ID           string    `gorm:"column:id;type:varchar(36);primaryKey"`
 	Code         string    `gorm:"column:code;type:varchar(20);uniqueIndex"`
@@ -294,18 +312,19 @@ type ServiceUsageDaily struct {
 func (ServiceUsageDaily) TableName() string { return "sys_service_usage_daily" }
 
 type Conversation struct {
-	ID          string     `gorm:"column:id;type:varchar(36);primaryKey"`
-	UserID      string     `gorm:"column:user_id;type:varchar(36)"`
-	LanguageID  string     `gorm:"column:language_id;type:varchar(36)"`
-	VoiceRoleID *string    `gorm:"column:voice_role_id;type:varchar(36)"`
-	LlmConfigID *string    `gorm:"column:llm_config_id;type:varchar(36)"`
-	PromptID    *string    `gorm:"column:prompt_id;type:varchar(36)"`
-	Title       *string    `gorm:"column:title;type:varchar(200)"`
-	Status      string     `gorm:"column:status;type:varchar(20)"`
-	Remark      *string    `gorm:"column:remark;type:varchar(500)"`
-	DeletedAt   *time.Time `gorm:"column:deleted_at"`
-	CreatedAt   time.Time  `gorm:"column:created_at"`
-	UpdatedAt   time.Time  `gorm:"column:updated_at"`
+	ID           string     `gorm:"column:id;type:varchar(36);primaryKey"`
+	UserID       string     `gorm:"column:user_id;type:varchar(36)"`
+	LanguageID   string     `gorm:"column:language_id;type:varchar(36)"`
+	VoiceRoleID  *string    `gorm:"column:voice_role_id;type:varchar(36)"`
+	LlmConfigID  *string    `gorm:"column:llm_config_id;type:varchar(36)"`
+	PromptID     *string    `gorm:"column:prompt_id;type:varchar(36)"`
+	ScenarioCode *string    `gorm:"column:scenario_code;type:varchar(32)"`
+	Title        *string    `gorm:"column:title;type:varchar(200)"`
+	Status       string     `gorm:"column:status;type:varchar(20)"`
+	Remark       *string    `gorm:"column:remark;type:varchar(500)"`
+	DeletedAt    *time.Time `gorm:"column:deleted_at"`
+	CreatedAt    time.Time  `gorm:"column:created_at"`
+	UpdatedAt    time.Time  `gorm:"column:updated_at"`
 }
 
 func (Conversation) TableName() string { return "usr_conversations" }

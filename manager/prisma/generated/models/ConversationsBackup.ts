@@ -31,6 +31,7 @@ export type ConversationsBackupMinAggregateOutputType = {
   voiceRoleId: string | null
   llmConfigId: string | null
   promptId: string | null
+  scenarioCode: string | null
   title: string | null
   status: string | null
   remark: string | null
@@ -47,6 +48,7 @@ export type ConversationsBackupMaxAggregateOutputType = {
   voiceRoleId: string | null
   llmConfigId: string | null
   promptId: string | null
+  scenarioCode: string | null
   title: string | null
   status: string | null
   remark: string | null
@@ -63,6 +65,7 @@ export type ConversationsBackupCountAggregateOutputType = {
   voiceRoleId: number
   llmConfigId: number
   promptId: number
+  scenarioCode: number
   title: number
   status: number
   remark: number
@@ -81,6 +84,7 @@ export type ConversationsBackupMinAggregateInputType = {
   voiceRoleId?: true
   llmConfigId?: true
   promptId?: true
+  scenarioCode?: true
   title?: true
   status?: true
   remark?: true
@@ -97,6 +101,7 @@ export type ConversationsBackupMaxAggregateInputType = {
   voiceRoleId?: true
   llmConfigId?: true
   promptId?: true
+  scenarioCode?: true
   title?: true
   status?: true
   remark?: true
@@ -113,6 +118,7 @@ export type ConversationsBackupCountAggregateInputType = {
   voiceRoleId?: true
   llmConfigId?: true
   promptId?: true
+  scenarioCode?: true
   title?: true
   status?: true
   remark?: true
@@ -202,6 +208,7 @@ export type ConversationsBackupGroupByOutputType = {
   voiceRoleId: string | null
   llmConfigId: string | null
   promptId: string | null
+  scenarioCode: string | null
   title: string | null
   status: string | null
   remark: string | null
@@ -239,6 +246,7 @@ export type ConversationsBackupWhereInput = {
   voiceRoleId?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   llmConfigId?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   promptId?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
+  scenarioCode?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   title?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   status?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   remark?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
@@ -255,6 +263,7 @@ export type ConversationsBackupOrderByWithRelationInput = {
   voiceRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
   llmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   promptId?: Prisma.SortOrderInput | Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   remark?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -274,6 +283,7 @@ export type ConversationsBackupWhereUniqueInput = Prisma.AtLeast<{
   voiceRoleId?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   llmConfigId?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   promptId?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
+  scenarioCode?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   title?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   status?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
   remark?: Prisma.StringNullableFilter<"ConversationsBackup"> | string | null
@@ -290,6 +300,7 @@ export type ConversationsBackupOrderByWithAggregationInput = {
   voiceRoleId?: Prisma.SortOrderInput | Prisma.SortOrder
   llmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   promptId?: Prisma.SortOrderInput | Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrderInput | Prisma.SortOrder
   remark?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -312,6 +323,7 @@ export type ConversationsBackupScalarWhereWithAggregatesInput = {
   voiceRoleId?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
   llmConfigId?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
   promptId?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
+  scenarioCode?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
   title?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
   status?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
   remark?: Prisma.StringNullableWithAggregatesFilter<"ConversationsBackup"> | string | null
@@ -328,6 +340,7 @@ export type ConversationsBackupCreateInput = {
   voiceRoleId?: string | null
   llmConfigId?: string | null
   promptId?: string | null
+  scenarioCode?: string | null
   title?: string | null
   status?: string | null
   remark?: string | null
@@ -344,6 +357,7 @@ export type ConversationsBackupUncheckedCreateInput = {
   voiceRoleId?: string | null
   llmConfigId?: string | null
   promptId?: string | null
+  scenarioCode?: string | null
   title?: string | null
   status?: string | null
   remark?: string | null
@@ -360,6 +374,7 @@ export type ConversationsBackupUpdateInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -376,6 +391,7 @@ export type ConversationsBackupUncheckedUpdateInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -392,6 +408,7 @@ export type ConversationsBackupCreateManyInput = {
   voiceRoleId?: string | null
   llmConfigId?: string | null
   promptId?: string | null
+  scenarioCode?: string | null
   title?: string | null
   status?: string | null
   remark?: string | null
@@ -408,6 +425,7 @@ export type ConversationsBackupUpdateManyMutationInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -424,6 +442,7 @@ export type ConversationsBackupUncheckedUpdateManyInput = {
   voiceRoleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   llmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   promptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  scenarioCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   remark?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -440,6 +459,7 @@ export type ConversationsBackupCountOrderByAggregateInput = {
   voiceRoleId?: Prisma.SortOrder
   llmConfigId?: Prisma.SortOrder
   promptId?: Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrder
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrder
@@ -456,6 +476,7 @@ export type ConversationsBackupMaxOrderByAggregateInput = {
   voiceRoleId?: Prisma.SortOrder
   llmConfigId?: Prisma.SortOrder
   promptId?: Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrder
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrder
@@ -472,6 +493,7 @@ export type ConversationsBackupMinOrderByAggregateInput = {
   voiceRoleId?: Prisma.SortOrder
   llmConfigId?: Prisma.SortOrder
   promptId?: Prisma.SortOrder
+  scenarioCode?: Prisma.SortOrder
   title?: Prisma.SortOrder
   status?: Prisma.SortOrder
   remark?: Prisma.SortOrder
@@ -490,6 +512,7 @@ export type ConversationsBackupSelect<ExtArgs extends runtime.Types.Extensions.I
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -506,6 +529,7 @@ export type ConversationsBackupSelectCreateManyAndReturn<ExtArgs extends runtime
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -522,6 +546,7 @@ export type ConversationsBackupSelectUpdateManyAndReturn<ExtArgs extends runtime
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -538,6 +563,7 @@ export type ConversationsBackupSelectScalar = {
   voiceRoleId?: boolean
   llmConfigId?: boolean
   promptId?: boolean
+  scenarioCode?: boolean
   title?: boolean
   status?: boolean
   remark?: boolean
@@ -547,7 +573,7 @@ export type ConversationsBackupSelectScalar = {
   backupBatch?: boolean
 }
 
-export type ConversationsBackupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "languageId" | "voiceRoleId" | "llmConfigId" | "promptId" | "title" | "status" | "remark" | "createdAt" | "updatedAt" | "cancelledAt" | "backupBatch", ExtArgs["result"]["conversationsBackup"]>
+export type ConversationsBackupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "languageId" | "voiceRoleId" | "llmConfigId" | "promptId" | "scenarioCode" | "title" | "status" | "remark" | "createdAt" | "updatedAt" | "cancelledAt" | "backupBatch", ExtArgs["result"]["conversationsBackup"]>
 
 export type $ConversationsBackupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ConversationsBackup"
@@ -559,6 +585,7 @@ export type $ConversationsBackupPayload<ExtArgs extends runtime.Types.Extensions
     voiceRoleId: string | null
     llmConfigId: string | null
     promptId: string | null
+    scenarioCode: string | null
     title: string | null
     status: string | null
     remark: string | null
@@ -995,6 +1022,7 @@ export interface ConversationsBackupFieldRefs {
   readonly voiceRoleId: Prisma.FieldRef<"ConversationsBackup", 'String'>
   readonly llmConfigId: Prisma.FieldRef<"ConversationsBackup", 'String'>
   readonly promptId: Prisma.FieldRef<"ConversationsBackup", 'String'>
+  readonly scenarioCode: Prisma.FieldRef<"ConversationsBackup", 'String'>
   readonly title: Prisma.FieldRef<"ConversationsBackup", 'String'>
   readonly status: Prisma.FieldRef<"ConversationsBackup", 'String'>
   readonly remark: Prisma.FieldRef<"ConversationsBackup", 'String'>

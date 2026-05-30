@@ -228,6 +228,27 @@ model PromptTemplate {
   @@map("sys_prompt_templates")
 }
 
+/// 口语练习场景（购物、酒店等），关联提示词模板
+model PracticeScenario {
+  id               String   @id @default(uuid())
+  code             String   @unique @db.VarChar(32)
+  name             String   @db.VarChar(100)
+  nameEn           String?  @map("name_en") @db.VarChar(100)
+  icon             String?  @db.VarChar(50)
+  description      String?  @db.VarChar(500)
+  descriptionEn    String?  @map("description_en") @db.VarChar(500)
+  promptTemplateId String?  @map("prompt_template_id") @db.VarChar(36)
+  sortOrder        Int      @default(0) @map("sort_order")
+  status           String   @default("active") @db.VarChar(20)
+  remark           String?  @db.VarChar(500)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([code])
+  @@index([status])
+  @@map("sys_practice_scenarios")
+}
+
 model MembershipTier {
   id           String   @id @default(uuid())
   code         String   @unique @db.VarChar(20)
@@ -353,21 +374,23 @@ model SysServiceUsageDaily {
 }
 
 model Conversation {
-  id          String    @id @default(uuid())
-  userId      String    @map("user_id") @db.VarChar(36)
-  languageId  String    @map("language_id") @db.VarChar(36)
-  voiceRoleId String?   @map("voice_role_id") @db.VarChar(36)
-  llmConfigId String?   @map("llm_config_id") @db.VarChar(36)
-  promptId    String?   @map("prompt_id") @db.VarChar(36)
-  title       String?   @default("新对话") @db.VarChar(200)
-  status      String    @default("active") @db.VarChar(20)
-  remark      String?   @db.VarChar(500)
-  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id") @db.VarChar(36)
+  languageId   String    @map("language_id") @db.VarChar(36)
+  voiceRoleId  String?   @map("voice_role_id") @db.VarChar(36)
+  llmConfigId  String?   @map("llm_config_id") @db.VarChar(36)
+  promptId     String?   @map("prompt_id") @db.VarChar(36)
+  scenarioCode String?   @map("scenario_code") @db.VarChar(32)
+  title        String?   @default("新对话") @db.VarChar(200)
+  status       String    @default("active") @db.VarChar(20)
+  remark       String?   @db.VarChar(500)
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([userId])
   @@index([status])
+  @@index([scenarioCode])
   @@index([createdAt])
   @@map("usr_conversations")
 }
@@ -413,13 +436,14 @@ model UsersBackup {
 }
 
 model ConversationsBackup {
-  id          String    @id @db.VarChar(36)
-  userId      String    @map("user_id") @db.VarChar(36)
-  languageId  String    @map("language_id") @db.VarChar(36)
-  voiceRoleId String?   @map("voice_role_id") @db.VarChar(36)
-  llmConfigId String?   @map("llm_config_id") @db.VarChar(36)
-  promptId    String?   @map("prompt_id") @db.VarChar(36)
-  title       String?   @db.VarChar(200)
+  id           String    @id @db.VarChar(36)
+  userId       String    @map("user_id") @db.VarChar(36)
+  languageId   String    @map("language_id") @db.VarChar(36)
+  voiceRoleId  String?   @map("voice_role_id") @db.VarChar(36)
+  llmConfigId  String?   @map("llm_config_id") @db.VarChar(36)
+  promptId     String?   @map("prompt_id") @db.VarChar(36)
+  scenarioCode String?   @map("scenario_code") @db.VarChar(32)
+  title        String?   @db.VarChar(200)
   status      String?   @db.VarChar(20)
   remark      String?   @db.VarChar(500)
   createdAt   DateTime? @map("created_at") @db.Timestamptz(6)

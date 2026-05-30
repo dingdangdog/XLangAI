@@ -180,7 +180,11 @@ func main() {
 
 	lr := repository.NewLangRepo(gdb)
 
-	ch := handler.NewConvHandler(cr, msgR, sr, ur, vr, lr, cfg.VerboseLogs)
+	scenarioR := repository.NewScenarioRepo(gdb)
+
+	ch := handler.NewConvHandler(cr, msgR, sr, scenarioR, ur, vr, lr, cfg.VerboseLogs)
+
+	scenarioH := handler.NewScenarioHandler(scenarioR)
 
 	mediaSvc := media.NewService(osr, cfg, sysSettings)
 
@@ -207,7 +211,7 @@ func main() {
 
 	bh := handler.NewBillingHandler(cfg, appleCfg, br, ur, mr, az)
 
-	r := router.New(cfg, az, uh, ch, ah, lh, vh, mh, sh, bh, sth, mdh, captchaH)
+	r := router.New(cfg, az, uh, ch, ah, lh, vh, scenarioH, mh, sh, bh, sth, mdh, captchaH)
 
 	log.Printf("listen :%s", cfg.Port)
 
