@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -216,10 +215,7 @@ func (s *Service) ReadAudio(name string) ([]byte, error) {
 	if err == nil {
 		return data, nil
 	}
-	bundledDir := strings.TrimSpace(os.Getenv("BUNDLED_AUDIO_DIR"))
-	if bundledDir == "" {
-		bundledDir = "/app/bootstrap-storage/audio"
-	}
+	bundledDir := resolveBundledAudioDir()
 	if bundledDir != "" && bundledDir != dirs.AudioDir {
 		if fallback, fallbackErr := storage.ReadAudio(bundledDir, name); fallbackErr == nil {
 			return fallback, nil

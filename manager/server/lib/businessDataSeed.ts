@@ -302,7 +302,7 @@ const SEED_PRACTICE_SCENARIOS = [
   {
     code: "free",
     name: "自由对话",
-    nameEn: "Free conversation",
+    nameEn: "Auto",
     icon: "chat_bubble_outline",
     description: "无特定场景，随意聊天练习",
     descriptionEn: "Open-ended chat without a fixed scenario",
