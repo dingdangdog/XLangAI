@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"xlangai/server/internal/authz"
@@ -22,11 +24,12 @@ type ConvHandler struct {
 	userRepo     *repository.UserRepo
 	voiceRepo    *repository.VoiceRepo
 	langRepo     *repository.LangRepo
+	opening      ScenarioOpeningEnsurer
 	verbose      bool
 }
 
-func NewConvHandler(convRepo *repository.ConvRepo, msgRepo *repository.MessageRepo, systemRepo *repository.SystemRepo, scenarioRepo *repository.ScenarioRepo, userRepo *repository.UserRepo, voiceRepo *repository.VoiceRepo, langRepo *repository.LangRepo, verbose bool) *ConvHandler {
-	return &ConvHandler{convRepo: convRepo, msgRepo: msgRepo, systemRepo: systemRepo, scenarioRepo: scenarioRepo, userRepo: userRepo, voiceRepo: voiceRepo, langRepo: langRepo, verbose: verbose}
+func NewConvHandler(convRepo *repository.ConvRepo, msgRepo *repository.MessageRepo, systemRepo *repository.SystemRepo, scenarioRepo *repository.ScenarioRepo, userRepo *repository.UserRepo, voiceRepo *repository.VoiceRepo, langRepo *repository.LangRepo, opening ScenarioOpeningEnsurer, verbose bool) *ConvHandler {
+	return &ConvHandler{convRepo: convRepo, msgRepo: msgRepo, systemRepo: systemRepo, scenarioRepo: scenarioRepo, userRepo: userRepo, voiceRepo: voiceRepo, langRepo: langRepo, opening: opening, verbose: verbose}
 }
 
 func (h *ConvHandler) Create(c *gin.Context) {
@@ -137,6 +140,17 @@ func (h *ConvHandler) Create(c *gin.Context) {
 		return
 	}
 	enrichConversationScenario(c, h.scenarioRepo, conv)
+	if h.opening != nil && scenarioCode != "" && scenarioCode != "free" {
+		convCopy := *conv
+		uidCopy := uid
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+			defer cancel()
+			if err := h.opening.EnsureScenarioOpening(ctx, &convCopy, uidCopy); err != nil && h.verbose {
+				log.Printf("ConvHandler.Create opening: conv_id=%s: %v", convCopy.ID, err)
+			}
+		}()
+	}
 	c.JSON(http.StatusOK, conv)
 }
 
@@ -204,6 +218,16 @@ func (h *ConvHandler) ListMessages(c *gin.Context) {
 	if conv.UserID != uid {
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
 		return
+	}
+	if h.langRepo != nil && strings.TrimSpace(conv.LanguageID) != "" {
+		if code, err := h.langRepo.GetCodeByID(c.Request.Context(), conv.LanguageID); err == nil {
+			conv.LanguageCode = strings.TrimSpace(code)
+		}
+	}
+	if h.opening != nil {
+		if err := h.opening.EnsureScenarioOpening(c.Request.Context(), conv, uid); err != nil && h.verbose {
+			log.Printf("ListMessages opening: conv_id=%s: %v", id, err)
+		}
 	}
 	limit := 50
 	if l := c.Query("limit"); l != "" {

@@ -37,6 +37,7 @@ type AIHandler struct {
 	ttsCfg       *repository.TtsConfigRepo
 	translateCfg *repository.TranslateConfigRepo
 	voice        *repository.VoiceRepo
+	opening      *repository.ScenarioOpeningRepo
 	userRepo     *repository.UserRepo
 	usage        *repository.UsageRepo
 	az           *authz.Service
@@ -54,6 +55,7 @@ func NewAIHandler(
 	ttsCfg *repository.TtsConfigRepo,
 	translateCfg *repository.TranslateConfigRepo,
 	voice *repository.VoiceRepo,
+	opening *repository.ScenarioOpeningRepo,
 	userRepo *repository.UserRepo,
 	usage *repository.UsageRepo,
 	az *authz.Service,
@@ -62,7 +64,7 @@ func NewAIHandler(
 	return &AIHandler{
 		cfg: cfg, msg: msg, sys: sys, conv: conv, lang: lang,
 		llmCfg: llmCfg, sttCfg: sttCfg, ttsCfg: ttsCfg, translateCfg: translateCfg,
-		voice: voice, userRepo: userRepo, usage: usage, az: az, media: mediaSvc,
+		voice: voice, opening: opening, userRepo: userRepo, usage: usage, az: az, media: mediaSvc,
 	}
 }
 
@@ -571,88 +573,7 @@ func (h *AIHandler) writeQuotaError(c *gin.Context, err error) {
 }
 
 func (h *AIHandler) synthesizeReply(c *gin.Context, userID string, conv *model.Conversation, reply string, useTTS *bool) (*string, error) {
-	enabled := useTTS == nil || *useTTS
-	voiceID := conv.VoiceRoleID
-	if !enabled || voiceID == nil || *voiceID == "" {
-		return nil, nil
-	}
-
-	vrEntity, err := h.voice.GetEntityByID(c.Request.Context(), *voiceID)
-	if err != nil || vrEntity == nil {
-		return nil, nil
-	}
-	if repository.NormalizeSynthesisType(vrEntity.SynthesisType) != repository.SynthesisTTS {
-		return nil, nil
-	}
-	if vrEntity.TtsServiceConfigID == nil || strings.TrimSpace(*vrEntity.TtsServiceConfigID) == "" || strings.TrimSpace(vrEntity.VoiceCode) == "" {
-		return nil, errTTSFailed
-	}
-
-	ttsRow, err := h.ttsCfg.GetByID(c.Request.Context(), strings.TrimSpace(*vrEntity.TtsServiceConfigID))
-	if err != nil || ttsRow == nil {
-		return nil, errTTSFailed
-	}
-
-	apiKey, region, tBase := h.resolveTTSCredentials(ttsRow)
-	ex := ai.ParseTTSExtraConfig(ttsRow.ConfigJSON)
-
-	result, err := ai.Synthesize(c.Request.Context(), ai.TTSRequest{
-		Provider:        ttsRow.Provider,
-		BaseURL:         tBase,
-		APIKey:          apiKey,
-		Region:          region,
-		ModelCode:       ttsRow.ModelCode,
-		ConfigJSON:      ttsRow.ConfigJSON,
-		VoiceCode:       vrEntity.VoiceCode,
-		Text:            reply,
-		AliyunAppKey:    strings.TrimSpace(ex.AppKey),
-		TencentSecretID: ex.TencentSecretID(),
-	})
-	if err != nil {
-		if h.cfg.VerboseLogs {
-			log.Printf("[tts] synthesize provider=%s code=%q: %v", ttsRow.Provider, ttsRow.Code, err)
-		}
-		return nil, errTTSFailed
-	}
-	if result == nil || len(result.Audio) == 0 {
-		return nil, errTTSFailed
-	}
-	if h.cfg.TTSLoudnessNorm {
-		opts := &ai.TTSLoudnessOptions{TargetLUFS: h.cfg.TTSTargetLUFS}
-		norm, normMime, normErr := ai.NormalizeTTSLoudness(c.Request.Context(), h.cfg.FFmpegPath, result.Audio, result.MimeType, opts)
-		if normErr == nil && len(norm) > 0 {
-			result.Audio = norm
-			if normMime != "" {
-				result.MimeType = normMime
-			}
-		} else {
-			boost, boostMime, boostErr := ai.BoostTTSVolumeFallback(c.Request.Context(), h.cfg.FFmpegPath, result.Audio, result.MimeType)
-			if boostErr == nil && len(boost) > 0 {
-				result.Audio = boost
-				if boostMime != "" {
-					result.MimeType = boostMime
-				}
-			} else if errors.Is(normErr, ai.ErrFFmpegNotFound) || errors.Is(boostErr, ai.ErrFFmpegNotFound) {
-				log.Printf("[tts] WARNING: ffmpeg not found — TTS audio is not loudness-normalized. Install ffmpeg or set XLANGAI_FFMPEG_PATH")
-			} else if h.cfg.VerboseLogs && normErr != nil {
-				log.Printf("[tts] loudness normalize skipped: %v", normErr)
-			}
-		}
-	}
-	if h.usage != nil && userID != "" {
-		charCount := utf8.RuneCountInString(reply)
-		_ = h.usage.Record(c.Request.Context(), repository.UsageRecord{
-			UserID:          userID,
-			TTSCalls:        1,
-			TTSChars:        charCount,
-			ServiceType:     repository.ServiceUsageTTS,
-			ServiceConfigID: ttsRow.ID,
-			ServiceRequests: 1,
-			ServiceUnits:    int64(charCount),
-		})
-	}
-	ext := ai.MimeToAudioExt(result.MimeType)
-	return h.saveAssistantTTS(c.Request.Context(), result.Audio, ext)
+	return h.synthesizeAssistantText(c.Request.Context(), userID, conv, reply, useTTS)
 }
 
 func (h *AIHandler) resolveTTSCredentials(ttsRow *repository.TtsServiceConfig) (apiKey, region, baseURL string) {

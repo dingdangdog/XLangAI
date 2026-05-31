@@ -208,6 +208,19 @@ type PracticeScenario struct {
 
 func (PracticeScenario) TableName() string { return "sys_practice_scenarios" }
 
+type ScenarioOpeningLine struct {
+	ID           string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	ScenarioCode string    `gorm:"column:scenario_code;type:varchar(32)"`
+	LanguageCode string    `gorm:"column:language_code;type:varchar(10)"`
+	Template     string    `gorm:"column:template;type:varchar(500)"`
+	Status       string    `gorm:"column:status;type:varchar(20)"`
+	Remark       *string   `gorm:"column:remark;type:varchar(500)"`
+	CreatedAt    time.Time `gorm:"column:created_at"`
+	UpdatedAt    time.Time `gorm:"column:updated_at"`
+}
+
+func (ScenarioOpeningLine) TableName() string { return "sys_scenario_opening_lines" }
+
 type MembershipTier struct {
 	ID           string    `gorm:"column:id;type:varchar(36);primaryKey"`
 	Code         string    `gorm:"column:code;type:varchar(20);uniqueIndex"`

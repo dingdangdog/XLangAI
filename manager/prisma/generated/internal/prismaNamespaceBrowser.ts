@@ -62,6 +62,7 @@ export const ModelName = {
   VoiceRole: 'VoiceRole',
   PromptTemplate: 'PromptTemplate',
   PracticeScenario: 'PracticeScenario',
+  ScenarioOpeningLine: 'ScenarioOpeningLine',
   MembershipTier: 'MembershipTier',
   User: 'User',
   BillingProduct: 'BillingProduct',
@@ -302,6 +303,20 @@ export const PracticeScenarioScalarFieldEnum = {
 } as const
 
 export type PracticeScenarioScalarFieldEnum = (typeof PracticeScenarioScalarFieldEnum)[keyof typeof PracticeScenarioScalarFieldEnum]
+
+
+export const ScenarioOpeningLineScalarFieldEnum = {
+  id: 'id',
+  scenarioCode: 'scenarioCode',
+  languageCode: 'languageCode',
+  template: 'template',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ScenarioOpeningLineScalarFieldEnum = (typeof ScenarioOpeningLineScalarFieldEnum)[keyof typeof ScenarioOpeningLineScalarFieldEnum]
 
 
 export const MembershipTierScalarFieldEnum = {

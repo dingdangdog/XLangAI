@@ -43,6 +43,8 @@ const EXPECTED_TABLES = [
   "sys_tts_service_configs",
   "sys_voice_roles",
   "sys_prompt_templates",
+  "sys_practice_scenarios",
+  "sys_scenario_opening_lines",
   "sys_membership_tiers",
   "sys_billing_products",
   "usr_users",

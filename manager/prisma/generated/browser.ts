@@ -73,6 +73,11 @@ export type PromptTemplate = Prisma.PromptTemplateModel
  */
 export type PracticeScenario = Prisma.PracticeScenarioModel
 /**
+ * Model ScenarioOpeningLine
+ * 场景开场语模板（按场景 + 语言；{name} 替换为语音角色名）
+ */
+export type ScenarioOpeningLine = Prisma.ScenarioOpeningLineModel
+/**
  * Model MembershipTier
  * 
  */

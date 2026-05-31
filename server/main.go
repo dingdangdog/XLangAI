@@ -182,13 +182,15 @@ func main() {
 
 	scenarioR := repository.NewScenarioRepo(gdb)
 
-	ch := handler.NewConvHandler(cr, msgR, sr, scenarioR, ur, vr, lr, cfg.VerboseLogs)
-
-	scenarioH := handler.NewScenarioHandler(scenarioR)
+	openingR := repository.NewScenarioOpeningRepo(gdb)
 
 	mediaSvc := media.NewService(osr, cfg, sysSettings)
 
-	ah := handler.NewAIHandler(cfg, msgR, sr, cr, lr, llm, stt, tc, tr, vr, ur, urUsage, az, mediaSvc)
+	ah := handler.NewAIHandler(cfg, msgR, sr, cr, lr, llm, stt, tc, tr, vr, openingR, ur, urUsage, az, mediaSvc)
+
+	ch := handler.NewConvHandler(cr, msgR, sr, scenarioR, ur, vr, lr, ah, cfg.VerboseLogs)
+
+	scenarioH := handler.NewScenarioHandler(scenarioR)
 
 	lh := handler.NewLangHandler(lr, appCache, cfg.LangCacheTTL)
 

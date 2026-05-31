@@ -51,6 +51,15 @@ func (r *MessageRepo) Create(ctx context.Context, in CreateMessageInput) (*model
 	return messageToModel(&row), nil
 }
 
+func (r *MessageRepo) CountByConversation(ctx context.Context, convID string) (int64, error) {
+	var n int64
+	err := r.notDeleted().WithContext(ctx).
+		Model(&entity.Message{}).
+		Where("conversation_id = ?", convID).
+		Count(&n).Error
+	return n, err
+}
+
 func (r *MessageRepo) ListByConversation(ctx context.Context, convID string, limit int, beforeID *string) ([]*model.Message, error) {
 	q := r.notDeleted().WithContext(ctx).Where("conversation_id = ?", convID)
 	if beforeID != nil && *beforeID != "" {

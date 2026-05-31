@@ -715,6 +715,117 @@ async function ensurePracticeScenarios(db: AppPrismaClient) {
   }
 }
 
+/** 各场景 × 语言的开场语模板；{name} 替换为语音角色名 */
+const SCENARIO_OPENING_TEMPLATES: Record<string, Record<string, string>> = {
+  shopping: {
+    zh: "欢迎光临！我是{name}，请问您在找什么？",
+    yue: "歡迎光臨！我係{name}，想搵啲咩？",
+    en: "Welcome! I'm {name}. Can I help you find something?",
+    ja: "いらっしゃいませ。{name}です。何をお探しですか？",
+    ko: "어서 오세요. {name}입니다. 무엇을 찾으시나요?",
+    es: "¡Bienvenido! Soy {name}. ¿Busca algo en particular?",
+    fr: "Bienvenue ! Je suis {name}. Vous cherchez quelque chose ?",
+    de: "Willkommen! Ich bin {name}. Kann ich Ihnen etwas zeigen?",
+    pt: "Bem-vindo! Sou {name}. Posso ajudá-lo a encontrar algo?",
+    it: "Benvenuto! Sono {name}. Cerca qualcosa in particolare?",
+    ru: "Добро пожаловать! Я {name}. Чем могу помочь?",
+    ar: "أهلاً بك! أنا {name}. هل تبحث عن شيء معين؟",
+    hi: "स्वागत है! मैं {name} हूँ। आप क्या ढूँढ रहे हैं?",
+  },
+  hotel: {
+    zh: "欢迎光临！我是前台{name}，请问有什么可以帮您？",
+    yue: "歡迎光臨！我係前台{name}，有咩可以幫到你？",
+    en: "Welcome! I'm {name} at the front desk. How may I assist you?",
+    ja: "いらっしゃいませ。フロントの{name}です。ご用件はございますか？",
+    ko: "어서 오세요. 프런트 {name}입니다. 무엇을 도와드릴까요?",
+    es: "¡Bienvenido! Soy {name} de recepción. ¿En qué puedo ayudarle?",
+    fr: "Bienvenue ! Je suis {name} à la réception. Comment puis-je vous aider ?",
+    de: "Willkommen! Ich bin {name} an der Rezeption. Womit kann ich helfen?",
+    pt: "Bem-vindo! Sou {name} na recepção. Como posso ajudá-lo?",
+    it: "Benvenuto! Sono {name} alla reception. Come posso aiutarla?",
+    ru: "Добро пожаловать! Я {name} на стойке регистрации. Чем могу помочь?",
+    ar: "أهلاً بك! أنا {name} في الاستقبال. كيف يمكنني مساعدتك؟",
+    hi: "स्वागत है! मैं रिसेप्शन पर {name} हूँ। मैं आपकी कैसे मदद कर सकता/सकती हूँ?",
+  },
+  restaurant: {
+    zh: "欢迎光临！我是{name}，请问几位用餐？",
+    yue: "歡迎光臨！我係{name}，請問幾多位？",
+    en: "Welcome! I'm {name}. How many are in your party?",
+    ja: "いらっしゃいませ。{name}です。何名様でしょうか？",
+    ko: "어서 오세요. {name}입니다. 몇 분이세요?",
+    es: "¡Bienvenido! Soy {name}. ¿Cuántas personas son?",
+    fr: "Bienvenue ! Je suis {name}. Vous êtes combien ?",
+    de: "Willkommen! Ich bin {name}. Wie viele Personen sind Sie?",
+    pt: "Bem-vindo! Sou {name}. Quantas pessoas?",
+    it: "Benvenuto! Sono {name}. Quanti siete?",
+    ru: "Добро пожаловать! Я {name}. Сколько вас человек?",
+    ar: "أهلاً بك! أنا {name}. كم عددكم؟",
+    hi: "स्वागत है! मैं {name} हूँ। आप कितने लोग हैं?",
+  },
+  cafe: {
+    zh: "欢迎光临小浪咖啡屋，我是{name}，请问您想喝点什么？",
+    yue: "歡迎光臨小浪咖啡屋，我係{name}，想飲啲咩？",
+    en: "Welcome to Xiaolang Café! I'm {name}. What can I get started for you?",
+    ja: "いらっしゃいませ。{name}です。何になさいますか？",
+    ko: "어서 오세요. {name}입니다. 무엇을 드릴까요?",
+    es: "¡Bienvenido a Xiaolang Café! Soy {name}. ¿Qué le gustaría tomar?",
+    fr: "Bienvenue au café Xiaolang ! Je suis {name}. Que puis-je vous servir ?",
+    de: "Willkommen im Xiaolang Café! Ich bin {name}. Was darf es sein?",
+    pt: "Bem-vindo ao Café Xiaolang! Sou {name}. O que posso preparar?",
+    it: "Benvenuto al Xiaolang Café! Sono {name}. Cosa desidera?",
+    ru: "Добро пожаловать в кафе Xiaolang! Я {name}. Что для вас приготовить?",
+    ar: "أهلاً بك في مقهى Xiaolang! أنا {name}. ماذا تود أن تشرب؟",
+    hi: "Xiaolang Café में स्वागत है! मैं {name} हूँ। आप क्या पीना चाहेंगे?",
+  },
+  office: {
+    zh: "你好，我是{name}。今天有什么需要协调的吗？",
+    yue: "你好，我係{name}。今日有咩要傾？",
+    en: "Hi, I'm {name}. Is there anything we need to align on today?",
+    ja: "こんにちは、{name}です。今日、何かすり合わせはありますか？",
+    ko: "안녕하세요, {name}입니다. 오늘 맞춰야 할 일이 있을까요?",
+    es: "Hola, soy {name}. ¿Hay algo que debamos alinear hoy?",
+    fr: "Bonjour, je suis {name}. Y a-t-il quelque chose à aligner aujourd'hui ?",
+    de: "Hallo, ich bin {name}. Gibt es heute etwas abzustimmen?",
+    pt: "Olá, sou {name}. Há algo para alinhar hoje?",
+    it: "Ciao, sono {name}. C'è qualcosa da allineare oggi?",
+    ru: "Привет, я {name}. Нужно ли что-то согласовать сегодня?",
+    ar: "مرحباً، أنا {name}. هل هناك شيء نحتاج لتنسيقه اليوم؟",
+    hi: "नमस्ते, मैं {name} हूँ। आज कुछ तालमेल बिठाना है?",
+  },
+};
+
+async function ensureScenarioOpeningLines(db: AppPrismaClient) {
+  for (const [scenarioCode, byLang] of Object.entries(SCENARIO_OPENING_TEMPLATES)) {
+    for (const [languageCode, template] of Object.entries(byLang)) {
+      const exists = await db.scenarioOpeningLine.findUnique({
+        where: {
+          scenarioCode_languageCode: { scenarioCode, languageCode },
+        },
+      });
+      if (exists) {
+        if (exists.template !== template) {
+          await db.scenarioOpeningLine.update({
+            where: { id: exists.id },
+            data: { template, remark: `Seed: ${scenarioCode} opening (${languageCode})` },
+          });
+          console.info(`[data-seed] updated opening ${scenarioCode}/${languageCode}`);
+        }
+        continue;
+      }
+      await db.scenarioOpeningLine.create({
+        data: {
+          scenarioCode,
+          languageCode,
+          template,
+          status: "active",
+          remark: `Seed: ${scenarioCode} opening (${languageCode})`,
+        },
+      });
+      console.info(`[data-seed] opening line ${scenarioCode}/${languageCode}`);
+    }
+  }
+}
+
 export async function ensureTestSeedUser(db: AppPrismaClient) {
   await ensureMembershipTiers(db);
 
@@ -811,4 +922,5 @@ export async function runBusinessDataSeed(db: AppPrismaClient): Promise<void> {
   await ensureLlmServiceConfig(db);
   await ensurePromptTemplate(db);
   await ensurePracticeScenarios(db);
+  await ensureScenarioOpeningLines(db);
 }

@@ -249,6 +249,24 @@ model PracticeScenario {
   @@map("sys_practice_scenarios")
 }
 
+/// 场景开场语模板（按场景 + 语言；{name} 替换为语音角色名）
+model ScenarioOpeningLine {
+  id           String   @id @default(uuid())
+  scenarioCode String   @map("scenario_code") @db.VarChar(32)
+  languageCode String   @map("language_code") @db.VarChar(10)
+  template     String   @db.VarChar(500)
+  status       String   @default("active") @db.VarChar(20)
+  remark       String?  @db.VarChar(500)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([scenarioCode, languageCode])
+  @@index([scenarioCode])
+  @@index([languageCode])
+  @@index([status])
+  @@map("sys_scenario_opening_lines")
+}
+
 model MembershipTier {
   id           String   @id @default(uuid())
   code         String   @unique @db.VarChar(20)
@@ -444,12 +462,12 @@ model ConversationsBackup {
   promptId     String?   @map("prompt_id") @db.VarChar(36)
   scenarioCode String?   @map("scenario_code") @db.VarChar(32)
   title        String?   @db.VarChar(200)
-  status      String?   @db.VarChar(20)
-  remark      String?   @db.VarChar(500)
-  createdAt   DateTime? @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
-  cancelledAt DateTime  @default(now()) @map("cancelled_at") @db.Timestamptz(6)
-  backupBatch String    @map("backup_batch") @db.VarChar(36)
+  status       String?   @db.VarChar(20)
+  remark       String?   @db.VarChar(500)
+  createdAt    DateTime? @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
+  cancelledAt  DateTime  @default(now()) @map("cancelled_at") @db.Timestamptz(6)
+  backupBatch  String    @map("backup_batch") @db.VarChar(36)
 
   @@index([backupBatch])
   @@map("bak_usr_conversations")
