@@ -509,6 +509,11 @@
       "addVocabulary": "新建词汇",
       "sceneTitle": "场景名称",
       "fillOneLocaleName": "请至少填写一种语言的场景名称",
+      "translateTitles": "翻译到其他语言",
+      "translateTitlesHint": "先在任意一行填写场景名称，再点翻译；将自动填入其余语言（不要求管理员会所有语言）。",
+      "translateTitlesNoSource": "请先填写至少一种语言的场景名称",
+      "translateTitlesFailed": "翻译失败，请检查 LLM 配置或稍后重试",
+      "translateTitlesDone": "已填入其余 {count} 种语言",
       "noActiveLanguages": "请先在语言管理中启用至少一种语言。"
     },
     "readAloudCategories": {

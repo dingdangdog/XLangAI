@@ -159,6 +159,8 @@ watch([vocabPage, vocabPageSize, selectedCategoryId, filterLanguageId], () => vo
 const categoryDialogVisible = ref(false);
 const categoryDialogMode = ref<"create" | "edit">("create");
 const categorySaving = ref(false);
+const translatingTitles = ref(false);
+const categoryTranslateLlmId = ref("");
 
 const categoryForm = reactive({
   id: "",
@@ -215,6 +217,54 @@ function resetCategoryForm() {
   syncCategoryLocales();
 }
 
+function findFilledSourceLocale():
+  | { languageId: string; code: string; title: string }
+  | null {
+  for (const lang of activeLanguages.value) {
+    const title = categoryLocales.value[lang.id]?.name?.trim() ?? "";
+    if (title) return { languageId: lang.id, code: lang.code, title };
+  }
+  return null;
+}
+
+async function translateCategoryTitles() {
+  const source = findFilledSourceLocale();
+  if (!source) {
+    toast.warning(t("pages.readAloud.translateTitlesNoSource"));
+    return;
+  }
+  translatingTitles.value = true;
+  try {
+    const res = await $fetch<{
+      titlesByLanguageId: Record<string, string>;
+    }>("/api/admin/read-aloud-categories/translate-titles", {
+      method: "POST",
+      body: {
+        sourceLanguageId: source.languageId,
+        title: source.title,
+        llmServiceConfigId: categoryTranslateLlmId.value || undefined,
+      },
+    });
+    const map = res.titlesByLanguageId ?? {};
+    let applied = 0;
+    for (const lang of activeLanguages.value) {
+      const translated = map[lang.id]?.trim();
+      if (!translated) continue;
+      if (lang.id === source.languageId) continue;
+      if (categoryLocales.value[lang.id]) {
+        categoryLocales.value[lang.id].name = translated;
+        applied += 1;
+      }
+    }
+    toast.success(t("pages.readAloud.translateTitlesDone", { count: applied }));
+  } catch (e) {
+    toast.error(t("pages.readAloud.translateTitlesFailed"));
+    console.error(e);
+  } finally {
+    translatingTitles.value = false;
+  }
+}
+
 function seedLegacyNameIntoFirstLang(fallbackName: string) {
   const name = fallbackName.trim();
   if (!name) return;
@@ -230,6 +280,7 @@ async function openCategoryCreate() {
   resetCategoryForm();
   await loadActiveLanguages();
   syncCategoryLocales();
+  categoryTranslateLlmId.value = llmOptions.value[0]?.id ?? "";
   categoryDialogVisible.value = true;
 }
 
@@ -247,6 +298,7 @@ async function openCategoryEdit(row?: Record<string, unknown>) {
   const labels = target.localeLabels as CategoryLocaleLabel[] | undefined;
   syncCategoryLocales(localeLabelsToMap(labels));
   seedLegacyNameIntoFirstLang(String(target.name ?? ""));
+  categoryTranslateLlmId.value = llmOptions.value[0]?.id ?? "";
   categoryDialogVisible.value = true;
 }
 
@@ -787,7 +839,30 @@ onMounted(() => void loadOptions());
             {{ $t("nav.items.languages") }}
           </AdminButton>
         </p>
-        <div v-else class="overflow-x-auto rounded-lg border border-border">
+        <div v-else class="space-y-2">
+          <div class="flex flex-wrap items-end gap-3">
+            <AdminFormField
+              v-if="llmOptions.length"
+              :label="$t('pages.readAloudVocabularies.llmConfig')"
+              class="min-w-[220px] flex-1"
+            >
+              <AdminSelect
+                v-model="categoryTranslateLlmId"
+                :options="llmSelectOptions"
+                :loading="optionsLoading"
+              />
+            </AdminFormField>
+            <AdminButton
+              variant="secondary"
+              :loading="translatingTitles"
+              :disabled="activeLanguagesLoading"
+              @click="translateCategoryTitles"
+            >
+              {{ $t("pages.readAloud.translateTitles") }}
+            </AdminButton>
+          </div>
+          <p class="text-xs text-muted">{{ $t("pages.readAloud.translateTitlesHint") }}</p>
+          <div class="overflow-x-auto rounded-lg border border-border">
           <table class="min-w-full text-sm">
             <thead>
               <tr class="border-b border-border bg-surface-muted/40 text-left text-xs text-muted">
@@ -811,6 +886,7 @@ onMounted(() => void loadOptions());
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
 
         <AdminFormField :label="$t('pages.readAloudCategories.icon')">

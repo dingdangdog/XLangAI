@@ -512,6 +512,11 @@
       "addVocabulary": "New vocabulary",
       "sceneTitle": "Scenario title",
       "fillOneLocaleName": "Enter a scenario title for at least one language",
+      "translateTitles": "Translate to other languages",
+      "translateTitlesHint": "Fill the title in any one row, then translate — other languages are filled automatically.",
+      "translateTitlesNoSource": "Enter a scenario title in at least one language first",
+      "translateTitlesFailed": "Translation failed; check LLM settings or try again",
+      "translateTitlesDone": "Filled {count} other language(s)",
       "noActiveLanguages": "Enable at least one language in Language settings first."
     },
     "readAloudCategories": {
