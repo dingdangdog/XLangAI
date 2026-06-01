@@ -119,6 +119,12 @@ export async function adminListHandler(event: H3Event, resource: ResourceSlug) {
   if (resource === "user-usage" && q.userId) {
     where.userId = String(q.userId);
   }
+  if (resource === "read-aloud-vocabularies" && q.categoryId) {
+    where.categoryId = String(q.categoryId);
+  }
+  if (resource === "read-aloud-vocabularies" && q.languageId) {
+    where.languageId = String(q.languageId);
+  }
   if (
     (resource === "users-backup" ||
       resource === "conversations-backup" ||

@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, sch *handler.ScenarioHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler, captchaH *handler.CaptchaHandler) *gin.Engine {
+func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *handler.ConvHandler, ah *handler.AIHandler, lh *handler.LangHandler, vh *handler.VoiceHandler, sch *handler.ScenarioHandler, rah *handler.ReadAloudHandler, mh *handler.MembershipHandler, sh *handler.StatsHandler, bh *handler.BillingHandler, sth *handler.SettingsHandler, mdh *handler.MediaHandler, captchaH *handler.CaptchaHandler) *gin.Engine {
 	r := gin.Default()
 	r.Use(handler.HTTPErrorLogMiddleware())
 
@@ -56,6 +56,12 @@ func New(cfg *config.Config, az *authz.Service, uh *handler.UserHandler, ch *han
 		prot.POST("/conversations/:id/chat", ah.Chat)
 		prot.POST("/conversations/:id/voice", ah.VoiceChat)
 		prot.POST("/translate", ah.Translate)
+		prot.GET("/read-aloud/categories", rah.ListCategories)
+		prot.GET("/read-aloud/categories/:id/vocabularies", rah.ListVocabularies)
+		prot.POST("/read-aloud/sessions", rah.CreateSession)
+		prot.GET("/read-aloud/sessions", rah.ListSessions)
+		prot.GET("/read-aloud/sessions/:id", rah.GetSession)
+		prot.POST("/read-aloud/sessions/:id/attempts", rah.SubmitAttempt)
 	}
 
 	return r

@@ -182,6 +182,8 @@ func main() {
 
 	scenarioR := repository.NewScenarioRepo(gdb)
 
+	readAloudR := repository.NewReadAloudRepo(gdb)
+
 	openingR := repository.NewScenarioOpeningRepo(gdb)
 
 	mediaSvc := media.NewService(osr, cfg, sysSettings)
@@ -191,6 +193,8 @@ func main() {
 	ch := handler.NewConvHandler(cr, msgR, sr, scenarioR, ur, vr, lr, ah, cfg.VerboseLogs)
 
 	scenarioH := handler.NewScenarioHandler(scenarioR)
+
+	readAloudH := handler.NewReadAloudHandler(readAloudR, lr)
 
 	lh := handler.NewLangHandler(lr, appCache, cfg.LangCacheTTL)
 
@@ -213,7 +217,7 @@ func main() {
 
 	bh := handler.NewBillingHandler(cfg, appleCfg, br, ur, mr, az)
 
-	r := router.New(cfg, az, uh, ch, ah, lh, vh, scenarioH, mh, sh, bh, sth, mdh, captchaH)
+	r := router.New(cfg, az, uh, ch, ah, lh, vh, scenarioH, readAloudH, mh, sh, bh, sth, mdh, captchaH)
 
 	log.Printf("listen :%s", cfg.Port)
 

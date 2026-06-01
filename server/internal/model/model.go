@@ -49,6 +49,60 @@ type PracticeScenario struct {
 	SortOrder   int     `json:"sort_order"`
 }
 
+type ReadAloudCategory struct {
+	ID            string `json:"id"`
+	Code          string `json:"code"`
+	Name          string `json:"name"`
+	NameEn        string `json:"name_en,omitempty"`
+	Icon          string `json:"icon,omitempty"`
+	Description   string `json:"description,omitempty"`
+	DescriptionEn string `json:"description_en,omitempty"`
+	SortOrder     int    `json:"sort_order"`
+	VocabCount    int    `json:"vocab_count,omitempty"`
+}
+
+type ReadAloudVocabulary struct {
+	ID               string     `json:"id"`
+	CategoryID       string     `json:"category_id"`
+	LanguageID       string     `json:"language_id"`
+	Word             string     `json:"word"`
+	ExampleSentence  string     `json:"example_sentence"`
+	VoiceRoleID      string     `json:"voice_role_id"`
+	WordAudioURL     *string    `json:"word_audio_url,omitempty"`
+	SentenceAudioURL *string    `json:"sentence_audio_url,omitempty"`
+	SortOrder        int        `json:"sort_order"`
+}
+
+type ReadAloudSession struct {
+	ID             string     `json:"id"`
+	UserID         string     `json:"user_id"`
+	CategoryID     string     `json:"category_id"`
+	CategoryName   string     `json:"category_name,omitempty"`
+	LanguageID     string     `json:"language_id"`
+	LanguageCode   string     `json:"language_code,omitempty"`
+	Status         string     `json:"status"`
+	TotalItems     int        `json:"total_items"`
+	CompletedItems int        `json:"completed_items"`
+	AverageScore   *int       `json:"average_score,omitempty"`
+	StartedAt      time.Time  `json:"started_at"`
+	CompletedAt    *time.Time `json:"completed_at,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+}
+
+type ReadAloudAttempt struct {
+	ID            string    `json:"id"`
+	SessionID     string    `json:"session_id"`
+	VocabularyID  string    `json:"vocabulary_id"`
+	Part          string    `json:"part"`
+	ReferenceText string    `json:"reference_text"`
+	Transcript    string    `json:"transcript"`
+	Score         int       `json:"score"`
+	MatchDetail   *string   `json:"match_detail,omitempty"`
+	DurationMs    *int      `json:"duration_ms,omitempty"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
 type Message struct {
 	ID                  string    `json:"id"`
 	ConversationID      string    `json:"conversation_id"`

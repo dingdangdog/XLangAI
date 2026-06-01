@@ -37,6 +37,8 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       { to: "/manage/languages", labelKey: "nav.items.languages", icon: GlobeAltIcon },
       { to: "/manage/prompt-templates", labelKey: "nav.items.promptTemplates", icon: DocumentTextIcon },
       { to: "/manage/practice-scenarios", labelKey: "nav.items.practiceScenarios", icon: DocumentTextIcon },
+      { to: "/manage/read-aloud-categories", labelKey: "nav.items.readAloudCategories", icon: DocumentTextIcon },
+      { to: "/manage/read-aloud-vocabularies", labelKey: "nav.items.readAloudVocabularies", icon: DocumentTextIcon },
     ],
   },
   {

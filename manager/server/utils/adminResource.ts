@@ -23,6 +23,8 @@ export const RESOURCE_SLUGS = [
   "voice-roles",
   "prompt-templates",
   "practice-scenarios",
+  "read-aloud-categories",
+  "read-aloud-vocabularies",
   "membership-tiers",
   "users",
   "user-usage",
@@ -53,6 +55,8 @@ type DelegateKey =
   | "voiceRole"
   | "promptTemplate"
   | "practiceScenario"
+  | "readAloudCategory"
+  | "readAloudVocabulary"
   | "membershipTier"
   | "user"
   | "userUsage"
@@ -123,6 +127,16 @@ export const RESOURCE_META: Record<
   },
   "practice-scenarios": {
     delegate: "practiceScenario",
+    softListFilter: false,
+    orderBy: orderBySortOrderCode(),
+  },
+  "read-aloud-categories": {
+    delegate: "readAloudCategory",
+    softListFilter: false,
+    orderBy: orderBySortOrderCode(),
+  },
+  "read-aloud-vocabularies": {
+    delegate: "readAloudVocabulary",
     softListFilter: false,
     orderBy: orderBySortOrderCode(),
   },

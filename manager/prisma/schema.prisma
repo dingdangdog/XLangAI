@@ -267,6 +267,93 @@ model ScenarioOpeningLine {
   @@map("sys_scenario_opening_lines")
 }
 
+/// 跟读练习场景分类（购物、酒店等专项词汇场景，与对话练习场景独立）
+model ReadAloudCategory {
+  id            String   @id @default(uuid())
+  code          String   @unique @db.VarChar(32)
+  name          String   @db.VarChar(100)
+  nameEn        String?  @map("name_en") @db.VarChar(100)
+  icon          String?  @db.VarChar(50)
+  description   String?  @db.VarChar(500)
+  descriptionEn String?  @map("description_en") @db.VarChar(500)
+  sortOrder     Int      @default(0) @map("sort_order")
+  status        String   @default("active") @db.VarChar(20)
+  remark        String?  @db.VarChar(500)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([code])
+  @@index([status])
+  @@map("sys_read_aloud_categories")
+}
+
+/// 跟读练习词汇（按场景 + 语言；词汇与例句分别生成 TTS 参考音频）
+model ReadAloudVocabulary {
+  id                         String    @id @default(uuid())
+  categoryId                 String    @map("category_id") @db.VarChar(36)
+  languageId                 String    @map("language_id") @db.VarChar(36)
+  word                       String    @db.VarChar(200)
+  exampleSentence            String    @map("example_sentence") @db.VarChar(500)
+  voiceRoleId                String    @map("voice_role_id") @db.VarChar(36)
+  wordAudioUrl               String?   @map("word_audio_url") @db.VarChar(500)
+  wordAudioLocalFilename     String?   @map("word_audio_local_filename") @db.VarChar(200)
+  wordAudioGeneratedAt       DateTime? @map("word_audio_generated_at") @db.Timestamptz(6)
+  sentenceAudioUrl           String?   @map("sentence_audio_url") @db.VarChar(500)
+  sentenceAudioLocalFilename String?   @map("sentence_audio_local_filename") @db.VarChar(200)
+  sentenceAudioGeneratedAt   DateTime? @map("sentence_audio_generated_at") @db.Timestamptz(6)
+  sortOrder                  Int       @default(0) @map("sort_order")
+  status                     String    @default("active") @db.VarChar(20)
+  remark                     String?   @db.VarChar(500)
+  createdAt                  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                  DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([categoryId])
+  @@index([languageId])
+  @@index([categoryId, languageId])
+  @@index([status])
+  @@map("sys_read_aloud_vocabularies")
+}
+
+/// 用户跟读练习会话
+model ReadAloudSession {
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id") @db.VarChar(36)
+  categoryId     String    @map("category_id") @db.VarChar(36)
+  languageId     String    @map("language_id") @db.VarChar(36)
+  status         String    @default("in_progress") @db.VarChar(20)
+  totalItems     Int       @default(0) @map("total_items")
+  completedItems Int       @default(0) @map("completed_items")
+  averageScore   Int?      @map("average_score")
+  startedAt      DateTime  @default(now()) @map("started_at") @db.Timestamptz(6)
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("usr_read_aloud_sessions")
+}
+
+/// 跟读练习单次作答（词汇或例句）
+model ReadAloudAttempt {
+  id            String   @id @default(uuid())
+  sessionId     String   @map("session_id") @db.VarChar(36)
+  vocabularyId  String   @map("vocabulary_id") @db.VarChar(36)
+  /// word | sentence
+  part          String   @db.VarChar(20)
+  referenceText String   @map("reference_text") @db.VarChar(500)
+  transcript    String   @db.Text
+  score         Int
+  matchDetail   String?  @map("match_detail") @db.Text
+  durationMs    Int?     @map("duration_ms")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([sessionId])
+  @@index([vocabularyId])
+  @@map("usr_read_aloud_attempts")
+}
+
 model MembershipTier {
   id           String   @id @default(uuid())
   code         String   @unique @db.VarChar(20)

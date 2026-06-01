@@ -357,3 +357,74 @@ type Message struct {
 }
 
 func (Message) TableName() string { return "usr_messages" }
+
+type ReadAloudCategory struct {
+	ID            string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	Code          string    `gorm:"column:code;type:varchar(32);uniqueIndex"`
+	Name          string    `gorm:"column:name;type:varchar(100)"`
+	NameEn        *string   `gorm:"column:name_en;type:varchar(100)"`
+	Icon          *string   `gorm:"column:icon;type:varchar(50)"`
+	Description   *string   `gorm:"column:description;type:varchar(500)"`
+	DescriptionEn *string   `gorm:"column:description_en;type:varchar(500)"`
+	SortOrder     int       `gorm:"column:sort_order"`
+	Status        string    `gorm:"column:status;type:varchar(20)"`
+	Remark        *string   `gorm:"column:remark;type:varchar(500)"`
+	CreatedAt     time.Time `gorm:"column:created_at"`
+	UpdatedAt     time.Time `gorm:"column:updated_at"`
+}
+
+func (ReadAloudCategory) TableName() string { return "sys_read_aloud_categories" }
+
+type ReadAloudVocabulary struct {
+	ID                         string     `gorm:"column:id;type:varchar(36);primaryKey"`
+	CategoryID                 string     `gorm:"column:category_id;type:varchar(36)"`
+	LanguageID                 string     `gorm:"column:language_id;type:varchar(36)"`
+	Word                       string     `gorm:"column:word;type:varchar(200)"`
+	ExampleSentence            string     `gorm:"column:example_sentence;type:varchar(500)"`
+	VoiceRoleID                string     `gorm:"column:voice_role_id;type:varchar(36)"`
+	WordAudioURL               *string    `gorm:"column:word_audio_url;type:varchar(500)"`
+	WordAudioLocalFilename     *string    `gorm:"column:word_audio_local_filename;type:varchar(200)"`
+	WordAudioGeneratedAt       *time.Time `gorm:"column:word_audio_generated_at"`
+	SentenceAudioURL           *string    `gorm:"column:sentence_audio_url;type:varchar(500)"`
+	SentenceAudioLocalFilename *string    `gorm:"column:sentence_audio_local_filename;type:varchar(200)"`
+	SentenceAudioGeneratedAt   *time.Time `gorm:"column:sentence_audio_generated_at"`
+	SortOrder                  int        `gorm:"column:sort_order"`
+	Status                     string     `gorm:"column:status;type:varchar(20)"`
+	Remark                     *string    `gorm:"column:remark;type:varchar(500)"`
+	CreatedAt                  time.Time  `gorm:"column:created_at"`
+	UpdatedAt                  time.Time  `gorm:"column:updated_at"`
+}
+
+func (ReadAloudVocabulary) TableName() string { return "sys_read_aloud_vocabularies" }
+
+type ReadAloudSession struct {
+	ID             string     `gorm:"column:id;type:varchar(36);primaryKey"`
+	UserID         string     `gorm:"column:user_id;type:varchar(36)"`
+	CategoryID     string     `gorm:"column:category_id;type:varchar(36)"`
+	LanguageID     string     `gorm:"column:language_id;type:varchar(36)"`
+	Status         string     `gorm:"column:status;type:varchar(20)"`
+	TotalItems     int        `gorm:"column:total_items"`
+	CompletedItems int        `gorm:"column:completed_items"`
+	AverageScore   *int       `gorm:"column:average_score"`
+	StartedAt      time.Time  `gorm:"column:started_at"`
+	CompletedAt    *time.Time `gorm:"column:completed_at"`
+	CreatedAt      time.Time  `gorm:"column:created_at"`
+	UpdatedAt      time.Time  `gorm:"column:updated_at"`
+}
+
+func (ReadAloudSession) TableName() string { return "usr_read_aloud_sessions" }
+
+type ReadAloudAttempt struct {
+	ID            string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	SessionID     string    `gorm:"column:session_id;type:varchar(36)"`
+	VocabularyID  string    `gorm:"column:vocabulary_id;type:varchar(36)"`
+	Part          string    `gorm:"column:part;type:varchar(20)"`
+	ReferenceText string    `gorm:"column:reference_text;type:varchar(500)"`
+	Transcript    string    `gorm:"column:transcript;type:text"`
+	Score         int       `gorm:"column:score"`
+	MatchDetail   *string   `gorm:"column:match_detail;type:text"`
+	DurationMs    *int      `gorm:"column:duration_ms"`
+	CreatedAt     time.Time `gorm:"column:created_at"`
+}
+
+func (ReadAloudAttempt) TableName() string { return "usr_read_aloud_attempts" }
