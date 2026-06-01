@@ -163,9 +163,7 @@ const categorySaving = ref(false);
 const categoryForm = reactive({
   id: "",
   code: "",
-  name: "",
   icon: "",
-  description: "",
   status: "active",
   sortOrder: 0,
   remark: "",
@@ -210,13 +208,21 @@ function syncCategoryLocales(merge?: Record<string, CategoryLocaleEntry>) {
 function resetCategoryForm() {
   categoryForm.id = "";
   categoryForm.code = "";
-  categoryForm.name = "";
   categoryForm.icon = "";
-  categoryForm.description = "";
   categoryForm.status = "active";
   categoryForm.sortOrder = 0;
   categoryForm.remark = "";
   syncCategoryLocales();
+}
+
+function seedLegacyNameIntoFirstLang(fallbackName: string) {
+  const name = fallbackName.trim();
+  if (!name) return;
+  const firstId = activeLanguages.value[0]?.id;
+  if (!firstId || !categoryLocales.value[firstId]) return;
+  if (!categoryLocales.value[firstId].name.trim()) {
+    categoryLocales.value[firstId].name = name;
+  }
 }
 
 async function openCategoryCreate() {
@@ -233,36 +239,36 @@ async function openCategoryEdit(row?: Record<string, unknown>) {
   categoryDialogMode.value = "edit";
   categoryForm.id = String(target.id ?? "");
   categoryForm.code = String(target.code ?? "");
-  categoryForm.name = String(target.name ?? "");
   categoryForm.icon = String(target.icon ?? "");
-  categoryForm.description = String(target.description ?? "");
   categoryForm.status = String(target.status ?? "active");
   categoryForm.sortOrder = Number(target.sortOrder ?? 0);
   categoryForm.remark = String(target.remark ?? "");
   await loadActiveLanguages();
   const labels = target.localeLabels as CategoryLocaleLabel[] | undefined;
   syncCategoryLocales(localeLabelsToMap(labels));
+  seedLegacyNameIntoFirstLang(String(target.name ?? ""));
   categoryDialogVisible.value = true;
 }
 
 async function submitCategory() {
-  if (!categoryForm.name.trim()) {
-    toast.warning(t("validation.fillName"));
-    return;
-  }
   const localeLabels = mapToLocaleLabels(
     activeLanguages.value.map((l) => l.id),
     categoryLocales.value,
   );
+  if (!localeLabels.length) {
+    toast.warning(t("pages.readAloud.fillOneLocaleName"));
+    return;
+  }
+  const primaryName = localeLabels[0].name;
   const body = {
     code:
       categoryDialogMode.value === "create"
-        ? autoAdminCode(categoryForm.name)
+        ? autoAdminCode(primaryName)
         : categoryForm.code,
-    name: categoryForm.name.trim(),
+    name: primaryName,
     localeLabels,
     icon: categoryForm.icon.trim() || null,
-    description: categoryForm.description.trim() || null,
+    description: null,
     status: categoryForm.status,
     sortOrder: categoryForm.sortOrder,
     remark: categoryForm.remark.trim() || null,
@@ -772,64 +778,44 @@ onMounted(() => void loadOptions());
       size="lg"
     >
       <div class="space-y-4">
-        <AdminFormField :label="$t('common.name')" required>
-          <AdminInput v-model="categoryForm.name" />
-        </AdminFormField>
+        <div v-if="activeLanguagesLoading" class="py-6">
+          <AdminSkeleton class="h-24 rounded-lg" />
+        </div>
+        <p v-else-if="!activeLanguages.length" class="text-sm text-muted">
+          {{ $t("pages.readAloud.noActiveLanguages") }}
+          <AdminButton to="/manage/languages" variant="link" size="sm" class="ml-1">
+            {{ $t("nav.items.languages") }}
+          </AdminButton>
+        </p>
+        <div v-else class="overflow-x-auto rounded-lg border border-border">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="border-b border-border bg-surface-muted/40 text-left text-xs text-muted">
+                <th class="px-3 py-2 font-medium">{{ $t("pages.readAloudVocabularies.language") }}</th>
+                <th class="px-3 py-2 font-medium">{{ $t("pages.readAloud.sceneTitle") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="lang in activeLanguages"
+                :key="lang.id"
+                class="border-b border-border last:border-b-0"
+              >
+                <td class="whitespace-nowrap px-3 py-3 align-middle text-foreground">{{ lang.label }}</td>
+                <td class="px-3 py-2 align-middle">
+                  <AdminInput
+                    v-if="categoryLocales[lang.id]"
+                    v-model="categoryLocales[lang.id].name"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <AdminFormField :label="$t('pages.readAloudCategories.icon')">
           <AdminInput v-model="categoryForm.icon" />
         </AdminFormField>
-        <AdminFormField :label="$t('pages.readAloudCategories.description')">
-          <AdminTextarea v-model="categoryForm.description" rows="2" />
-        </AdminFormField>
-
-        <div class="rounded-lg border border-border">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2">
-            <p class="text-xs text-muted">{{ $t("pages.readAloud.localesTableHint") }}</p>
-            <AdminButton to="/manage/languages" variant="link" size="sm">
-              {{ $t("nav.items.languages") }}
-            </AdminButton>
-          </div>
-          <div v-if="activeLanguagesLoading" class="p-4">
-            <AdminSkeleton class="h-20 rounded-lg" />
-          </div>
-          <p v-else-if="!activeLanguages.length" class="p-4 text-sm text-muted">
-            {{ $t("pages.readAloud.noActiveLanguages") }}
-          </p>
-          <div v-else class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-              <thead>
-                <tr class="border-b border-border bg-surface-muted/40 text-left text-xs text-muted">
-                  <th class="px-3 py-2 font-medium">{{ $t("pages.readAloudVocabularies.language") }}</th>
-                  <th class="px-3 py-2 font-medium">{{ $t("common.name") }}</th>
-                  <th class="px-3 py-2 font-medium">{{ $t("pages.readAloudCategories.description") }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="lang in activeLanguages"
-                  :key="lang.id"
-                  class="border-b border-border last:border-b-0"
-                >
-                  <td class="whitespace-nowrap px-3 py-2 align-middle text-foreground">{{ lang.label }}</td>
-                  <td class="px-3 py-2 align-middle">
-                    <AdminInput
-                      v-if="categoryLocales[lang.id]"
-                      v-model="categoryLocales[lang.id].name"
-                      :placeholder="categoryForm.name"
-                    />
-                  </td>
-                  <td class="px-3 py-2 align-middle">
-                    <AdminInput
-                      v-if="categoryLocales[lang.id]"
-                      v-model="categoryLocales[lang.id].description"
-                      :placeholder="categoryForm.description"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
         <AdminFormField :label="$t('common.status')">
           <AdminSelect v-model="categoryForm.status" :options="statusOptions" />
         </AdminFormField>

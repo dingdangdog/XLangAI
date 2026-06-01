@@ -510,7 +510,8 @@
       "editCategory": "Edit scenario",
       "deleteCategory": "Delete scenario",
       "addVocabulary": "New vocabulary",
-      "localesTableHint": "Rows come from Language settings; add or enable a language there, then reopen this dialog.",
+      "sceneTitle": "Scenario title",
+      "fillOneLocaleName": "Enter a scenario title for at least one language",
       "noActiveLanguages": "Enable at least one language in Language settings first."
     },
     "readAloudCategories": {

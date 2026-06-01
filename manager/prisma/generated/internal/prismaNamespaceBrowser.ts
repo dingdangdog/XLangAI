@@ -63,6 +63,11 @@ export const ModelName = {
   PromptTemplate: 'PromptTemplate',
   PracticeScenario: 'PracticeScenario',
   ScenarioOpeningLine: 'ScenarioOpeningLine',
+  ReadAloudCategory: 'ReadAloudCategory',
+  ReadAloudCategoryLocale: 'ReadAloudCategoryLocale',
+  ReadAloudVocabulary: 'ReadAloudVocabulary',
+  ReadAloudSession: 'ReadAloudSession',
+  ReadAloudAttempt: 'ReadAloudAttempt',
   MembershipTier: 'MembershipTier',
   User: 'User',
   BillingProduct: 'BillingProduct',
@@ -317,6 +322,94 @@ export const ScenarioOpeningLineScalarFieldEnum = {
 } as const
 
 export type ScenarioOpeningLineScalarFieldEnum = (typeof ScenarioOpeningLineScalarFieldEnum)[keyof typeof ScenarioOpeningLineScalarFieldEnum]
+
+
+export const ReadAloudCategoryScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  nameEn: 'nameEn',
+  icon: 'icon',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudCategoryScalarFieldEnum = (typeof ReadAloudCategoryScalarFieldEnum)[keyof typeof ReadAloudCategoryScalarFieldEnum]
+
+
+export const ReadAloudCategoryLocaleScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  languageId: 'languageId',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudCategoryLocaleScalarFieldEnum = (typeof ReadAloudCategoryLocaleScalarFieldEnum)[keyof typeof ReadAloudCategoryLocaleScalarFieldEnum]
+
+
+export const ReadAloudVocabularyScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  languageId: 'languageId',
+  word: 'word',
+  exampleSentence: 'exampleSentence',
+  voiceRoleId: 'voiceRoleId',
+  wordAudioUrl: 'wordAudioUrl',
+  wordAudioLocalFilename: 'wordAudioLocalFilename',
+  wordAudioGeneratedAt: 'wordAudioGeneratedAt',
+  sentenceAudioUrl: 'sentenceAudioUrl',
+  sentenceAudioLocalFilename: 'sentenceAudioLocalFilename',
+  sentenceAudioGeneratedAt: 'sentenceAudioGeneratedAt',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudVocabularyScalarFieldEnum = (typeof ReadAloudVocabularyScalarFieldEnum)[keyof typeof ReadAloudVocabularyScalarFieldEnum]
+
+
+export const ReadAloudSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  categoryId: 'categoryId',
+  languageId: 'languageId',
+  status: 'status',
+  totalItems: 'totalItems',
+  completedItems: 'completedItems',
+  averageScore: 'averageScore',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudSessionScalarFieldEnum = (typeof ReadAloudSessionScalarFieldEnum)[keyof typeof ReadAloudSessionScalarFieldEnum]
+
+
+export const ReadAloudAttemptScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  vocabularyId: 'vocabularyId',
+  part: 'part',
+  referenceText: 'referenceText',
+  transcript: 'transcript',
+  score: 'score',
+  matchDetail: 'matchDetail',
+  durationMs: 'durationMs',
+  createdAt: 'createdAt'
+} as const
+
+export type ReadAloudAttemptScalarFieldEnum = (typeof ReadAloudAttemptScalarFieldEnum)[keyof typeof ReadAloudAttemptScalarFieldEnum]
 
 
 export const MembershipTierScalarFieldEnum = {

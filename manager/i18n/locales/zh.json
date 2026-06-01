@@ -507,7 +507,8 @@
       "editCategory": "编辑场景",
       "deleteCategory": "删除场景",
       "addVocabulary": "新建词汇",
-      "localesTableHint": "下列语言来自「语言管理」；新增或启用语言后，重新打开本对话框即可出现对应行。",
+      "sceneTitle": "场景名称",
+      "fillOneLocaleName": "请至少填写一种语言的场景名称",
       "noActiveLanguages": "请先在语言管理中启用至少一种语言。"
     },
     "readAloudCategories": {

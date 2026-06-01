@@ -78,6 +78,31 @@ export type PracticeScenario = Prisma.PracticeScenarioModel
  */
 export type ScenarioOpeningLine = Prisma.ScenarioOpeningLineModel
 /**
+ * Model ReadAloudCategory
+ * 跟读练习场景分类（购物、酒店等专项词汇场景，与对话练习场景独立）
+ */
+export type ReadAloudCategory = Prisma.ReadAloudCategoryModel
+/**
+ * Model ReadAloudCategoryLocale
+ * 跟读场景在各语言下的展示名（关联 sys_languages.id）
+ */
+export type ReadAloudCategoryLocale = Prisma.ReadAloudCategoryLocaleModel
+/**
+ * Model ReadAloudVocabulary
+ * 跟读练习词汇（按场景 + 语言；词汇与例句分别生成 TTS 参考音频）
+ */
+export type ReadAloudVocabulary = Prisma.ReadAloudVocabularyModel
+/**
+ * Model ReadAloudSession
+ * 用户跟读练习会话
+ */
+export type ReadAloudSession = Prisma.ReadAloudSessionModel
+/**
+ * Model ReadAloudAttempt
+ * 跟读练习单次作答（词汇或例句）
+ */
+export type ReadAloudAttempt = Prisma.ReadAloudAttemptModel
+/**
  * Model MembershipTier
  * 
  */

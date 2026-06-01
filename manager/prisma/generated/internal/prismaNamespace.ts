@@ -396,6 +396,11 @@ export const ModelName = {
   PromptTemplate: 'PromptTemplate',
   PracticeScenario: 'PracticeScenario',
   ScenarioOpeningLine: 'ScenarioOpeningLine',
+  ReadAloudCategory: 'ReadAloudCategory',
+  ReadAloudCategoryLocale: 'ReadAloudCategoryLocale',
+  ReadAloudVocabulary: 'ReadAloudVocabulary',
+  ReadAloudSession: 'ReadAloudSession',
+  ReadAloudAttempt: 'ReadAloudAttempt',
   MembershipTier: 'MembershipTier',
   User: 'User',
   BillingProduct: 'BillingProduct',
@@ -423,7 +428,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "language" | "sysLlmServiceConfig" | "sysSttServiceConfig" | "sysTranslateServiceConfig" | "sysObjectStorageConfig" | "sysSmsServiceConfig" | "sysSystemSetting" | "ttsServiceConfig" | "voiceRole" | "promptTemplate" | "practiceScenario" | "scenarioOpeningLine" | "membershipTier" | "user" | "billingProduct" | "storeTransaction" | "userUsage" | "sysServiceUsageDaily" | "conversation" | "message" | "usersBackup" | "conversationsBackup" | "messagesBackup" | "userUsageBackup"
+    modelProps: "language" | "sysLlmServiceConfig" | "sysSttServiceConfig" | "sysTranslateServiceConfig" | "sysObjectStorageConfig" | "sysSmsServiceConfig" | "sysSystemSetting" | "ttsServiceConfig" | "voiceRole" | "promptTemplate" | "practiceScenario" | "scenarioOpeningLine" | "readAloudCategory" | "readAloudCategoryLocale" | "readAloudVocabulary" | "readAloudSession" | "readAloudAttempt" | "membershipTier" | "user" | "billingProduct" | "storeTransaction" | "userUsage" | "sysServiceUsageDaily" | "conversation" | "message" | "usersBackup" | "conversationsBackup" | "messagesBackup" | "userUsageBackup"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1312,6 +1317,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ScenarioOpeningLineCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ScenarioOpeningLineCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReadAloudCategory: {
+      payload: Prisma.$ReadAloudCategoryPayload<ExtArgs>
+      fields: Prisma.ReadAloudCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadAloudCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadAloudCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadAloudCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadAloudCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.ReadAloudCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.ReadAloudCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.ReadAloudCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadAloudCategoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadAloudCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>
+        }
+        update: {
+          args: Prisma.ReadAloudCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadAloudCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadAloudCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadAloudCategoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadAloudCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadAloudCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadAloudCategory>
+        }
+        groupBy: {
+          args: Prisma.ReadAloudCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadAloudCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReadAloudCategoryLocale: {
+      payload: Prisma.$ReadAloudCategoryLocalePayload<ExtArgs>
+      fields: Prisma.ReadAloudCategoryLocaleFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadAloudCategoryLocaleFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadAloudCategoryLocaleFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>
+        }
+        findFirst: {
+          args: Prisma.ReadAloudCategoryLocaleFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadAloudCategoryLocaleFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>
+        }
+        findMany: {
+          args: Prisma.ReadAloudCategoryLocaleFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>[]
+        }
+        create: {
+          args: Prisma.ReadAloudCategoryLocaleCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>
+        }
+        createMany: {
+          args: Prisma.ReadAloudCategoryLocaleCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadAloudCategoryLocaleCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>[]
+        }
+        delete: {
+          args: Prisma.ReadAloudCategoryLocaleDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>
+        }
+        update: {
+          args: Prisma.ReadAloudCategoryLocaleUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadAloudCategoryLocaleDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadAloudCategoryLocaleUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadAloudCategoryLocaleUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadAloudCategoryLocaleUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudCategoryLocalePayload>
+        }
+        aggregate: {
+          args: Prisma.ReadAloudCategoryLocaleAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadAloudCategoryLocale>
+        }
+        groupBy: {
+          args: Prisma.ReadAloudCategoryLocaleGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudCategoryLocaleGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadAloudCategoryLocaleCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudCategoryLocaleCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReadAloudVocabulary: {
+      payload: Prisma.$ReadAloudVocabularyPayload<ExtArgs>
+      fields: Prisma.ReadAloudVocabularyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadAloudVocabularyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadAloudVocabularyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadAloudVocabularyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadAloudVocabularyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>
+        }
+        findMany: {
+          args: Prisma.ReadAloudVocabularyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>[]
+        }
+        create: {
+          args: Prisma.ReadAloudVocabularyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>
+        }
+        createMany: {
+          args: Prisma.ReadAloudVocabularyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadAloudVocabularyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadAloudVocabularyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>
+        }
+        update: {
+          args: Prisma.ReadAloudVocabularyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadAloudVocabularyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadAloudVocabularyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadAloudVocabularyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadAloudVocabularyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudVocabularyPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadAloudVocabularyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadAloudVocabulary>
+        }
+        groupBy: {
+          args: Prisma.ReadAloudVocabularyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudVocabularyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadAloudVocabularyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudVocabularyCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReadAloudSession: {
+      payload: Prisma.$ReadAloudSessionPayload<ExtArgs>
+      fields: Prisma.ReadAloudSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadAloudSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadAloudSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadAloudSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadAloudSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>
+        }
+        findMany: {
+          args: Prisma.ReadAloudSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>[]
+        }
+        create: {
+          args: Prisma.ReadAloudSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>
+        }
+        createMany: {
+          args: Prisma.ReadAloudSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadAloudSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadAloudSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>
+        }
+        update: {
+          args: Prisma.ReadAloudSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadAloudSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadAloudSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadAloudSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadAloudSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadAloudSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadAloudSession>
+        }
+        groupBy: {
+          args: Prisma.ReadAloudSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadAloudSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReadAloudAttempt: {
+      payload: Prisma.$ReadAloudAttemptPayload<ExtArgs>
+      fields: Prisma.ReadAloudAttemptFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReadAloudAttemptFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReadAloudAttemptFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>
+        }
+        findFirst: {
+          args: Prisma.ReadAloudAttemptFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReadAloudAttemptFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>
+        }
+        findMany: {
+          args: Prisma.ReadAloudAttemptFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>[]
+        }
+        create: {
+          args: Prisma.ReadAloudAttemptCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>
+        }
+        createMany: {
+          args: Prisma.ReadAloudAttemptCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReadAloudAttemptCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>[]
+        }
+        delete: {
+          args: Prisma.ReadAloudAttemptDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>
+        }
+        update: {
+          args: Prisma.ReadAloudAttemptUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReadAloudAttemptDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReadAloudAttemptUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReadAloudAttemptUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReadAloudAttemptUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReadAloudAttemptPayload>
+        }
+        aggregate: {
+          args: Prisma.ReadAloudAttemptAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReadAloudAttempt>
+        }
+        groupBy: {
+          args: Prisma.ReadAloudAttemptGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudAttemptGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReadAloudAttemptCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReadAloudAttemptCountAggregateOutputType> | number
         }
       }
     }
@@ -2468,6 +2843,94 @@ export const ScenarioOpeningLineScalarFieldEnum = {
 export type ScenarioOpeningLineScalarFieldEnum = (typeof ScenarioOpeningLineScalarFieldEnum)[keyof typeof ScenarioOpeningLineScalarFieldEnum]
 
 
+export const ReadAloudCategoryScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  nameEn: 'nameEn',
+  icon: 'icon',
+  description: 'description',
+  descriptionEn: 'descriptionEn',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudCategoryScalarFieldEnum = (typeof ReadAloudCategoryScalarFieldEnum)[keyof typeof ReadAloudCategoryScalarFieldEnum]
+
+
+export const ReadAloudCategoryLocaleScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  languageId: 'languageId',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudCategoryLocaleScalarFieldEnum = (typeof ReadAloudCategoryLocaleScalarFieldEnum)[keyof typeof ReadAloudCategoryLocaleScalarFieldEnum]
+
+
+export const ReadAloudVocabularyScalarFieldEnum = {
+  id: 'id',
+  categoryId: 'categoryId',
+  languageId: 'languageId',
+  word: 'word',
+  exampleSentence: 'exampleSentence',
+  voiceRoleId: 'voiceRoleId',
+  wordAudioUrl: 'wordAudioUrl',
+  wordAudioLocalFilename: 'wordAudioLocalFilename',
+  wordAudioGeneratedAt: 'wordAudioGeneratedAt',
+  sentenceAudioUrl: 'sentenceAudioUrl',
+  sentenceAudioLocalFilename: 'sentenceAudioLocalFilename',
+  sentenceAudioGeneratedAt: 'sentenceAudioGeneratedAt',
+  sortOrder: 'sortOrder',
+  status: 'status',
+  remark: 'remark',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudVocabularyScalarFieldEnum = (typeof ReadAloudVocabularyScalarFieldEnum)[keyof typeof ReadAloudVocabularyScalarFieldEnum]
+
+
+export const ReadAloudSessionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  categoryId: 'categoryId',
+  languageId: 'languageId',
+  status: 'status',
+  totalItems: 'totalItems',
+  completedItems: 'completedItems',
+  averageScore: 'averageScore',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReadAloudSessionScalarFieldEnum = (typeof ReadAloudSessionScalarFieldEnum)[keyof typeof ReadAloudSessionScalarFieldEnum]
+
+
+export const ReadAloudAttemptScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  vocabularyId: 'vocabularyId',
+  part: 'part',
+  referenceText: 'referenceText',
+  transcript: 'transcript',
+  score: 'score',
+  matchDetail: 'matchDetail',
+  durationMs: 'durationMs',
+  createdAt: 'createdAt'
+} as const
+
+export type ReadAloudAttemptScalarFieldEnum = (typeof ReadAloudAttemptScalarFieldEnum)[keyof typeof ReadAloudAttemptScalarFieldEnum]
+
+
 export const MembershipTierScalarFieldEnum = {
   id: 'id',
   code: 'code',
@@ -2907,6 +3370,11 @@ export type GlobalOmitConfig = {
   promptTemplate?: Prisma.PromptTemplateOmit
   practiceScenario?: Prisma.PracticeScenarioOmit
   scenarioOpeningLine?: Prisma.ScenarioOpeningLineOmit
+  readAloudCategory?: Prisma.ReadAloudCategoryOmit
+  readAloudCategoryLocale?: Prisma.ReadAloudCategoryLocaleOmit
+  readAloudVocabulary?: Prisma.ReadAloudVocabularyOmit
+  readAloudSession?: Prisma.ReadAloudSessionOmit
+  readAloudAttempt?: Prisma.ReadAloudAttemptOmit
   membershipTier?: Prisma.MembershipTierOmit
   user?: Prisma.UserOmit
   billingProduct?: Prisma.BillingProductOmit
