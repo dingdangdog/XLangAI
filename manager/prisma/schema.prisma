@@ -287,6 +287,22 @@ model ReadAloudCategory {
   @@map("sys_read_aloud_categories")
 }
 
+/// 跟读场景在各语言下的展示名（关联 sys_languages.id）
+model ReadAloudCategoryLocale {
+  id          String   @id @default(uuid())
+  categoryId  String   @map("category_id") @db.VarChar(36)
+  languageId  String   @map("language_id") @db.VarChar(36)
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([categoryId, languageId])
+  @@index([categoryId])
+  @@index([languageId])
+  @@map("sys_read_aloud_category_locales")
+}
+
 /// 跟读练习词汇（按场景 + 语言；词汇与例句分别生成 TTS 参考音频）
 model ReadAloudVocabulary {
   id                         String    @id @default(uuid())

@@ -7,6 +7,7 @@ import (
 
 	"xlangai/server/internal/authz"
 	"xlangai/server/internal/model"
+	"xlangai/server/internal/readaloud"
 	"xlangai/server/internal/repository"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,10 @@ func (h *ReadAloudHandler) ListCategories(c *gin.Context) {
 		return
 	}
 	langID := strings.TrimSpace(c.Query("lang_id"))
+	langCode := ""
+	if langID != "" && h.langRepo != nil {
+		langCode, _ = h.langRepo.GetCodeByID(c.Request.Context(), langID)
+	}
 	for _, cat := range categories {
 		if cat == nil {
 			continue
@@ -37,6 +42,18 @@ func (h *ReadAloudHandler) ListCategories(c *gin.Context) {
 			n, err := h.repo.CountVocabularies(c.Request.Context(), cat.ID, langID)
 			if err == nil {
 				cat.VocabCount = n
+			}
+		}
+		if langID != "" {
+			if loc, err := h.repo.GetCategoryLocale(c.Request.Context(), cat.ID, langID); err == nil && loc != nil {
+				cat.DisplayName = strings.TrimSpace(loc.Name)
+				if loc.Description != nil {
+					cat.DisplayDescription = strings.TrimSpace(*loc.Description)
+				}
+			} else if langCode != "" {
+				if ent, err := h.repo.GetCategoryByID(c.Request.Context(), cat.ID); err == nil && ent != nil {
+					cat.DisplayName, cat.DisplayDescription = readaloud.ResolveCategoryDisplay(ent, langCode)
+				}
 			}
 		}
 	}
@@ -248,7 +265,17 @@ func (h *ReadAloudHandler) enrichSession(c *gin.Context, session *model.ReadAlou
 		return
 	}
 	if cat, err := h.repo.GetCategoryByID(c.Request.Context(), session.CategoryID); err == nil && cat != nil {
-		session.CategoryName = strings.TrimSpace(cat.Name)
+		if loc, locErr := h.repo.GetCategoryLocale(
+			c.Request.Context(), session.CategoryID, session.LanguageID,
+		); locErr == nil && loc != nil {
+			session.CategoryName = strings.TrimSpace(loc.Name)
+		} else {
+			langCode := ""
+			if h.langRepo != nil {
+				langCode, _ = h.langRepo.GetCodeByID(c.Request.Context(), session.LanguageID)
+			}
+			session.CategoryName, _ = readaloud.ResolveCategoryDisplay(cat, langCode)
+		}
 	}
 	if lang, err := h.langRepo.GetCodeByID(c.Request.Context(), session.LanguageID); err == nil && lang != "" {
 		session.LanguageCode = lang

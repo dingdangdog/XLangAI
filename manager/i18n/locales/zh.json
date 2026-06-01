@@ -26,6 +26,7 @@
       "languages": "语言管理",
       "promptTemplates": "系统提示词",
       "practiceScenarios": "练习场景",
+      "readAloud": "跟读管理",
       "readAloudCategories": "跟读场景",
       "readAloudVocabularies": "跟读词汇",
       "aiSettings": "AI 与语音服务",
@@ -492,6 +493,22 @@
       "description": "描述",
       "descriptionEn": "英文描述",
       "promptTemplate": "提示词模板"
+    },
+    "readAloud": {
+      "title": "跟读管理",
+      "description": "左侧管理练习场景，右侧维护该场景下的词汇、例句与 TTS 参考音频。",
+      "categoryList": "练习场景",
+      "categoryListHint": "点击场景卡片查看并编辑词汇",
+      "emptyCategories": "暂无场景，请先创建",
+      "createFirstCategory": "创建第一个场景",
+      "selectCategoryTitle": "请选择场景",
+      "selectCategoryHint": "在左侧点击场景卡片，或新建场景后开始维护词汇。",
+      "selectCategoryFirst": "请先选择或创建一个场景",
+      "editCategory": "编辑场景",
+      "deleteCategory": "删除场景",
+      "addVocabulary": "新建词汇",
+      "localesTableHint": "下列语言来自「语言管理」；新增或启用语言后，重新打开本对话框即可出现对应行。",
+      "noActiveLanguages": "请先在语言管理中启用至少一种语言。"
     },
     "readAloudCategories": {
       "title": "跟读场景",

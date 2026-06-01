@@ -6,7 +6,12 @@ import {
   SunIcon,
   XMarkIcon,
 } from "@heroicons/vue/24/outline";
-import { AI_SETTINGS_LEGACY_PATHS, BACKUP_LEGACY_PATHS, SYSTEM_SETTINGS_LEGACY_PATHS } from "~/utils/adminNav";
+import {
+  AI_SETTINGS_LEGACY_PATHS,
+  BACKUP_LEGACY_PATHS,
+  READ_ALOUD_LEGACY_PATHS,
+  SYSTEM_SETTINGS_LEGACY_PATHS,
+} from "~/utils/adminNav";
 import { clearAuthStorage } from "~/utils/common";
 
 const route = useRoute();
@@ -40,6 +45,10 @@ const aiSettingsLegacyPaths = computed(() =>
 
 const systemSettingsLegacyPaths = computed(() =>
   SYSTEM_SETTINGS_LEGACY_PATHS.map((path) => localePath(path)),
+);
+
+const readAloudLegacyPaths = computed(() =>
+  READ_ALOUD_LEGACY_PATHS.map((path) => localePath(path)),
 );
 
 async function logout() {
@@ -80,6 +89,13 @@ function isActive(path: string) {
       route.path === localizedPath ||
       route.path.startsWith(`${localizedPath}/`) ||
       systemSettingsLegacyPaths.value.includes(route.path)
+    );
+  }
+  if (path === "/manage/read-aloud") {
+    return (
+      route.path === localizedPath ||
+      route.path.startsWith(`${localizedPath}/`) ||
+      readAloudLegacyPaths.value.includes(route.path)
     );
   }
   return route.path === localizedPath || route.path.startsWith(`${localizedPath}/`);

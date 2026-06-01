@@ -37,8 +37,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       { to: "/manage/languages", labelKey: "nav.items.languages", icon: GlobeAltIcon },
       { to: "/manage/prompt-templates", labelKey: "nav.items.promptTemplates", icon: DocumentTextIcon },
       { to: "/manage/practice-scenarios", labelKey: "nav.items.practiceScenarios", icon: DocumentTextIcon },
-      { to: "/manage/read-aloud-categories", labelKey: "nav.items.readAloudCategories", icon: DocumentTextIcon },
-      { to: "/manage/read-aloud-vocabularies", labelKey: "nav.items.readAloudVocabularies", icon: DocumentTextIcon },
+      { to: "/manage/read-aloud", labelKey: "nav.items.readAloud", icon: DocumentTextIcon },
     ],
   },
   {
@@ -50,6 +49,12 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     ],
   },
 ];
+
+/** 旧跟读场景/词汇子路由重定向到统一页时，侧栏仍高亮跟读菜单 */
+export const READ_ALOUD_LEGACY_PATHS = [
+  "/manage/read-aloud-categories",
+  "/manage/read-aloud-vocabularies",
+] as const;
 
 /** 旧删除记录子路由重定向到统一页时，侧栏仍高亮对应菜单 */
 export const BACKUP_LEGACY_PATHS = [

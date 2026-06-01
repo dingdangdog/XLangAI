@@ -26,6 +26,7 @@
       "languages": "Languages",
       "promptTemplates": "Prompt templates",
       "practiceScenarios": "Practice scenarios",
+      "readAloud": "Read-aloud",
       "readAloudCategories": "Read-aloud categories",
       "readAloudVocabularies": "Read-aloud vocabulary",
       "aiSettings": "AI & voice services",
@@ -495,6 +496,22 @@
       "description": "Description",
       "descriptionEn": "English description",
       "promptTemplate": "Prompt template"
+    },
+    "readAloud": {
+      "title": "Read-aloud",
+      "description": "Manage practice scenarios on the left; words, example sentences, and TTS audio on the right.",
+      "categoryList": "Scenarios",
+      "categoryListHint": "Click a scenario to view and edit its vocabulary",
+      "emptyCategories": "No scenarios yet",
+      "createFirstCategory": "Create first scenario",
+      "selectCategoryTitle": "Select a scenario",
+      "selectCategoryHint": "Pick a scenario on the left, or create one to start adding vocabulary.",
+      "selectCategoryFirst": "Select or create a scenario first",
+      "editCategory": "Edit scenario",
+      "deleteCategory": "Delete scenario",
+      "addVocabulary": "New vocabulary",
+      "localesTableHint": "Rows come from Language settings; add or enable a language there, then reopen this dialog.",
+      "noActiveLanguages": "Enable at least one language in Language settings first."
     },
     "readAloudCategories": {
       "title": "Read-aloud categories",

@@ -120,6 +120,25 @@ func (r *ReadAloudRepo) ListActiveCategories(ctx context.Context) ([]*model.Read
 	return out, nil
 }
 
+func (r *ReadAloudRepo) GetCategoryLocale(
+	ctx context.Context,
+	categoryID, languageID string,
+) (*entity.ReadAloudCategoryLocale, error) {
+	categoryID = strings.TrimSpace(categoryID)
+	languageID = strings.TrimSpace(languageID)
+	if categoryID == "" || languageID == "" {
+		return nil, gorm.ErrRecordNotFound
+	}
+	var row entity.ReadAloudCategoryLocale
+	err := r.db.WithContext(ctx).
+		Where("category_id = ? AND language_id = ?", categoryID, languageID).
+		First(&row).Error
+	if err != nil {
+		return nil, err
+	}
+	return &row, nil
+}
+
 func (r *ReadAloudRepo) GetCategoryByID(ctx context.Context, id string) (*entity.ReadAloudCategory, error) {
 	id = strings.TrimSpace(id)
 	if id == "" {

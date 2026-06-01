@@ -359,11 +359,11 @@ type Message struct {
 func (Message) TableName() string { return "usr_messages" }
 
 type ReadAloudCategory struct {
-	ID            string    `gorm:"column:id;type:varchar(36);primaryKey"`
-	Code          string    `gorm:"column:code;type:varchar(32);uniqueIndex"`
-	Name          string    `gorm:"column:name;type:varchar(100)"`
-	NameEn        *string   `gorm:"column:name_en;type:varchar(100)"`
-	Icon          *string   `gorm:"column:icon;type:varchar(50)"`
+	ID             string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	Code           string    `gorm:"column:code;type:varchar(32);uniqueIndex"`
+	Name           string    `gorm:"column:name;type:varchar(100)"`
+	NameEn         *string   `gorm:"column:name_en;type:varchar(100)"`
+	Icon           *string   `gorm:"column:icon;type:varchar(50)"`
 	Description   *string   `gorm:"column:description;type:varchar(500)"`
 	DescriptionEn *string   `gorm:"column:description_en;type:varchar(500)"`
 	SortOrder     int       `gorm:"column:sort_order"`
@@ -374,6 +374,18 @@ type ReadAloudCategory struct {
 }
 
 func (ReadAloudCategory) TableName() string { return "sys_read_aloud_categories" }
+
+type ReadAloudCategoryLocale struct {
+	ID          string    `gorm:"column:id;type:varchar(36);primaryKey"`
+	CategoryID  string    `gorm:"column:category_id;type:varchar(36)"`
+	LanguageID  string    `gorm:"column:language_id;type:varchar(36)"`
+	Name        string    `gorm:"column:name;type:varchar(100)"`
+	Description *string   `gorm:"column:description;type:varchar(500)"`
+	CreatedAt   time.Time `gorm:"column:created_at"`
+	UpdatedAt   time.Time `gorm:"column:updated_at"`
+}
+
+func (ReadAloudCategoryLocale) TableName() string { return "sys_read_aloud_category_locales" }
 
 type ReadAloudVocabulary struct {
 	ID                         string     `gorm:"column:id;type:varchar(36);primaryKey"`

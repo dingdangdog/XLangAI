@@ -50,15 +50,17 @@ type PracticeScenario struct {
 }
 
 type ReadAloudCategory struct {
-	ID            string `json:"id"`
-	Code          string `json:"code"`
-	Name          string `json:"name"`
-	NameEn        string `json:"name_en,omitempty"`
-	Icon          string `json:"icon,omitempty"`
-	Description   string `json:"description,omitempty"`
-	DescriptionEn string `json:"description_en,omitempty"`
-	SortOrder     int    `json:"sort_order"`
-	VocabCount    int    `json:"vocab_count,omitempty"`
+	ID              string `json:"id"`
+	Code            string `json:"code"`
+	Name            string `json:"name"`
+	NameEn          string `json:"name_en,omitempty"`
+	Icon            string `json:"icon,omitempty"`
+	Description     string `json:"description,omitempty"`
+	DescriptionEn   string `json:"description_en,omitempty"`
+	DisplayName     string `json:"display_name,omitempty"`
+	DisplayDescription string `json:"display_description,omitempty"`
+	SortOrder       int    `json:"sort_order"`
+	VocabCount      int    `json:"vocab_count,omitempty"`
 }
 
 type ReadAloudVocabulary struct {

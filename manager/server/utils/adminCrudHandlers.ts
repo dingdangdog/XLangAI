@@ -21,6 +21,14 @@ import { assertEditableSystemSettingKey, prepareSystemSettingWrite } from "./sys
 import { INTERNAL_SYSTEM_SETTING_KEYS } from "./systemSettingsKeys";
 import { jsonSafe } from "./jsonSafe";
 import { listVoiceRolesForAdmin } from "./voiceRoleList";
+import {
+  attachReadAloudCategoryLocales,
+  deleteReadAloudCategoryLocales,
+  extractLocaleLabels,
+  legacyEnFieldsFromLocales,
+  saveReadAloudCategoryLocales,
+  stripReadAloudCategoryVirtualFields,
+} from "./readAloudCategoryAdmin";
 
 async function attachVoiceRoleListFields(
   rows: Record<string, unknown>[],
@@ -170,6 +178,9 @@ export async function adminListHandler(event: H3Event, resource: ResourceSlug) {
   if (resource === "translate-service-configs") {
     items = await attachServiceConfigUsageFields(items, "translate");
   }
+  if (resource === "read-aloud-categories") {
+    items = await attachReadAloudCategoryLocales(items);
+  }
 
   return jsonSafe({ items, total, page, pageSize });
 }
@@ -212,7 +223,25 @@ export async function adminCreateHandler(event: H3Event, resource: ResourceSlug)
   if (resource === "system-settings") {
     data = prepareSystemSettingWrite(data, "create");
   }
+  const localeLabels =
+    resource === "read-aloud-categories" ? extractLocaleLabels(body) : [];
+  if (resource === "read-aloud-categories") {
+    data = stripReadAloudCategoryVirtualFields(data);
+  }
   const created = (await delegate.create({ data })) as Record<string, unknown>;
+  if (resource === "read-aloud-categories") {
+    const categoryId = String(created.id ?? "");
+    if (categoryId && localeLabels.length) {
+      await saveReadAloudCategoryLocales(categoryId, localeLabels);
+      const legacy = await legacyEnFieldsFromLocales(localeLabels);
+      if (legacy) {
+        await prisma.readAloudCategory.update({ where: { id: categoryId }, data: legacy });
+        Object.assign(created, legacy);
+      }
+    }
+    const [withLocales] = await attachReadAloudCategoryLocales([created]);
+    return jsonSafe(withLocales);
+  }
   const row = resource === "users" ? redactUserRecord(created) : created;
   return jsonSafe(row);
 }
@@ -265,10 +294,25 @@ export async function adminUpdateHandler(event: H3Event, resource: ResourceSlug)
     }
     data = prepareSystemSettingWrite(data, "update", existing?.key);
   }
+  const localeLabels =
+    resource === "read-aloud-categories" ? extractLocaleLabels(body) : [];
+  if (resource === "read-aloud-categories") {
+    data = stripReadAloudCategoryVirtualFields(data);
+  }
   const updated = (await delegate.update({
     where: { id },
     data,
   })) as Record<string, unknown>;
+  if (resource === "read-aloud-categories") {
+    await saveReadAloudCategoryLocales(id, localeLabels);
+    const legacy = await legacyEnFieldsFromLocales(localeLabels);
+    if (legacy) {
+      await prisma.readAloudCategory.update({ where: { id }, data: legacy });
+      Object.assign(updated, legacy);
+    }
+    const [withLocales] = await attachReadAloudCategoryLocales([updated]);
+    return jsonSafe(withLocales);
+  }
   const row = resource === "users" ? redactUserRecord(updated) : updated;
   return jsonSafe(row);
 }
@@ -290,6 +334,9 @@ export async function adminDeleteHandler(event: H3Event, resource: ResourceSlug)
     if (existing?.key) {
       assertEditableSystemSettingKey(existing.key);
     }
+  }
+  if (resource === "read-aloud-categories") {
+    await deleteReadAloudCategoryLocales(id);
   }
   if (SOFT_DELETE[resource]) {
     const row = await delegate.update({
