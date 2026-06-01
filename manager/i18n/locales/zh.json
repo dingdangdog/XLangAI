@@ -545,6 +545,7 @@
       "deleteConfirm": "确认删除该词汇？",
       "audioGenerated": "音频已生成",
       "audioGenerateFailed": "音频生成失败",
+      "audioNotGenerated": "尚未生成该音频，请先点击「生成音频」",
       "llmBatch": "LLM 批量生成",
       "llmBatchDialog": "LLM 批量生成词汇",
       "llmBatchHint": "选择 LLM 服务、场景与目标语言，由模型生成词汇与例句；预览确认后可批量导入。已存在的词汇会传给模型以避免重复。",

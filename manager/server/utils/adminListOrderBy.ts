@@ -11,6 +11,11 @@ export function orderBySortOrderCode(): AdminListOrderBy {
   return [{ sortOrder: "asc" }, { code: "asc" }, idAsc];
 }
 
+/** sortOrder → word → id（跟读词汇，无 code 字段） */
+export function orderBySortOrderWord(): AdminListOrderBy {
+  return [{ sortOrder: "asc" }, { word: "asc" }, idAsc];
+}
+
 /**
  * 语音角色（占位；实际列表走 voiceRoleList.ts 的 JOIN 排序）。
  * 顺序：语言 sort_order → 语言 code → 角色 sort_order → name → id

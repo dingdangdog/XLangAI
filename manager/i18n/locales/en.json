@@ -548,6 +548,7 @@
       "deleteConfirm": "Delete this vocabulary item?",
       "audioGenerated": "Audio generated",
       "audioGenerateFailed": "Failed to generate audio",
+      "audioNotGenerated": "Audio not generated yet. Click “Generate audio” first.",
       "llmBatch": "LLM batch generate",
       "llmBatchDialog": "LLM batch vocabulary",
       "llmBatchHint": "Pick an LLM, category, and language. The model proposes words and example sentences; review and import. Existing words are sent to reduce duplicates.",

@@ -8,6 +8,7 @@ import {
   type CategoryLocaleEntry,
   type CategoryLocaleLabel,
 } from "~/utils/readAloudCategoryLocale";
+import AdminServiceConfigCard from "~/components/admin/config/AdminServiceConfigCard.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -160,7 +161,6 @@ const categoryDialogVisible = ref(false);
 const categoryDialogMode = ref<"create" | "edit">("create");
 const categorySaving = ref(false);
 const translatingTitles = ref(false);
-const categoryTranslateLlmId = ref("");
 
 const categoryForm = reactive({
   id: "",
@@ -242,7 +242,6 @@ async function translateCategoryTitles() {
       body: {
         sourceLanguageId: source.languageId,
         title: source.title,
-        llmServiceConfigId: categoryTranslateLlmId.value || undefined,
       },
     });
     const map = res.titlesByLanguageId ?? {};
@@ -280,7 +279,6 @@ async function openCategoryCreate() {
   resetCategoryForm();
   await loadActiveLanguages();
   syncCategoryLocales();
-  categoryTranslateLlmId.value = llmOptions.value[0]?.id ?? "";
   categoryDialogVisible.value = true;
 }
 
@@ -298,7 +296,6 @@ async function openCategoryEdit(row?: Record<string, unknown>) {
   const labels = target.localeLabels as CategoryLocaleLabel[] | undefined;
   syncCategoryLocales(localeLabelsToMap(labels));
   seedLegacyNameIntoFirstLang(String(target.name ?? ""));
-  categoryTranslateLlmId.value = llmOptions.value[0]?.id ?? "";
   categoryDialogVisible.value = true;
 }
 
@@ -602,6 +599,52 @@ async function generateAudio(row: Record<string, unknown>, part: "word" | "sente
   }
 }
 
+const readAloudAudioEl = ref<HTMLAudioElement | null>(null);
+
+function readAloudAudioPlayUrl(audioUrl: unknown, localFilename: unknown): string | null {
+  const raw = String(audioUrl ?? "").trim();
+  if (!raw) return null;
+  if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+
+  const local = String(localFilename ?? "").trim();
+  if (local) {
+    return `/api/admin/preview-audio/${encodeURIComponent(local)}`;
+  }
+
+  const match = raw.match(/\/api\/v1\/audio\/([^/?#]+)/);
+  if (match?.[1]) {
+    return `/api/admin/preview-audio/${encodeURIComponent(match[1])}`;
+  }
+
+  return null;
+}
+
+function hasReadAloudAudio(row: Record<string, unknown>, part: "word" | "sentence") {
+  const url = part === "word" ? row.wordAudioUrl : row.sentenceAudioUrl;
+  return !!String(url ?? "").trim();
+}
+
+function playReadAloudAudio(row: Record<string, unknown>, part: "word" | "sentence") {
+  const url =
+    part === "word"
+      ? readAloudAudioPlayUrl(row.wordAudioUrl, row.wordAudioLocalFilename)
+      : readAloudAudioPlayUrl(row.sentenceAudioUrl, row.sentenceAudioLocalFilename);
+  if (!url) {
+    toast.warning(t("pages.readAloudVocabularies.audioNotGenerated"));
+    return;
+  }
+  let el = readAloudAudioEl.value;
+  if (!el) {
+    el = new Audio();
+    readAloudAudioEl.value = el;
+  }
+  el.src = url;
+  void el.play().catch((e) => {
+    toast.error(t("toast.playFailed"));
+    console.error(e);
+  });
+}
+
 const statusOptions = [
   { value: "active", label: "active" },
   { value: "inactive", label: "inactive" },
@@ -644,16 +687,20 @@ function categorySubtitle(row: Record<string, unknown>) {
 
 function categoryCardTitle(row: Record<string, unknown>) {
   if (filterLanguageId.value) {
-    return resolveCategoryDisplayName(row, filterLanguageId.value);
+    const localized = resolveCategoryDisplayName(row, filterLanguageId.value);
+    if (localized) return localized;
   }
   return categoryTitle(row);
 }
 
-onMounted(() => void loadOptions());
+onMounted(() => {
+  void loadOptions();
+  void loadCategories();
+});
 </script>
 
 <template>
-  <AdminListPage>
+  <AdminListPage fill>
     <template #header>
       <AdminPageHeader
         :title="$t('pages.readAloud.title')"
@@ -661,12 +708,13 @@ onMounted(() => void loadOptions());
       />
     </template>
 
-    <div
-      class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[minmax(260px,300px)_minmax(0,1fr)]"
-    >
+    <div class="flex min-h-0 flex-1 flex-col">
+      <div
+        class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[minmax(260px,300px)_minmax(0,1fr)]"
+      >
       <!-- 左侧：场景卡片 -->
       <aside
-        class="flex min-h-[320px] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm lg:min-h-0"
+        class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
       >
         <header class="shrink-0 border-b border-border px-4 py-3">
           <div class="flex items-center justify-between gap-2">
@@ -722,7 +770,7 @@ onMounted(() => void loadOptions());
 
       <!-- 右侧：词汇列表 -->
       <main
-        class="flex min-h-[320px] min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm lg:min-h-0"
+        class="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
       >
         <div
           v-if="!selectedCategory"
@@ -775,7 +823,7 @@ onMounted(() => void loadOptions());
                 <AdminTh>{{ $t("pages.readAloudVocabularies.language") }}</AdminTh>
                 <AdminTh>{{ $t("pages.readAloudVocabularies.audio") }}</AdminTh>
                 <AdminTh width="88px">{{ $t("common.status") }}</AdminTh>
-                <AdminTh width="220px" align="right">{{ $t("common.actions") }}</AdminTh>
+                <AdminTh width="280px" align="right">{{ $t("common.actions") }}</AdminTh>
               </template>
               <AdminTr v-for="row in vocabList" :key="String(row.id)">
                 <AdminTd>{{ row.word }}</AdminTd>
@@ -785,10 +833,40 @@ onMounted(() => void loadOptions());
                   </AdminCellText>
                 </AdminTd>
                 <AdminTd>{{ labelById(languageOptions, row.languageId) }}</AdminTd>
-                <AdminTd class="text-xs">
-                  <div>
-                    {{ row.wordAudioUrl ? $t("common.generated") : $t("common.notGenerated") }} /
-                    {{ row.sentenceAudioUrl ? $t("common.generated") : $t("common.notGenerated") }}
+                <AdminTd>
+                  <div class="flex flex-col gap-1.5 text-xs">
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span class="text-muted">{{ $t("pages.readAloudVocabularies.word") }}:</span>
+                      <span>{{
+                        hasReadAloudAudio(row, "word") ? $t("common.generated") : $t("common.notGenerated")
+                      }}</span>
+                      <AdminButton
+                        v-if="hasReadAloudAudio(row, 'word')"
+                        variant="link"
+                        size="sm"
+                        class="!px-0"
+                        @click="playReadAloudAudio(row, 'word')"
+                      >
+                        {{ $t("common.play") }}
+                      </AdminButton>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span class="text-muted">{{ $t("pages.readAloudVocabularies.exampleSentence") }}:</span>
+                      <span>{{
+                        hasReadAloudAudio(row, "sentence")
+                          ? $t("common.generated")
+                          : $t("common.notGenerated")
+                      }}</span>
+                      <AdminButton
+                        v-if="hasReadAloudAudio(row, 'sentence')"
+                        variant="link"
+                        size="sm"
+                        class="!px-0"
+                        @click="playReadAloudAudio(row, 'sentence')"
+                      >
+                        {{ $t("common.play") }}
+                      </AdminButton>
+                    </div>
                   </div>
                 </AdminTd>
                 <AdminTd><AdminBadge>{{ row.status }}</AdminBadge></AdminTd>
@@ -817,6 +895,7 @@ onMounted(() => void loadOptions());
           />
         </template>
       </main>
+      </div>
     </div>
 
     <!-- 场景对话框 -->
@@ -840,18 +919,7 @@ onMounted(() => void loadOptions());
           </AdminButton>
         </p>
         <div v-else class="space-y-2">
-          <div class="flex flex-wrap items-end gap-3">
-            <AdminFormField
-              v-if="llmOptions.length"
-              :label="$t('pages.readAloudVocabularies.llmConfig')"
-              class="min-w-[220px] flex-1"
-            >
-              <AdminSelect
-                v-model="categoryTranslateLlmId"
-                :options="llmSelectOptions"
-                :loading="optionsLoading"
-              />
-            </AdminFormField>
+          <div class="flex flex-wrap items-center gap-2">
             <AdminButton
               variant="secondary"
               :loading="translatingTitles"
@@ -860,8 +928,8 @@ onMounted(() => void loadOptions());
             >
               {{ $t("pages.readAloud.translateTitles") }}
             </AdminButton>
+            <span class="text-xs text-muted">{{ $t("pages.readAloud.translateTitlesHint") }}</span>
           </div>
-          <p class="text-xs text-muted">{{ $t("pages.readAloud.translateTitlesHint") }}</p>
           <div class="overflow-x-auto rounded-lg border border-border">
           <table class="min-w-full text-sm">
             <thead>

@@ -56,5 +56,7 @@ export function resolveCategoryDisplayName(
   const labels = row.localeLabels as CategoryLocaleLabel[] | undefined;
   const hit = labels?.find((l) => l.languageId === languageId);
   if (hit?.name?.trim()) return hit.name.trim();
-  return String(row.name ?? "");
+  const name = String(row.name ?? "").trim();
+  if (name) return name;
+  return String(row.code ?? "").trim();
 }

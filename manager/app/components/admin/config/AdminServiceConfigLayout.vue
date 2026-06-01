@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import AdminServiceConfigCard from "~/components/admin/config/AdminServiceConfigCard.vue";
+
 const props = withDefaults(
   defineProps<{
     items: Record<string, unknown>[];

@@ -5,6 +5,7 @@ import {
   orderByCreatedDesc,
   orderByKeyAsc,
   orderBySortOrderCode,
+  orderBySortOrderWord,
   orderByVoiceRole,
   orderByUsageDateDesc,
 } from "./adminListOrderBy";
@@ -138,7 +139,7 @@ export const RESOURCE_META: Record<
   "read-aloud-vocabularies": {
     delegate: "readAloudVocabulary",
     softListFilter: false,
-    orderBy: orderBySortOrderCode(),
+    orderBy: orderBySortOrderWord(),
   },
   "membership-tiers": {
     delegate: "membershipTier",
