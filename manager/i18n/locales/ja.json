@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "小浪AI 運営コンソール"
+    "title": "学浪AI 運営コンソール"
   },
   "language": {
     "switcher": "言語を切り替え"
@@ -97,9 +97,9 @@
     "AUTH_SECRET_NOT_CONFIGURED": "MANAGER_AUTH_SECRET が未設定です"
   },
   "common": {
-    "appName": "小浪AI",
+    "appName": "学浪AI",
     "adminConsole": "運営コンソール",
-    "adminConsoleShort": "小浪AI 管理",
+    "adminConsoleShort": "学浪AI 管理",
     "cancel": "キャンセル",
     "save": "保存",
     "create": "新規",
@@ -359,7 +359,7 @@
   },
   "pages": {
     "login": {
-      "title": "小浪AI 運営コンソール",
+      "title": "学浪AI 運営コンソール",
       "subtitle": "管理者アカウントでログイン",
       "usernamePlaceholder": "電話またはメール",
       "passwordPlaceholder": "パスワードを入力",

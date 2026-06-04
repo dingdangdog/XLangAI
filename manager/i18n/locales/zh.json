@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "小浪AI 运营后台"
+    "title": "学浪AI 运营后台"
   },
   "language": {
     "switcher": "切换语言"
@@ -102,9 +102,9 @@
     "AUTH_SECRET_NOT_CONFIGURED": "未配置 MANAGER_AUTH_SECRET，无法签发登录会话"
   },
   "common": {
-    "appName": "小浪AI",
+    "appName": "学浪AI",
     "adminConsole": "运营后台",
-    "adminConsoleShort": "小浪AI 后台",
+    "adminConsoleShort": "学浪AI 后台",
     "cancel": "取消",
     "save": "保存",
     "create": "新建",
@@ -363,7 +363,7 @@
   },
   "pages": {
     "login": {
-      "title": "小浪AI 运营后台",
+      "title": "学浪AI 运营后台",
       "subtitle": "请使用管理员账号登录",
       "usernamePlaceholder": "手机号或邮箱",
       "passwordPlaceholder": "请输入密码",

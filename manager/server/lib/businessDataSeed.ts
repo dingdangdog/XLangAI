@@ -763,8 +763,8 @@ const SCENARIO_OPENING_TEMPLATES: Record<string, Record<string, string>> = {
     hi: "स्वागत है! मैं {name} हूँ। आप कितने लोग हैं?",
   },
   cafe: {
-    zh: "欢迎光临小浪咖啡屋，我是{name}，请问您想喝点什么？",
-    yue: "歡迎光臨小浪咖啡屋，我係{name}，想飲啲咩？",
+    zh: "欢迎光临学浪咖啡屋，我是{name}，请问您想喝点什么？",
+    yue: "歡迎光臨学浪咖啡屋，我係{name}，想飲啲咩？",
     en: "Welcome to Xiaolang Café! I'm {name}. What can I get started for you?",
     ja: "いらっしゃいませ。{name}です。何になさいますか？",
     ko: "어서 오세요. {name}입니다. 무엇을 드릴까요?",

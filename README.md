@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <strong>XLangAI（小浪AI） · 服务端与运营后台</strong> — 面向多语种口语练习场景的完整后端解决方案
+  <strong>XLangAI（学浪AI） · 服务端与运营后台</strong> — 面向多语种口语练习场景的完整后端解决方案
 </p>
 
 <p align="center">
