@@ -190,12 +190,25 @@ watch(
     </aside>
 
     <main class="flex min-w-0 flex-1 flex-col overflow-hidden">
-      <header class="flex shrink-0 items-center justify-between border-b border-border bg-surface px-3 py-2 md:hidden">
-        <h2 class="text-base font-semibold">{{ $t("common.adminConsoleShort") }}</h2>
-        <div class="flex items-center gap-1">
-          <div class="w-36">
-            <AdminLanguageSwitcher />
-          </div>
+      <header
+        class="flex shrink-0 items-center justify-between border-b border-border bg-surface px-3 py-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:hidden"
+      >
+        <div class="min-w-0">
+          <h2 class="truncate text-base font-semibold">{{ $t("common.adminConsoleShort") }}</h2>
+          <p class="truncate text-[11px] text-muted">
+            {{ userStore.displayName || $t("common.adminFallback") }}
+          </p>
+        </div>
+        <div class="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            class="rounded-lg p-1.5 text-muted hover:bg-surface-muted"
+            :aria-label="themeStore.isDark ? $t('common.lightMode') : $t('common.darkMode')"
+            @click="themeStore.toggle()"
+          >
+            <SunIcon v-if="themeStore.isDark" class="h-5 w-5" />
+            <MoonIcon v-else class="h-5 w-5" />
+          </button>
           <button
             type="button"
             class="rounded-lg p-1.5 text-muted hover:bg-surface-muted"
@@ -251,7 +264,13 @@ watch(
               </ul>
             </template>
           </nav>
-          <div class="space-y-1 border-t border-border p-3">
+          <div class="space-y-1 border-t border-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+            <p
+              class="truncate px-2 pb-1 text-xs text-muted"
+              :title="userStore.displayName || $t('common.adminFallback')"
+            >
+              {{ userStore.displayName || $t("common.adminFallback") }}
+            </p>
             <AdminLanguageSwitcher />
             <button
               type="button"
@@ -262,11 +281,24 @@ watch(
               <MoonIcon v-else class="h-4 w-4" />
               {{ themeStore.isDark ? $t("common.lightMode") : $t("common.darkMode") }}
             </button>
+            <button
+              type="button"
+              class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted hover:bg-surface-muted disabled:opacity-50"
+              :disabled="logoutLoading"
+              @click="logout"
+            >
+              <ArrowRightOnRectangleIcon class="h-4 w-4" />
+              {{ logoutLoading ? $t("common.loggingOut") : $t("common.logout") }}
+            </button>
+            <p v-if="appVersion" class="px-2 pt-1 text-[10px] leading-relaxed text-muted/70">
+              {{ $t("common.systemVersion") }} {{ appVersion
+              }}<span v-if="buildSha"> · {{ buildSha.slice(0, 7) }}</span>
+            </p>
           </div>
         </aside>
       </Transition>
 
-      <div class="flex min-h-0 flex-1 flex-col overflow-hidden p-2 md:p-4">
+      <div class="flex min-h-0 flex-1 flex-col overflow-hidden p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:p-4">
         <slot />
       </div>
     </main>

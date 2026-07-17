@@ -1,6 +1,4 @@
 <script setup lang="ts">
-const { t } = useI18n();
-
 const page = defineModel<number>("page", { required: true });
 const pageSize = defineModel<number>("pageSize", { required: true });
 
@@ -19,11 +17,11 @@ function go(p: number) {
 
 <template>
   <div
-    class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3 text-sm text-muted"
+    class="flex shrink-0 flex-col gap-2 border-t border-border px-3 py-2.5 text-sm text-muted sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:px-4 sm:py-3"
   >
-    <span>{{ $t("pagination.total", { total }) }}</span>
-    <div class="flex flex-wrap items-center gap-3">
-      <label class="flex items-center gap-2">
+    <span class="text-xs sm:text-sm">{{ $t("pagination.total", { total }) }}</span>
+    <div class="flex flex-wrap items-center justify-between gap-2 sm:justify-end sm:gap-3">
+      <label class="flex items-center gap-2 text-xs sm:text-sm">
         {{ $t("pagination.perPage") }}
         <select
           v-model.number="pageSize"
@@ -36,7 +34,9 @@ function go(p: number) {
         <AdminButton size="sm" :disabled="page <= 1" @click="go(page - 1)">
           {{ $t("pagination.prev") }}
         </AdminButton>
-        <span class="min-w-[4rem] text-center text-foreground">{{ page }} / {{ totalPages }}</span>
+        <span class="min-w-[3.5rem] text-center text-xs text-foreground sm:min-w-[4rem] sm:text-sm">
+          {{ page }} / {{ totalPages }}
+        </span>
         <AdminButton size="sm" :disabled="page >= totalPages" @click="go(page + 1)">
           {{ $t("pagination.next") }}
         </AdminButton>

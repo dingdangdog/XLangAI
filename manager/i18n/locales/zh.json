@@ -112,6 +112,7 @@
     "delete": "删除",
     "enable": "启用",
     "softDelete": "软删",
+    "back": "返回",
     "actions": "操作",
     "optional": "（可选）",
     "optionalParen": "（不选）",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { autoAdminCode } from "~/utils/autoAdminCode";
+import { ArrowLeftIcon } from "@heroicons/vue/24/outline";
 import {
   emptyLocaleMapByLanguageId,
   localeLabelsToMap,
@@ -13,6 +14,7 @@ import AdminServiceConfigCard from "~/components/admin/config/AdminServiceConfig
 const { t } = useI18n();
 const route = useRoute();
 const localePath = useLocalePath();
+const isNarrow = useIsNarrow();
 
 const categoriesApi = useAdminResourceApi("/api/admin/read-aloud-categories");
 const vocabApi = useAdminResourceApi("/api/admin/read-aloud-vocabularies");
@@ -31,6 +33,8 @@ const categoriesLoading = ref(false);
 const selectedCategoryId = ref<string | null>(
   String(route.query.categoryId ?? "").trim() || null,
 );
+/** 窄屏：是否进入词汇钻取页 */
+const mobileShowVocab = ref(!!String(route.query.categoryId ?? "").trim());
 
 const selectedCategory = computed(() =>
   categories.value.find((r) => String(r.id) === selectedCategoryId.value) ?? null,
@@ -59,11 +63,20 @@ async function loadCategories() {
 function selectCategory(row: Record<string, unknown>) {
   selectedCategoryId.value = String(row.id);
   vocabPage.value = 1;
+  if (isNarrow.value) mobileShowVocab.value = true;
   void navigateTo({
     path: localePath("/manage/read-aloud"),
     query: { categoryId: selectedCategoryId.value ?? undefined },
   });
 }
+
+function backToCategories() {
+  mobileShowVocab.value = false;
+}
+
+watch(isNarrow, (narrow) => {
+  if (!narrow) mobileShowVocab.value = false;
+});
 
 watch([catPage, catPageSize], () => void loadCategories(), { immediate: true });
 
@@ -714,7 +727,8 @@ onMounted(() => {
       >
       <!-- 左侧：场景卡片 -->
       <aside
-        class="flex min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+        class="min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+        :class="isNarrow && mobileShowVocab ? 'hidden' : 'flex'"
       >
         <header class="shrink-0 border-b border-border px-4 py-3">
           <div class="flex items-center justify-between gap-2">
@@ -770,7 +784,8 @@ onMounted(() => {
 
       <!-- 右侧：词汇列表 -->
       <main
-        class="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+        class="min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm"
+        :class="isNarrow && !mobileShowVocab ? 'hidden' : 'flex'"
       >
         <div
           v-if="!selectedCategory"
@@ -781,14 +796,25 @@ onMounted(() => {
         </div>
 
         <template v-else>
-          <header class="shrink-0 border-b border-border px-4 py-3 md:px-5">
+          <header class="shrink-0 border-b border-border px-3 py-3 sm:px-4 md:px-5">
             <div class="flex flex-wrap items-start justify-between gap-3">
-              <div class="min-w-0 flex-1">
-                <h2 class="truncate text-base font-semibold text-foreground">
-                  {{ selectedCategory ? categoryCardTitle(selectedCategory) : "" }}
-                </h2>
+              <div class="flex min-w-0 flex-1 items-start gap-2">
+                <button
+                  v-if="isNarrow"
+                  type="button"
+                  class="mt-0.5 rounded-lg p-1.5 text-muted hover:bg-surface-muted lg:hidden"
+                  :aria-label="$t('common.back')"
+                  @click="backToCategories"
+                >
+                  <ArrowLeftIcon class="h-5 w-5" />
+                </button>
+                <div class="min-w-0 flex-1">
+                  <h2 class="truncate text-base font-semibold text-foreground">
+                    {{ selectedCategory ? categoryCardTitle(selectedCategory) : "" }}
+                  </h2>
+                </div>
               </div>
-              <div class="flex flex-wrap gap-2">
+              <div class="flex w-full flex-wrap gap-2 sm:w-auto">
                 <AdminButton size="sm" variant="secondary" @click="openCategoryEdit()">
                   {{ $t("pages.readAloud.editCategory") }}
                 </AdminButton>
@@ -805,7 +831,7 @@ onMounted(() => {
             </div>
 
             <div class="mt-3 flex flex-wrap items-end gap-3">
-              <AdminFormField :label="$t('pages.readAloudVocabularies.filterLanguage')" class="min-w-[200px]">
+              <AdminFormField :label="$t('pages.readAloudVocabularies.filterLanguage')" class="w-full min-w-0 sm:min-w-[200px] sm:w-auto">
                 <AdminSelect
                   v-model="filterLanguageId"
                   :options="languageSelectOptions"
@@ -884,6 +910,72 @@ onMounted(() => {
                   </AdminButton>
                 </AdminTd>
               </AdminTr>
+              <template #mobile>
+                <p v-if="!vocabList.length && !vocabLoading" class="py-12 text-center text-sm text-muted">
+                  {{ $t("table.noData") }}
+                </p>
+                <AdminMobileCard
+                  v-for="row in vocabList"
+                  :key="String(row.id)"
+                  :title="String(row.word ?? '')"
+                  :subtitle="labelById(languageOptions, row.languageId)"
+                >
+                  <template #badge>
+                    <AdminBadge>{{ row.status }}</AdminBadge>
+                  </template>
+                  <template #menu>
+                    <AdminOverflowMenu
+                      :actions="[
+                        {
+                          label: $t('pages.readAloudVocabularies.generateBoth'),
+                          onClick: () => generateAudio(row, 'both'),
+                        },
+                        { label: $t('common.edit'), onClick: () => openVocabEdit(row) },
+                        {
+                          label: $t('common.delete'),
+                          danger: true,
+                          onClick: () => removeVocab(row),
+                        },
+                      ]"
+                    />
+                  </template>
+                  <AdminMobileMeta :label="$t('pages.readAloudVocabularies.exampleSentence')">
+                    {{ row.exampleSentence || $t("common.emDash") }}
+                  </AdminMobileMeta>
+                  <AdminMobileMeta :label="$t('pages.readAloudVocabularies.audio')">
+                    {{
+                      [
+                        hasReadAloudAudio(row, "word") ? $t("pages.readAloudVocabularies.word") : null,
+                        hasReadAloudAudio(row, "sentence")
+                          ? $t("pages.readAloudVocabularies.exampleSentence")
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || $t("common.notGenerated")
+                    }}
+                  </AdminMobileMeta>
+                  <template #footer>
+                    <AdminButton
+                      v-if="hasReadAloudAudio(row, 'word')"
+                      variant="link"
+                      size="sm"
+                      class="!px-0"
+                      @click="playReadAloudAudio(row, 'word')"
+                    >
+                      {{ $t("common.play") }} · {{ $t("pages.readAloudVocabularies.word") }}
+                    </AdminButton>
+                    <AdminButton
+                      v-if="hasReadAloudAudio(row, 'sentence')"
+                      variant="link"
+                      size="sm"
+                      class="!px-0"
+                      @click="playReadAloudAudio(row, 'sentence')"
+                    >
+                      {{ $t("common.play") }} · {{ $t("pages.readAloudVocabularies.exampleSentence") }}
+                    </AdminButton>
+                  </template>
+                </AdminMobileCard>
+              </template>
             </AdminTable>
           </div>
 
@@ -906,7 +998,7 @@ onMounted(() => {
           ? $t('pages.readAloudCategories.createDialog')
           : $t('pages.readAloudCategories.editDialog')
       "
-      size="lg"
+      width="lg"
     >
       <div class="space-y-4">
         <div v-if="activeLanguagesLoading" class="py-6">
@@ -986,7 +1078,7 @@ onMounted(() => {
           ? $t('pages.readAloudVocabularies.createDialog')
           : $t('pages.readAloudVocabularies.editDialog')
       "
-      size="lg"
+      width="lg"
     >
       <div class="space-y-4">
         <AdminFormField :label="$t('pages.readAloudVocabularies.language')" required>

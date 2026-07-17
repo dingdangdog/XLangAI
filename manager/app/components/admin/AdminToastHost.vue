@@ -27,7 +27,7 @@ const icons = {
 <template>
   <Teleport to="body">
     <div
-      class="pointer-events-none fixed right-4 top-4 z-[100] flex max-w-sm flex-col gap-2"
+      class="pointer-events-none fixed inset-x-3 top-[max(0.75rem,env(safe-area-inset-top))] z-[100] flex max-w-sm flex-col gap-2 sm:inset-x-auto sm:right-4 sm:top-4"
       aria-live="polite"
     >
       <TransitionGroup name="toast" tag="div" class="flex flex-col gap-2">

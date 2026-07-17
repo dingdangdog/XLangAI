@@ -153,6 +153,40 @@ function openUsage(row: Record<string, unknown>) {
   usageDialogVisible.value = true;
 }
 
+function userMobileActions(row: Record<string, unknown>) {
+  const actions: { label: string; onClick: () => void; danger?: boolean; disabled?: boolean }[] = [
+    { label: t("common.usage"), onClick: () => openUsage(row) },
+    { label: t("common.edit"), onClick: () => openEdit(row) },
+  ];
+  if (!row.deletedAt) {
+    if (row.status !== "inactive") {
+      actions.push({
+        label: t("pages.users.disable"),
+        onClick: () => setUserStatus(row, "inactive", t("pages.users.disable")),
+      });
+    }
+    if (row.status !== "banned") {
+      actions.push({
+        label: t("pages.users.ban"),
+        danger: true,
+        onClick: () => setUserStatus(row, "banned", t("pages.users.ban")),
+      });
+    }
+    if (row.status !== "active") {
+      actions.push({
+        label: t("pages.users.unban"),
+        onClick: () => setUserStatus(row, "active", t("pages.users.unban")),
+      });
+    }
+    actions.push({
+      label: t("common.softDelete"),
+      danger: true,
+      onClick: () => removeRow(row),
+    });
+  }
+  return actions;
+}
+
 watch(usageDialogVisible, (open) => {
   if (!open) usageUser.value = null;
 });
@@ -353,7 +387,9 @@ const llmSelectOptions = computed(() => [
       >
         <template #actions>
           <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
-          <AdminButton variant="primary" @click="openCreate">{{ $t("pages.users.createAccount") }}</AdminButton>
+          <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
+            {{ $t("pages.users.createAccount") }}
+          </AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -435,6 +471,42 @@ const llmSelectOptions = computed(() => [
             </AdminButton>
           </AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="usageUserLabel(row)"
+            :subtitle="[row.phone, row.email].filter(Boolean).join(' · ') || undefined"
+          >
+            <template #badge>
+              <AdminBadge :variant="statusBadgeVariant(row.status)">
+                {{ statusLabel(row.status) }}
+              </AdminBadge>
+            </template>
+            <template #menu>
+              <AdminOverflowMenu :actions="userMobileActions(row)" />
+            </template>
+            <AdminMobileMeta :label="$t('fields.tier')">
+              <span v-if="row.tierLabel">{{ row.tierName || row.tierCode }}</span>
+              <span v-else>{{ $t("common.notAssigned") }}</span>
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.defaultLlm')">
+              {{ row.defaultLlmLabel || $t("pages.users.defaultLlmGlobal") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.todayUsageCol')">
+              {{ userUsagePrimaryLine(row, "today") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.monthUsageCol')">
+              {{ userUsagePrimaryLine(row, "month") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.lastLogin')">
+              {{ formatDateTime(row.lastLoginAt) }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>

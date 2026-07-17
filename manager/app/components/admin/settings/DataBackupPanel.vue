@@ -172,6 +172,14 @@ onMounted(() => {
             <AdminTd>{{ row.label }}</AdminTd>
             <AdminTd>{{ row.count }}</AdminTd>
           </AdminTr>
+          <template #mobile>
+            <AdminMobileCard
+              v-for="row in tableRows"
+              :key="row.key"
+              :title="row.label"
+              :subtitle="String(row.count)"
+            />
+          </template>
         </AdminTable>
       </AdminPanel>
 

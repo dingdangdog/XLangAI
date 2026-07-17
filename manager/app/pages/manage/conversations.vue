@@ -294,13 +294,15 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
       >
         <template #actions>
           <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
-          <div class="w-56">
+          <div class="w-full sm:w-56">
             <AdminSelect v-model="filterUserId" :options="userFilterOptions" />
           </div>
-          <div class="w-44">
+          <div class="w-full sm:w-44">
             <AdminSelect v-model="filterScenarioCode" :options="scenarioFilterOptions" />
           </div>
-          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
+          <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
+            {{ $t("common.create") }}
+          </AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -359,6 +361,46 @@ const promptSelectOptions = computed(() => optionalSelect(promptOptions.value));
             </AdminButton>
           </AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="String(row.title ?? $t('common.emDash'))"
+            :subtitle="userDisplayLabel(row.userId)"
+          >
+            <template #badge>
+              <AdminBadge>{{ row.status }}</AdminBadge>
+            </template>
+            <template #menu>
+              <AdminOverflowMenu
+                :actions="[
+                  { label: $t('common.edit'), onClick: () => openEdit(row) },
+                  {
+                    label: $t('common.softDelete'),
+                    danger: true,
+                    disabled: !!row.deletedAt,
+                    onClick: () => removeRow(row),
+                  },
+                ]"
+              />
+            </template>
+            <AdminMobileMeta :label="$t('pages.practiceScenarios.title')">
+              {{ scenarioDisplayLabel(row.scenarioCode) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.language')">
+              {{ languageDisplayLabel(row.languageId) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.voiceRole')">
+              {{ voiceRoleDisplayLabel(row.voiceRoleId) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('common.updatedAt')">
+              {{ formatDateTime(row.updatedAt) }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>

@@ -43,10 +43,10 @@ const emit = defineEmits<{ close: [] }>();
             role="dialog"
             aria-modal="true"
           >
-            <header class="shrink-0 border-b border-border/60 px-6 py-5">
-              <div class="flex items-start justify-between gap-4">
+            <header class="shrink-0 border-b border-border/60 px-4 py-4 sm:px-6 sm:py-5">
+              <div class="flex items-start justify-between gap-3 sm:gap-4">
                 <div class="min-w-0">
-                  <h2 class="truncate text-lg font-semibold tracking-tight text-foreground">{{ title }}</h2>
+                  <h2 class="truncate text-base font-semibold tracking-tight text-foreground sm:text-lg">{{ title }}</h2>
                   <p v-if="subtitle" class="mt-1 text-sm text-muted">{{ subtitle }}</p>
                 </div>
                 <button
@@ -60,13 +60,13 @@ const emit = defineEmits<{ close: [] }>();
               <slot name="header-extra" />
             </header>
 
-            <div class="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-5">
               <slot />
             </div>
 
             <footer
               v-if="$slots.footer"
-              class="shrink-0 border-t border-border/60 bg-surface-muted/30 px-6 py-4"
+              class="shrink-0 border-t border-border/60 bg-surface-muted/30 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4"
             >
               <slot name="footer" />
             </footer>

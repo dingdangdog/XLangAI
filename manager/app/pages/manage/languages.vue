@@ -147,7 +147,9 @@ const { activateRow, activatingId } = useActivateConfigRow({
         :description="$t('pages.languages.description')"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
+          <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
+            {{ $t("common.create") }}
+          </AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -187,6 +189,39 @@ const { activateRow, activatingId } = useActivateConfigRow({
             </AdminButton>
           </AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="String(row.name ?? '')"
+            :subtitle="String(row.code ?? '')"
+          >
+            <template #badge>
+              <AdminBadge>{{ row.status }}</AdminBadge>
+            </template>
+            <template #menu>
+              <AdminOverflowMenu
+                :actions="[
+                  ...(String(row.status) !== 'active'
+                    ? [{ label: $t('common.enable'), onClick: () => activateRow(row) }]
+                    : []),
+                  { label: $t('common.edit'), onClick: () => openEdit(row) },
+                  { label: $t('common.delete'), danger: true, onClick: () => removeRow(row) },
+                ]"
+              />
+            </template>
+            <AdminMobileMeta :label="$t('fields.localName')">
+              {{ row.nameNative ?? $t("common.emDash") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('common.sort')">{{ row.sortOrder }}</AdminMobileMeta>
+            <AdminMobileMeta :label="$t('common.updatedAt')">
+              {{ formatDateTime(row.updatedAt) }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>

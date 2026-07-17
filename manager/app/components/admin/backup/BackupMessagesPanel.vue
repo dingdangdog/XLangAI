@@ -36,7 +36,7 @@ watch([page, pageSize, filterBatch], () => void load(), { immediate: true });
 <template>
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="mb-4 flex shrink-0 justify-end">
-      <div class="w-56">
+      <div class="w-full sm:w-56">
         <AdminInput
           v-model="filterBatch"
           :placeholder="$t('common.filterByBackupBatch')"
@@ -63,6 +63,28 @@ watch([page, pageSize, filterBatch], () => void load(), { immediate: true });
           <AdminTd nowrap>{{ formatDateTime(row.createdAt) }}</AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.cancelledAt) }}</AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id) + String(row.backupBatch)"
+            :title="String(row.content ?? '').slice(0, 80) || String(row.id)"
+            :subtitle="String(row.conversationId ?? '')"
+          >
+            <template #badge>
+              <AdminBadge>{{ row.role }}</AdminBadge>
+            </template>
+            <AdminMobileMeta :label="$t('fields.batch')">{{ row.backupBatch }}</AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.originalCreatedAt')">
+              {{ formatDateTime(row.createdAt) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.backupTime')">
+              {{ formatDateTime(row.cancelledAt) }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>

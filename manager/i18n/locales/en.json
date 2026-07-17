@@ -112,6 +112,7 @@
     "delete": "Delete",
     "enable": "Enable",
     "softDelete": "Soft delete",
+    "back": "Back",
     "actions": "Actions",
     "optional": "(optional)",
     "optionalParen": "(none)",

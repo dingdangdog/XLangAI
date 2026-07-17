@@ -187,7 +187,9 @@ onMounted(() => void loadPrompts());
         :description="$t('pages.practiceScenarios.description')"
       >
         <template #actions>
-          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
+          <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
+            {{ $t("common.create") }}
+          </AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -221,6 +223,36 @@ onMounted(() => void loadPrompts());
             </AdminButton>
           </AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="String(row.name ?? '')"
+            :subtitle="String(row.code ?? '')"
+          >
+            <template #badge>
+              <AdminBadge>{{ row.status }}</AdminBadge>
+            </template>
+            <template #menu>
+              <AdminOverflowMenu
+                :actions="[
+                  { label: $t('common.edit'), onClick: () => openEdit(row) },
+                  { label: $t('common.delete'), danger: true, onClick: () => removeRow(row) },
+                ]"
+              />
+            </template>
+            <AdminMobileMeta :label="$t('pages.practiceScenarios.nameEn')">
+              {{ row.nameEn ?? $t("common.emDash") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('pages.practiceScenarios.promptTemplate')">
+              {{ promptDisplayLabel(row.promptTemplateId) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('common.sort')">{{ row.sortOrder }}</AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>
@@ -228,7 +260,7 @@ onMounted(() => void loadPrompts());
     <AdminDialog
       v-model="dialogVisible"
       :title="dialogMode === 'create' ? $t('pages.practiceScenarios.createDialog') : $t('pages.practiceScenarios.editDialog')"
-      size="lg"
+      width="lg"
     >
       <div class="space-y-4">
         <AdminFormField :label="$t('common.code')" required>

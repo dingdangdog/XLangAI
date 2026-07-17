@@ -55,27 +55,11 @@ const TAB_PANEL = {
 
       <AdminAlert :title="$t('pages.backups.readonlyAlert')" />
 
-      <div
-        class="flex flex-wrap gap-1 rounded-lg border border-border bg-surface-muted p-1"
-        role="tablist"
-      >
-        <button
-          v-for="tab in TABS"
-          :key="tab.key"
-          type="button"
-          role="tab"
-          class="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-          :class="
-            activeTab === tab.key
-              ? 'bg-surface text-foreground shadow-sm'
-              : 'text-muted hover:text-foreground'
-          "
-          :aria-selected="activeTab === tab.key"
-          @click="setTab(tab.key)"
-        >
-          {{ tab.label }}
-        </button>
-      </div>
+      <AgentSegmentNav
+        :items="TABS"
+        :active="activeTab"
+        @change="setTab($event as TabKey)"
+      />
     </template>
 
     <div class="flex min-h-0 flex-1 flex-col">

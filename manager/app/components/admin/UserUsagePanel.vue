@@ -187,8 +187,42 @@ const emit = defineEmits<{ changed: [] }>();
             {{ $t("common.delete") }}
           </AdminButton>
         </AdminTd>
-      </AdminTr>
-    </AdminTable>
+        </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="formatDate(row.date)"
+            :subtitle="`${$t('fields.calls')} ${row.usageCount} · ${$t('fields.token')} ${row.tokenCount}`"
+          >
+            <template #menu>
+              <AdminOverflowMenu
+                :actions="[
+                  { label: $t('common.edit'), onClick: () => openEdit(row) },
+                  { label: $t('common.delete'), danger: true, onClick: () => removeRow(row) },
+                ]"
+              />
+            </template>
+            <AdminMobileMeta :label="$t('fields.translate')">
+              {{ usageCountCharsLine(row.translateCount, row.translateChars) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.tts')">
+              {{ usageCountCharsLine(row.ttsCount, row.ttsChars) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.stt')">
+              {{
+                $t("usage.sttLine", {
+                  count: Number(row.sttCount ?? 0),
+                  size: formatAudioBytes(String(row.sttAudioBytes ?? 0)),
+                })
+              }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
+      </AdminTable>
     <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
 
     <AdminDialog

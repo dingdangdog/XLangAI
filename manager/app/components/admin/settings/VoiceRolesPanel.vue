@@ -293,6 +293,36 @@ async function removeRow(row: Record<string, unknown>) {
   }
 }
 
+function voiceMobileActions(row: Record<string, unknown>) {
+  const actions: { label: string; onClick: () => void; danger?: boolean; disabled?: boolean }[] = [];
+  if (String(row.status) !== "active") {
+    actions.push({ label: t("common.enable"), onClick: () => activateRow(row) });
+  }
+  actions.push({
+    label: t("common.play"),
+    disabled: !row.previewAudioUrl,
+    onClick: () => playPreview(row),
+  });
+  actions.push({ label: t("common.edit"), onClick: () => openEdit(row) });
+  actions.push({
+    label: t("common.generatePreview"),
+    disabled: previewDisabledForRow(row),
+    onClick: () => generatePreview(row),
+  });
+  actions.push({
+    label: t("common.deletePreview"),
+    danger: true,
+    disabled: !row.previewAudioUrl,
+    onClick: () => deletePreview(row),
+  });
+  actions.push({
+    label: t("common.delete"),
+    danger: true,
+    onClick: () => removeRow(row),
+  });
+  return actions;
+}
+
 const statusOptions = [
   { value: "active", label: "active" },
   { value: "inactive", label: "inactive" },
@@ -423,7 +453,9 @@ async function deletePreview(row: Record<string, unknown>) {
 <template>
   <div class="flex min-h-0 flex-1 flex-col gap-3">
     <div class="flex justify-end">
-      <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
+      <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
+        {{ $t("common.create") }}
+      </AdminButton>
     </div>
 
     <AdminAlert :title="$t('pages.voiceRoles.usageAlertTitle')">
@@ -440,11 +472,11 @@ async function deletePreview(row: Record<string, unknown>) {
           <AdminTd v-for="col in tableColumns" :key="col.prop">
             <template v-if="col.prop === 'previewAudioUrl'">
               <span v-if="row.previewAudioUrl" class="inline-flex" :title="$t('common.generated')">
-                <CheckCircleIcon class="h-5 w-5 text-success-600" aria-hidden="true" />
+                <CheckCircleIcon class="h-5 w-5 text-primary-600" aria-hidden="true" />
                 <span class="sr-only">{{ $t("common.generated") }}</span>
               </span>
               <span v-else class="inline-flex" :title="$t('common.notGenerated')">
-                <XCircleIcon class="h-5 w-5 text-surface-400" aria-hidden="true" />
+                <XCircleIcon class="h-5 w-5 text-muted" aria-hidden="true" />
                 <span class="sr-only">{{ $t("common.notGenerated") }}</span>
               </span>
             </template>
@@ -489,6 +521,33 @@ async function deletePreview(row: Record<string, unknown>) {
             </div>
           </AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="String(row.name ?? row.voiceCode ?? row.id)"
+            :subtitle="String(row.voiceCode ?? '')"
+          >
+            <template #badge>
+              <AdminBadge>{{ row.status }}</AdminBadge>
+            </template>
+            <template #menu>
+              <AdminOverflowMenu :actions="voiceMobileActions(row)" />
+            </template>
+            <AdminMobileMeta :label="$t('fields.synthesisType')">
+              {{ synthesisTypeLabel(row.synthesisType) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.gender')">
+              {{ cellValue(row, "gender") || $t("common.emDash") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('common.play')">
+              {{ row.previewAudioUrl ? $t("common.generated") : $t("common.notGenerated") }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>

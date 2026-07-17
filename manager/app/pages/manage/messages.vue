@@ -193,13 +193,15 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
       >
         <template #actions>
           <AdminCheckbox v-model="showDeleted" :label="$t('common.includeDeleted')" />
-          <div class="w-56">
+          <div class="w-full sm:w-56">
             <AdminInput
               v-model="filterConversationId"
               :placeholder="$t('pages.messages.filterConversationId')"
             />
           </div>
-          <AdminButton variant="primary" @click="openCreate">{{ $t("common.create") }}</AdminButton>
+          <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
+            {{ $t("common.create") }}
+          </AdminButton>
         </template>
       </AdminPageHeader>
     </template>
@@ -250,6 +252,43 @@ function parseAiInteractionStatus(row: Record<string, unknown>): string {
             </AdminButton>
           </AdminTd>
         </AdminTr>
+        <template #mobile>
+          <p v-if="!list.length && !loading" class="py-12 text-center text-sm text-muted">
+            {{ $t("table.noData") }}
+          </p>
+          <AdminMobileCard
+            v-for="row in list"
+            :key="String(row.id)"
+            :title="String(row.content ?? $t('common.emDash')).slice(0, 80)"
+            :subtitle="String(row.conversationId ?? '')"
+          >
+            <template #badge>
+              <AdminBadge>{{ row.role }}</AdminBadge>
+            </template>
+            <template #menu>
+              <AdminOverflowMenu
+                :actions="[
+                  { label: $t('common.edit'), onClick: () => openEdit(row) },
+                  {
+                    label: $t('common.softDelete'),
+                    danger: true,
+                    disabled: !!row.deletedAt,
+                    onClick: () => removeRow(row),
+                  },
+                ]"
+              />
+            </template>
+            <AdminMobileMeta :label="$t('fields.aiStatus')">
+              {{ aiStatusLabel(row) }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('fields.durationMs')">
+              {{ row.durationMs ?? $t("common.emDash") }}
+            </AdminMobileMeta>
+            <AdminMobileMeta :label="$t('common.createdAt')">
+              {{ formatDateTime(row.createdAt) }}
+            </AdminMobileMeta>
+          </AdminMobileCard>
+        </template>
       </AdminTable>
       <AdminPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
     </AdminPanel>

@@ -107,6 +107,7 @@
     "delete": "削除",
     "enable": "有効化",
     "softDelete": "論理削除",
+    "back": "戻る",
     "actions": "操作",
     "optional": "（任意）",
     "optionalParen": "（未選択）",
