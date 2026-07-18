@@ -24,6 +24,12 @@ function validateValue(key: SystemSettingKey, value: unknown, valueType: string)
     }
     return v.toLowerCase() === "true" || v === "1" ? "true" : "false";
   }
+  if (meta.numeric) {
+    if (!/^\d+$/.test(v)) {
+      throw createError({ statusCode: 400, message: "value must be a non-negative integer" });
+    }
+    return v;
+  }
   if (meta.enumValues && !meta.enumValues.includes(v as (typeof MEDIA_STORAGE_VALUES)[number])) {
     throw createError({
       statusCode: 400,

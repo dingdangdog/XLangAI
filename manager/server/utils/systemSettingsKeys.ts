@@ -8,6 +8,7 @@ export const SYSTEM_SETTING_KEYS = [
   "media.user_recording.storage",
   "media.assistant_tts.storage",
   "media.avatar.storage",
+  "quota.signup_turn_grant",
 ] as const;
 
 export type SystemSettingKey = (typeof SYSTEM_SETTING_KEYS)[number];
@@ -18,7 +19,7 @@ export const MEDIA_STORAGE_VALUES = ["client", "server", "cloud"] as const;
 
 export const KEY_META: Record<
   SystemSettingKey,
-  { label: string; valueType: "bool" | "string"; enumValues?: readonly string[] }
+  { label: string; valueType: "bool" | "string"; enumValues?: readonly string[]; numeric?: boolean }
 > = {
   "auth.password.enabled": { label: "账号密码登录", valueType: "bool" },
   "auth.password.register_enabled": { label: "账号密码注册", valueType: "bool" },
@@ -38,6 +39,11 @@ export const KEY_META: Record<
     label: "头像存储",
     valueType: "string",
     enumValues: ["server", "cloud"],
+  },
+  "quota.signup_turn_grant": {
+    label: "注册赠送永久对话次数",
+    valueType: "string",
+    numeric: true,
   },
 };
 

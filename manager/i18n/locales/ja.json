@@ -236,6 +236,8 @@
     "accountStatus": "アカウント状態",
     "todayUsageCol": "本日",
     "monthUsageCol": "今月",
+    "turnBalance": "永久会話回数",
+    "addTurnBalance": "回数を追加",
     "lastLogin": "最終ログイン",
     "title": "タイトル",
     "userId": "ユーザー ID",
@@ -318,7 +320,8 @@
     "dailyLimit": "日上限 {value}",
     "monthlyLimit": "月上限 {value}",
     "subscriptionUntil": "購読期限 {date}",
-    "tokenBalance": "Token 残高 {value}"
+    "tokenBalance": "Token 残高 {value}",
+    "turnBalance": "永久回数 {value}"
   },
   "security": {
     "hide": "非表示",
@@ -405,7 +408,7 @@
     },
     "users": {
       "title": "ユーザーアカウント",
-      "description": "アカウント・会員・本日/今月利用量。作成・パスワード・日次利用・無効/停止。",
+      "description": "アカウント・会員・永久会話回数・本日/今月利用量。作成・パスワード・回数追加・日次利用・無効/停止。",
       "createAccount": "新規アカウント",
       "createDialog": "新規アカウント",
       "editDialog": "アカウント編集",
@@ -419,6 +422,9 @@
       "passwordHintEdit": "空欄で変更なし；入力で上書き",
       "passwordPlaceholderCreate": "必須",
       "passwordPlaceholderEdit": "空欄で変更なし",
+      "turnBalanceHint": "期限なし。日/月上限のないプラン（free 等）で消費。カレンダー上限のある有料プランは月額を優先。",
+      "addTurnBalanceHint": "正の整数を入れると現在残高に加算；上の絶対値より優先。",
+      "addTurnBalancePlaceholder": "空欄なら上の絶対値を保存",
       "nativeLanguageHint": "クライアント STT 補助用；学習言語とは無関係",
       "defaultLlmGlobal": "グローバル既定に従う",
       "defaultLlmHint": "LLM+TTS モードのみ。native_audio は音声ロールの LLM を使用"

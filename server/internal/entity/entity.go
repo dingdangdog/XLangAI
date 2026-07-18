@@ -268,6 +268,7 @@ type User struct {
 	DefaultLlmConfigID    *string    `gorm:"column:default_llm_config_id;type:varchar(36)"`
 	Settings              *string    `gorm:"column:settings;type:text"`
 	TokenBalance          int64      `gorm:"column:token_balance"`
+	TurnBalance           int        `gorm:"column:turn_balance"`
 	SubscriptionExpiresAt *time.Time `gorm:"column:subscription_expires_at"`
 	AppleSub              *string    `gorm:"column:apple_sub;type:varchar(255);uniqueIndex"`
 	GoogleSub             *string    `gorm:"column:google_sub;type:varchar(255);uniqueIndex"`

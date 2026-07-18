@@ -73,7 +73,48 @@ export async function prepareUserAdminWriteData(
     data.defaultLlmConfigId = await normalizeUserDefaultLlmConfigId(body.defaultLlmConfigId);
   }
 
+  // 运营加次：优先于绝对写入 turnBalance
+  if (mode === "update" && "addTurnBalance" in body) {
+    const delta = Math.floor(Number(body.addTurnBalance));
+    delete data.addTurnBalance;
+    if (Number.isFinite(delta) && delta > 0) {
+      delete data.turnBalance;
+      data.turnBalance = { increment: delta };
+      return data;
+    }
+  }
+
+  if ("turnBalance" in body || mode === "create") {
+    data.turnBalance = await normalizeTurnBalance(body.turnBalance, mode);
+  }
+
   return data;
+}
+
+async function normalizeTurnBalance(
+  value: unknown,
+  mode: "create" | "update",
+): Promise<number> {
+  if (value === undefined || value === null || value === "") {
+    if (mode === "create") {
+      const setting = await prisma.sysSystemSetting.findUnique({
+        where: { key: "quota.signup_turn_grant" },
+        select: { value: true, status: true },
+      });
+      const raw =
+        setting && (!setting.status || setting.status === "active")
+          ? String(setting.value ?? "").trim()
+          : "20";
+      const n = Number.parseInt(raw || "20", 10);
+      return Number.isFinite(n) && n >= 0 ? n : 20;
+    }
+    throw createError({ statusCode: 400, message: "turnBalance 无效" });
+  }
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 0) {
+    throw createError({ statusCode: 400, message: "turnBalance 须为非负整数" });
+  }
+  return n;
 }
 
 function utcDateOnly(d = new Date()): Date {

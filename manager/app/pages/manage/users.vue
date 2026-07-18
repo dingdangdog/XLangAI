@@ -135,6 +135,10 @@ function tierSubline(row: Record<string, unknown>): string {
   if (bal != null && String(bal) !== "0") {
     parts.push(t("usage.tokenBalance", { value: bal }));
   }
+  const turns = row.turnBalance;
+  if (turns != null) {
+    parts.push(t("usage.turnBalance", { value: turns }));
+  }
   return parts.join(t("usage.separator")) || t("common.emDash");
 }
 
@@ -205,6 +209,8 @@ const form = reactive({
   tierId: "",
   languageId: "",
   defaultLlmConfigId: "",
+  turnBalance: 20 as number | null,
+  addTurnBalance: null as number | null,
   settings: "{}",
   status: "active",
   remark: "",
@@ -220,6 +226,8 @@ function resetForm() {
   form.tierId = "";
   form.languageId = "";
   form.defaultLlmConfigId = "";
+  form.turnBalance = 20;
+  form.addTurnBalance = null;
   form.settings = "{}";
   form.status = "active";
   form.remark = "";
@@ -243,6 +251,8 @@ function openEdit(row: Record<string, unknown>) {
   form.tierId = String(row.tierId ?? "");
   form.languageId = String(row.languageId ?? "");
   form.defaultLlmConfigId = String(row.defaultLlmConfigId ?? "");
+  form.turnBalance = row.turnBalance != null ? Number(row.turnBalance) : 0;
+  form.addTurnBalance = null;
   form.settings = row.settings != null ? String(row.settings) : "{}";
   form.status = String(row.status ?? "active");
   form.remark = String(row.remark ?? "");
@@ -293,6 +303,16 @@ async function submit() {
   };
   if (form.password) {
     body.password = form.password;
+  }
+
+  const addTurns =
+    dialogMode.value === "edit" && form.addTurnBalance != null
+      ? Math.floor(Number(form.addTurnBalance))
+      : 0;
+  if (addTurns > 0) {
+    body.addTurnBalance = addTurns;
+  } else if (form.turnBalance != null && Number.isFinite(Number(form.turnBalance))) {
+    body.turnBalance = Math.max(0, Math.floor(Number(form.turnBalance)));
   }
 
   saving.value = true;
@@ -554,6 +574,16 @@ const llmSelectOptions = computed(() => [
         </AdminFormField>
         <AdminFormField :label="$t('fields.tierLevel')">
           <AdminSelect v-model="form.tierId" :options="tierSelectOptions" />
+        </AdminFormField>
+        <AdminFormField :label="$t('fields.turnBalance')" :hint="$t('pages.users.turnBalanceHint')">
+          <AdminInput v-model="form.turnBalance" type="number" min="0" step="1" />
+        </AdminFormField>
+        <AdminFormField
+          v-if="dialogMode === 'edit'"
+          :label="$t('fields.addTurnBalance')"
+          :hint="$t('pages.users.addTurnBalanceHint')"
+        >
+          <AdminInput v-model="form.addTurnBalance" type="number" min="0" step="1" :placeholder="$t('pages.users.addTurnBalancePlaceholder')" />
         </AdminFormField>
         <AdminFormField :label="$t('fields.nativeLanguage')" :hint="$t('pages.users.nativeLanguageHint')">
           <AdminSelect v-model="form.languageId" :options="langSelectOptions" />

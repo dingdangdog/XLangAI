@@ -184,21 +184,21 @@ const SEED_MEMBERSHIP_TIERS = [
   {
     code: "free",
     name: "Free",
-    dailyLimit: 10,
-    monthlyLimit: 100,
+    dailyLimit: null as number | null,
+    monthlyLimit: null as number | null,
     features: JSON.stringify({
       voice_chat: true,
       text_chat: true,
       pronunciation_check: true,
     }),
     sortOrder: 10,
-    remark: "Startup seed: free tier, 10 daily / 100 monthly conversations",
+    remark: "Startup seed: free tier uses permanent turn_balance (no calendar limits)",
   },
   {
     code: "plus",
     name: "Plus",
-    dailyLimit: 100,
-    monthlyLimit: 1000,
+    dailyLimit: 100 as number | null,
+    monthlyLimit: 1000 as number | null,
     features: JSON.stringify({
       voice_chat: true,
       text_chat: true,
@@ -210,8 +210,8 @@ const SEED_MEMBERSHIP_TIERS = [
   {
     code: "pro",
     name: "Pro",
-    dailyLimit: 500,
-    monthlyLimit: 5000,
+    dailyLimit: 500 as number | null,
+    monthlyLimit: 5000 as number | null,
     features: JSON.stringify({
       voice_chat: true,
       text_chat: true,
@@ -548,7 +548,37 @@ async function ensureAzureVoiceRoles(db: AppPrismaClient, ttsId: string) {
 async function ensureMembershipTiers(db: AppPrismaClient) {
   for (const tier of SEED_MEMBERSHIP_TIERS) {
     const exists = await db.membershipTier.findUnique({ where: { code: tier.code } });
-    if (exists) continue;
+    if (exists) {
+      // Align free tier with permanent turn-balance model (no calendar limits).
+      if (
+        tier.code === "free" &&
+        (exists.dailyLimit != null || exists.monthlyLimit != null)
+      ) {
+        await db.membershipTier.update({
+          where: { code: "free" },
+          data: {
+            dailyLimit: null,
+            monthlyLimit: null,
+            remark: tier.remark,
+          },
+        });
+        // Existing free users would otherwise be stuck at turn_balance=0 after migrate.
+        const grant = await resolveSignupTurnGrant(db);
+        await db.$executeRaw`
+          UPDATE usr_users AS u
+          SET turn_balance = ${grant}
+          FROM sys_membership_tiers AS t
+          WHERE u.tier_id = t.id
+            AND t.code = 'free'
+            AND u.deleted_at IS NULL
+            AND COALESCE(u.turn_balance, 0) = 0
+        `;
+        console.info(
+          `[data-seed] free tier limits cleared; backfilled turn_balance=${grant} for empty free users`,
+        );
+      }
+      continue;
+    }
 
     await db.membershipTier.create({
       data: {
@@ -563,6 +593,18 @@ async function ensureMembershipTiers(db: AppPrismaClient) {
       },
     });
   }
+}
+
+async function resolveSignupTurnGrant(db: AppPrismaClient): Promise<number> {
+  const setting = await db.sysSystemSetting.findUnique({
+    where: { key: "quota.signup_turn_grant" },
+    select: { value: true, status: true },
+  });
+  if (setting && (!setting.status || setting.status === "active")) {
+    const n = Number.parseInt(String(setting.value ?? "").trim() || "20", 10);
+    if (Number.isFinite(n) && n >= 0) return n;
+  }
+  return 20;
 }
 
 async function ensureLlmServiceConfig(db: AppPrismaClient) {
@@ -849,6 +891,7 @@ export async function ensureTestSeedUser(db: AppPrismaClient) {
       passwordHash,
       nickname: "Test User",
       tierId: freeTier?.id ?? null,
+      turnBalance: 20,
       status: "active",
     },
   });
@@ -899,6 +942,13 @@ const SEED_SYSTEM_SETTINGS: {
       valueType: "string",
       status: "active",
       description: "Avatars: server | cloud",
+    },
+    {
+      key: "quota.signup_turn_grant",
+      value: "20",
+      valueType: "string",
+      status: "active",
+      description: "Permanent chat turns granted on new user signup (non-negative integer)",
     },
   ];
 

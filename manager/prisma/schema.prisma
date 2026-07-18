@@ -403,6 +403,8 @@ model User {
   settings              String?   @db.Text
   /// 可抵扣 LLM 对话的 token 余额（与 OpenAI usage.total_tokens 同量纲）；内购消耗型核销时累加。
   tokenBalance          BigInt    @default(0) @map("token_balance")
+  /// 永久对话次数余额（不过期，成功一轮对话扣 1）；档位无日/月限额时使用。
+  turnBalance           Int       @default(0) @map("turn_balance")
   /// 当前商店订阅权益到期时间（UTC）；到期后 Go 端在 Principal 中按逻辑回落到免费档额度。
   subscriptionExpiresAt DateTime? @map("subscription_expires_at") @db.Timestamptz(6)
   /// Apple Sign In identityToken 的 `sub`；与密码登录并存时用于关联。

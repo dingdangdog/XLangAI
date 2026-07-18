@@ -441,6 +441,7 @@ export const UserScalarFieldEnum = {
   defaultLlmConfigId: 'defaultLlmConfigId',
   settings: 'settings',
   tokenBalance: 'tokenBalance',
+  turnBalance: 'turnBalance',
   subscriptionExpiresAt: 'subscriptionExpiresAt',
   appleSub: 'appleSub',
   googleSub: 'googleSub',

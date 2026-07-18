@@ -21,6 +21,7 @@ func userToModel(u *entity.User) *model.User {
 		TierID:                u.TierID,
 		LanguageID:            u.LanguageID,
 		TokenBalance:          u.TokenBalance,
+		TurnBalance:           u.TurnBalance,
 		SubscriptionExpiresAt: u.SubscriptionExpiresAt,
 		Status:                u.Status,
 		LastLoginAt:           u.LastLoginAt,

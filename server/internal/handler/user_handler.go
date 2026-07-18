@@ -57,6 +57,14 @@ func (h *UserHandler) authEnabled(c *gin.Context, key string) bool {
 	return true
 }
 
+func (h *UserHandler) signupTurnGrant(ctx context.Context) int {
+	const fallback = 20
+	if h.settings == nil {
+		return fallback
+	}
+	return h.settings.Int(ctx, settings.QuotaSignupTurnGrant, fallback)
+}
+
 func (h *UserHandler) Create(c *gin.Context) {
 	if !h.authEnabled(c, settings.AuthPasswordEnabled) {
 		return
@@ -78,11 +86,13 @@ func (h *UserHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "phone or email required"})
 		return
 	}
-	u, err := h.repo.Create(c.Request.Context(), repository.CreateUserParams{
-		Phone:    req.Phone,
-		Email:    req.Email,
-		Password: req.Password,
-		Nickname: req.Nickname,
+	ctx := c.Request.Context()
+	u, err := h.repo.Create(ctx, repository.CreateUserParams{
+		Phone:       req.Phone,
+		Email:       req.Email,
+		Password:    req.Password,
+		Nickname:    req.Nickname,
+		TurnBalance: h.signupTurnGrant(ctx),
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -359,7 +369,7 @@ func (h *UserHandler) RegisterWithSms(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "lookup failed"})
 		return
 	}
-	u, err := h.repo.CreateSmsUser(ctx, phone, req.Nickname)
+	u, err := h.repo.CreateSmsUser(ctx, phone, req.Nickname, h.signupTurnGrant(ctx))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -418,6 +428,7 @@ func (h *UserHandler) Me(c *gin.Context) {
 		}
 	}
 	resp["token_balance"] = u.TokenBalance
+	resp["turn_balance"] = u.TurnBalance
 	if u.SubscriptionExpiresAt != nil {
 		resp["subscription_expires_at"] = u.SubscriptionExpiresAt.UTC().Format(time.RFC3339)
 	}
@@ -685,5 +696,6 @@ func toUserResp(ctx context.Context, langRepo *repository.LangRepo, u *model.Use
 			}
 		}
 	}
+	resp["turn_balance"] = u.TurnBalance
 	return resp
 }

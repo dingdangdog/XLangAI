@@ -23,6 +23,7 @@ var (
 	ErrQuotaDaily        = errors.New("daily chat limit reached")
 	ErrQuotaMonthly      = errors.New("monthly chat limit reached")
 	ErrQuotaTokens       = errors.New("monthly included turns exhausted and token balance is empty")
+	ErrQuotaTurns        = errors.New("permanent turn balance is empty")
 )
 
 type tierFeatures struct {
@@ -36,6 +37,7 @@ type Principal struct {
 	Role         string                     `json:"role"`
 	Tier         *repository.MembershipTier `json:"tier,omitempty"`
 	TokenBalance int64                      `json:"token_balance"`
+	TurnBalance  int                        `json:"turn_balance"`
 	Feat         tierFeatures               `json:"-"`
 }
 
@@ -44,6 +46,7 @@ type cachedPrincipal struct {
 	Role         string                     `json:"role"`
 	Tier         *repository.MembershipTier `json:"tier,omitempty"`
 	TokenBalance int64                      `json:"token_balance"`
+	TurnBalance  int                        `json:"turn_balance"`
 	LanguageIDs  []string                   `json:"language_ids,omitempty"`
 	VoiceRoleIDs []string                   `json:"voice_role_ids,omitempty"`
 }
@@ -87,7 +90,13 @@ func (s *Service) principalFromUserTier(u *model.User, t *repository.MembershipT
 	if role == "" {
 		role = RoleUser
 	}
-	p := &Principal{UserID: u.ID, Role: role, Tier: t, TokenBalance: u.TokenBalance}
+	p := &Principal{
+		UserID:       u.ID,
+		Role:         role,
+		Tier:         t,
+		TokenBalance: u.TokenBalance,
+		TurnBalance:  u.TurnBalance,
+	}
 	if t != nil {
 		p.Feat = parseFeatures(t.FeaturesJSON)
 	}
@@ -100,6 +109,7 @@ func (s *Service) toCached(p *Principal) cachedPrincipal {
 		Role:         p.Role,
 		Tier:         p.Tier,
 		TokenBalance: p.TokenBalance,
+		TurnBalance:  p.TurnBalance,
 		LanguageIDs:  p.Feat.LanguageIDs,
 		VoiceRoleIDs: p.Feat.VoiceRoleIDs,
 	}
@@ -109,7 +119,13 @@ func (s *Service) fromCached(c *cachedPrincipal) *Principal {
 	if c == nil {
 		return nil
 	}
-	p := &Principal{UserID: c.UserID, Role: c.Role, Tier: c.Tier, TokenBalance: c.TokenBalance}
+	p := &Principal{
+		UserID:       c.UserID,
+		Role:         c.Role,
+		Tier:         c.Tier,
+		TokenBalance: c.TokenBalance,
+		TurnBalance:  c.TurnBalance,
+	}
 	p.Feat.LanguageIDs = c.LanguageIDs
 	p.Feat.VoiceRoleIDs = c.VoiceRoleIDs
 	if p.Role == "" {
@@ -214,21 +230,39 @@ func QuotaErrorCode(err error) string {
 		return "QUOTA_MONTHLY"
 	case errors.Is(err, ErrQuotaTokens):
 		return "QUOTA_TOKENS"
+	case errors.Is(err, ErrQuotaTurns):
+		return "QUOTA_TURNS"
 	default:
 		return ""
 	}
 }
 
-// EnsureChatQuota 发送对话前校验日/月轮次上限（limit 为 0 表示不限）。
+// UsesTurnBalance 为 true 时：有效档位无日/月日历限额，改用永久次数余额。
+func (p *Principal) UsesTurnBalance() bool {
+	if p == nil {
+		return true
+	}
+	if p.Tier == nil {
+		return true
+	}
+	return p.Tier.DailyLimit <= 0 && p.Tier.MonthlyLimit <= 0
+}
+
+// EnsureChatQuota 发送对话前校验额度。
+// - 无日/月限额的档位（如 free）：检查 turn_balance
+// - 有日/月限额的档位（如 plus/pro）：沿用日历限额；月满后可用 token_balance 兜底
 func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
-	if p == nil || p.Tier == nil {
+	if p == nil {
 		return nil
+	}
+	if p.UsesTurnBalance() {
+		if p.TurnBalance > 0 {
+			return nil
+		}
+		return ErrQuotaTurns
 	}
 	daily := p.Tier.DailyLimit
 	monthly := p.Tier.MonthlyLimit
-	if daily <= 0 && monthly <= 0 {
-		return nil
-	}
 	if daily > 0 {
 		n, err := s.usage.TodayUsageCount(ctx, p.UserID)
 		if err != nil {
@@ -256,7 +290,7 @@ func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
 
 // UsesTokenWalletForNextTurn 为 true 时，本回合完成后应按 LLM token 从钱包扣费（在仍通过 EnsureChatQuota 的前提下）。
 func (s *Service) UsesTokenWalletForNextTurn(ctx context.Context, p *Principal) (bool, error) {
-	if p == nil || p.Tier == nil {
+	if p == nil || p.UsesTurnBalance() || p.Tier == nil {
 		return false, nil
 	}
 	if p.Tier.MonthlyLimit <= 0 {
@@ -269,6 +303,11 @@ func (s *Service) UsesTokenWalletForNextTurn(ctx context.Context, p *Principal) 
 	return n >= p.Tier.MonthlyLimit, nil
 }
 
+// UsesTurnWalletForNextTurn 为 true 时，本回合完成后应从永久次数余额扣 1。
+func (s *Service) UsesTurnWalletForNextTurn(p *Principal) bool {
+	return p != nil && p.UsesTurnBalance()
+}
+
 // DeductChatTokens 对话完成后按 LLM 用量扣减 token 余额（仅影响 usr_users.token_balance）。
 func (s *Service) DeductChatTokens(ctx context.Context, userID string, n int64) error {
 	if n <= 0 {
@@ -279,6 +318,18 @@ func (s *Service) DeductChatTokens(ctx context.Context, userID string, n int64) 
 		s.InvalidatePrincipal(ctx, userID)
 	}
 	return err
+}
+
+// DeductChatTurn 对话完成后扣减永久次数余额 1。
+func (s *Service) DeductChatTurn(ctx context.Context, userID string) error {
+	ok, err := s.users.DeductTurnBalance(ctx, userID, 1)
+	if err != nil {
+		return err
+	}
+	if ok {
+		s.InvalidatePrincipal(ctx, userID)
+	}
+	return nil
 }
 
 func (s *Service) RecordChatTurn(ctx context.Context, userID string) error {

@@ -241,6 +241,8 @@
     "accountStatus": "Account status",
     "todayUsageCol": "Today",
     "monthUsageCol": "This month",
+    "turnBalance": "Permanent turns",
+    "addTurnBalance": "Add turns",
     "lastLogin": "Last login",
     "title": "Title",
     "userId": "User ID",
@@ -323,7 +325,8 @@
     "dailyLimit": "Daily limit {value}",
     "monthlyLimit": "Monthly limit {value}",
     "subscriptionUntil": "Subscribed until {date}",
-    "tokenBalance": "Token balance {value}"
+    "tokenBalance": "Token balance {value}",
+    "turnBalance": "Permanent turns {value}"
   },
   "security": {
     "hide": "Hide",
@@ -412,7 +415,7 @@
     },
     "users": {
       "title": "User accounts",
-      "description": "Accounts, tiers, today/month usage (turns, LLM tokens, TTS/translate/STT). Create accounts, reset passwords, manage daily usage, disable or ban.",
+      "description": "Accounts, tiers, permanent chat turns, today/month usage (turns, LLM tokens, TTS/translate/STT). Create accounts, reset passwords, grant turns, manage daily usage, disable or ban.",
       "createAccount": "New account",
       "createDialog": "New account",
       "editDialog": "Edit account",
@@ -426,6 +429,9 @@
       "passwordHintEdit": "Leave blank to keep; enter to replace",
       "passwordPlaceholderCreate": "Required",
       "passwordPlaceholderEdit": "Leave blank to keep",
+      "turnBalanceHint": "Never expires. Used when the tier has no daily/monthly limits (e.g. free). Paid tiers with calendar limits use monthly allowance first.",
+      "addTurnBalanceHint": "Positive integer adds to the current balance; takes priority over absolute permanent turns above.",
+      "addTurnBalancePlaceholder": "Leave blank to save absolute value above",
       "nativeLanguageHint": "For client STT bilingual assist; not practice target language",
       "defaultLlmGlobal": "Use global default",
       "defaultLlmHint": "Applies to LLM+TTS mode only; native_audio still uses the voice role's LLM"

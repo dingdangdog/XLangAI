@@ -238,6 +238,8 @@
     "accountStatus": "账号状态",
     "todayUsageCol": "今日用量",
     "monthUsageCol": "本月用量",
+    "turnBalance": "永久对话次数",
+    "addTurnBalance": "增加次数",
     "lastLogin": "最近登录",
     "title": "标题",
     "userId": "用户 ID",
@@ -320,7 +322,8 @@
     "dailyLimit": "日限额 {value}",
     "monthlyLimit": "月限额 {value}",
     "subscriptionUntil": "订阅至 {date}",
-    "tokenBalance": "Token 余额 {value}"
+    "tokenBalance": "Token 余额 {value}",
+    "turnBalance": "永久次数 {value}"
   },
   "security": {
     "hide": "隐藏",
@@ -409,7 +412,7 @@
     },
     "users": {
       "title": "用户账号",
-      "description": "账号与会员等级、今日/本月用量（对话轮次、LLM Token、TTS/翻译/STT）；可在此新建账号、重置密码、管理按日用量记录，以及禁用或封禁账号。",
+      "description": "账号与会员等级、永久对话次数、今日/本月用量（对话轮次、LLM Token、TTS/翻译/STT）；可在此新建账号、重置密码、加次、管理按日用量记录，以及禁用或封禁账号。",
       "createAccount": "新建账号",
       "createDialog": "新建账号",
       "editDialog": "编辑账号",
@@ -423,6 +426,9 @@
       "passwordHintEdit": "留空则不修改；填写则覆盖为新密码",
       "passwordPlaceholderCreate": "必填",
       "passwordPlaceholderEdit": "留空不修改",
+      "turnBalanceHint": "不过期；档位无日/月限额时（如 free）按此余额扣次。有日历限额的订阅档优先走月包。",
+      "addTurnBalanceHint": "填写正整数则在现有余额上增加；优先于上方「永久对话次数」的绝对写入。",
+      "addTurnBalancePlaceholder": "留空则按上方绝对值保存",
       "nativeLanguageHint": "用于客户端语音转文字双语辅助识别；与练习目标语言无关",
       "defaultLlmGlobal": "跟随全局默认",
       "defaultLlmHint": "仅影响 LLM+TTS 模式的新会话与对话；native_audio 模式仍使用语音角色绑定的 LLM"

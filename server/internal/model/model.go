@@ -12,7 +12,9 @@ type User struct {
 	Role         string     `json:"role,omitempty"`
 	TierID       *string    `json:"tier_id,omitempty"`
 	LanguageID   *string    `json:"language_id,omitempty"`
-	TokenBalance int64      `json:"token_balance"`
+	TokenBalance int64 `json:"token_balance"`
+	// TurnBalance 永久对话次数余额（不过期，成功一轮扣 1）。
+	TurnBalance int `json:"turn_balance"`
 	// SubscriptionExpiresAt 商店订阅权益到期（UTC）；nil 表示未记录或非订阅来源。
 	SubscriptionExpiresAt *time.Time `json:"subscription_expires_at,omitempty"`
 	Status                  string     `json:"status"`

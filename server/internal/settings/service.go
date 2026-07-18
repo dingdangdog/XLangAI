@@ -3,6 +3,7 @@ package settings
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 
 	"xlangai/server/internal/repository"
@@ -42,6 +43,19 @@ func (s *Service) Bool(ctx context.Context, key string) bool {
 
 func (s *Service) String(ctx context.Context, key string) string {
 	return s.raw(ctx, key)
+}
+
+// Int 解析整型设置；空值或非法时返回 fallback（负数按 fallback）。
+func (s *Service) Int(ctx context.Context, key string, fallback int) int {
+	v := s.raw(ctx, key)
+	if v == "" {
+		return fallback
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil || n < 0 {
+		return fallback
+	}
+	return n
 }
 
 // PublicMap 返回可暴露给客户端的 key→value（bool 转为 true/false 字符串保持原样）。

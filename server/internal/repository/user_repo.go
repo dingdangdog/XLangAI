@@ -15,10 +15,11 @@ import (
 )
 
 type CreateUserParams struct {
-	Phone    string
-	Email    string
-	Password string
-	Nickname string
+	Phone       string
+	Email       string
+	Password    string
+	Nickname    string
+	TurnBalance int // 注册赠送的永久对话次数
 }
 
 type UserRepo struct {
@@ -44,10 +45,13 @@ func (r *UserRepo) freeTierID(ctx context.Context) *string {
 }
 
 // CreateSmsUser 短信验证码注册：仅绑定手机号，无密码（password_hash 为 NULL）。
-func (r *UserRepo) CreateSmsUser(ctx context.Context, phone, nickname string) (*model.User, error) {
+func (r *UserRepo) CreateSmsUser(ctx context.Context, phone, nickname string, turnBalance int) (*model.User, error) {
 	phone = strings.TrimSpace(phone)
 	if phone == "" {
 		return nil, errors.New("phone required")
+	}
+	if turnBalance < 0 {
+		turnBalance = 0
 	}
 	var nickPtr *string
 	n := strings.TrimSpace(nickname)
@@ -58,11 +62,12 @@ func (r *UserRepo) CreateSmsUser(ctx context.Context, phone, nickname string) (*
 		nickPtr = &n
 	}
 	row := entity.User{
-		ID:       uuid.New().String(),
-		Phone:    &phone,
-		Nickname: nickPtr,
-		TierID:   r.freeTierID(ctx),
-		Status:   "active",
+		ID:          uuid.New().String(),
+		Phone:       &phone,
+		Nickname:    nickPtr,
+		TierID:      r.freeTierID(ctx),
+		TurnBalance: turnBalance,
+		Status:      "active",
 	}
 	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
 		return nil, err
@@ -73,6 +78,9 @@ func (r *UserRepo) CreateSmsUser(ctx context.Context, phone, nickname string) (*
 func (r *UserRepo) Create(ctx context.Context, p CreateUserParams) (*model.User, error) {
 	if p.Phone == "" && p.Email == "" {
 		return nil, errors.New("phone or email required")
+	}
+	if p.TurnBalance < 0 {
+		p.TurnBalance = 0
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(p.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -86,6 +94,7 @@ func (r *UserRepo) Create(ctx context.Context, p CreateUserParams) (*model.User,
 		PasswordHash: &hashStr,
 		Nickname:     strPtr(p.Nickname),
 		TierID:       r.freeTierID(ctx),
+		TurnBalance:  p.TurnBalance,
 		Status:       "active",
 	}
 	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
@@ -264,4 +273,27 @@ func (r *UserRepo) DeductTokenBalance(ctx context.Context, userID string, n int6
 		return 0, err
 	}
 	return row.TokenBalance, nil
+}
+
+// AddTurnBalance 增加永久对话次数（运营加次）。
+func (r *UserRepo) AddTurnBalance(ctx context.Context, userID string, delta int) error {
+	if delta == 0 {
+		return nil
+	}
+	return r.activeUserQuery().WithContext(ctx).Where("id = ?", userID).
+		Update("turn_balance", gorm.Expr("GREATEST(0, COALESCE(turn_balance, 0) + ?)", delta)).Error
+}
+
+// DeductTurnBalance 原子扣减永久次数；余额不足时不扣减，返回 ok=false。
+func (r *UserRepo) DeductTurnBalance(ctx context.Context, userID string, n int) (ok bool, err error) {
+	if n <= 0 {
+		return true, nil
+	}
+	res := r.activeUserQuery().WithContext(ctx).
+		Where("id = ? AND COALESCE(turn_balance, 0) >= ?", userID, n).
+		Update("turn_balance", gorm.Expr("turn_balance - ?", n))
+	if res.Error != nil {
+		return false, res.Error
+	}
+	return res.RowsAffected > 0, nil
 }

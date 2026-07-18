@@ -16,6 +16,9 @@ const (
 	MediaAvatarStorage        = "media.avatar.storage"
 )
 
+// 额度：新用户注册赠送的永久对话次数（字符串数字，默认 20）。
+const QuotaSignupTurnGrant = "quota.signup_turn_grant"
+
 const (
 	ValueTypeBool   = "bool"
 	ValueTypeString = "string"
@@ -30,6 +33,7 @@ var Defaults = map[string]string{
 	MediaUserRecordingStorage:   "server",
 	MediaAssistantTtsStorage:    "server",
 	MediaAvatarStorage:          "server",
+	QuotaSignupTurnGrant:        "20",
 }
 
 // PublicKeys 可通过 GET /api/v1/public/settings 暴露给客户端的 key（不含任何密钥）。

@@ -429,11 +429,15 @@ func (h *AIHandler) runConversationTurn(
 	}
 
 	debitTokens := false
+	debitTurn := false
 	if h.az != nil {
 		if p := CtxPrincipal(c); p != nil {
-			debitTokens, err = h.az.UsesTokenWalletForNextTurn(ctx, p)
-			if err != nil {
-				return h.failUserTurn(ctx, userMsg, err)
+			debitTurn = h.az.UsesTurnWalletForNextTurn(p)
+			if !debitTurn {
+				debitTokens, err = h.az.UsesTokenWalletForNextTurn(ctx, p)
+				if err != nil {
+					return h.failUserTurn(ctx, userMsg, err)
+				}
 			}
 		}
 	}
@@ -519,7 +523,9 @@ func (h *AIHandler) runConversationTurn(
 	}
 
 	if h.az != nil {
-		if debitTokens && usage != nil && usage.TotalTokens > 0 {
+		if debitTurn {
+			_ = h.az.DeductChatTurn(ctx, userID)
+		} else if debitTokens && usage != nil && usage.TotalTokens > 0 {
 			_ = h.az.DeductChatTokens(ctx, userID, int64(usage.TotalTokens))
 		}
 	}
@@ -567,6 +573,8 @@ func (h *AIHandler) writeQuotaError(c *gin.Context, err error) {
 		c.JSON(http.StatusForbidden, gin.H{"error": err.Error(), "code": "QUOTA_MONTHLY"})
 	case errors.Is(err, authz.ErrQuotaTokens):
 		c.JSON(http.StatusForbidden, gin.H{"error": err.Error(), "code": "QUOTA_TOKENS"})
+	case errors.Is(err, authz.ErrQuotaTurns):
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error(), "code": "QUOTA_TURNS"})
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}

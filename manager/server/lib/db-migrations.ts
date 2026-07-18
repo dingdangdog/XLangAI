@@ -206,8 +206,23 @@ async function validateExistingSchemaIsLatest(client: Client) {
       ) AS "exists"
     `
   );
+  if (!Boolean(billingResult.rows[0]?.exists)) {
+    return false;
+  }
 
-  return Boolean(billingResult.rows[0]?.exists);
+  const turnBalanceResult = await client.query<{ exists: boolean }>(
+    `
+      SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = current_schema()
+          AND table_name = 'usr_users'
+          AND column_name = 'turn_balance'
+      ) AS "exists"
+    `
+  );
+
+  return Boolean(turnBalanceResult.rows[0]?.exists);
 }
 
 async function ensureDatabaseExists(target: DatabaseTarget) {

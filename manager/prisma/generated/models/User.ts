@@ -28,10 +28,12 @@ export type AggregateUser = {
 
 export type UserAvgAggregateOutputType = {
   tokenBalance: number | null
+  turnBalance: number | null
 }
 
 export type UserSumAggregateOutputType = {
   tokenBalance: bigint | null
+  turnBalance: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -46,6 +48,7 @@ export type UserMinAggregateOutputType = {
   defaultLlmConfigId: string | null
   settings: string | null
   tokenBalance: bigint | null
+  turnBalance: number | null
   subscriptionExpiresAt: Date | null
   appleSub: string | null
   googleSub: string | null
@@ -69,6 +72,7 @@ export type UserMaxAggregateOutputType = {
   defaultLlmConfigId: string | null
   settings: string | null
   tokenBalance: bigint | null
+  turnBalance: number | null
   subscriptionExpiresAt: Date | null
   appleSub: string | null
   googleSub: string | null
@@ -92,6 +96,7 @@ export type UserCountAggregateOutputType = {
   defaultLlmConfigId: number
   settings: number
   tokenBalance: number
+  turnBalance: number
   subscriptionExpiresAt: number
   appleSub: number
   googleSub: number
@@ -107,10 +112,12 @@ export type UserCountAggregateOutputType = {
 
 export type UserAvgAggregateInputType = {
   tokenBalance?: true
+  turnBalance?: true
 }
 
 export type UserSumAggregateInputType = {
   tokenBalance?: true
+  turnBalance?: true
 }
 
 export type UserMinAggregateInputType = {
@@ -125,6 +132,7 @@ export type UserMinAggregateInputType = {
   defaultLlmConfigId?: true
   settings?: true
   tokenBalance?: true
+  turnBalance?: true
   subscriptionExpiresAt?: true
   appleSub?: true
   googleSub?: true
@@ -148,6 +156,7 @@ export type UserMaxAggregateInputType = {
   defaultLlmConfigId?: true
   settings?: true
   tokenBalance?: true
+  turnBalance?: true
   subscriptionExpiresAt?: true
   appleSub?: true
   googleSub?: true
@@ -171,6 +180,7 @@ export type UserCountAggregateInputType = {
   defaultLlmConfigId?: true
   settings?: true
   tokenBalance?: true
+  turnBalance?: true
   subscriptionExpiresAt?: true
   appleSub?: true
   googleSub?: true
@@ -281,6 +291,7 @@ export type UserGroupByOutputType = {
   defaultLlmConfigId: string | null
   settings: string | null
   tokenBalance: bigint
+  turnBalance: number
   subscriptionExpiresAt: Date | null
   appleSub: string | null
   googleSub: string | null
@@ -327,6 +338,7 @@ export type UserWhereInput = {
   defaultLlmConfigId?: Prisma.StringNullableFilter<"User"> | string | null
   settings?: Prisma.StringNullableFilter<"User"> | string | null
   tokenBalance?: Prisma.BigIntFilter<"User"> | bigint | number
+  turnBalance?: Prisma.IntFilter<"User"> | number
   subscriptionExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   appleSub?: Prisma.StringNullableFilter<"User"> | string | null
   googleSub?: Prisma.StringNullableFilter<"User"> | string | null
@@ -350,6 +362,7 @@ export type UserOrderByWithRelationInput = {
   defaultLlmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   settings?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   appleSub?: Prisma.SortOrderInput | Prisma.SortOrder
   googleSub?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -378,6 +391,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   defaultLlmConfigId?: Prisma.StringNullableFilter<"User"> | string | null
   settings?: Prisma.StringNullableFilter<"User"> | string | null
   tokenBalance?: Prisma.BigIntFilter<"User"> | bigint | number
+  turnBalance?: Prisma.IntFilter<"User"> | number
   subscriptionExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   status?: Prisma.StringFilter<"User"> | string
   lastLoginAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
@@ -399,6 +413,7 @@ export type UserOrderByWithAggregationInput = {
   defaultLlmConfigId?: Prisma.SortOrderInput | Prisma.SortOrder
   settings?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   appleSub?: Prisma.SortOrderInput | Prisma.SortOrder
   googleSub?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -430,6 +445,7 @@ export type UserScalarWhereWithAggregatesInput = {
   defaultLlmConfigId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   settings?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   tokenBalance?: Prisma.BigIntWithAggregatesFilter<"User"> | bigint | number
+  turnBalance?: Prisma.IntWithAggregatesFilter<"User"> | number
   subscriptionExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   appleSub?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   googleSub?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -453,6 +469,7 @@ export type UserCreateInput = {
   defaultLlmConfigId?: string | null
   settings?: string | null
   tokenBalance?: bigint | number
+  turnBalance?: number
   subscriptionExpiresAt?: Date | string | null
   appleSub?: string | null
   googleSub?: string | null
@@ -476,6 +493,7 @@ export type UserUncheckedCreateInput = {
   defaultLlmConfigId?: string | null
   settings?: string | null
   tokenBalance?: bigint | number
+  turnBalance?: number
   subscriptionExpiresAt?: Date | string | null
   appleSub?: string | null
   googleSub?: string | null
@@ -499,6 +517,7 @@ export type UserUpdateInput = {
   defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  turnBalance?: Prisma.IntFieldUpdateOperationsInput | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -522,6 +541,7 @@ export type UserUncheckedUpdateInput = {
   defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  turnBalance?: Prisma.IntFieldUpdateOperationsInput | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -545,6 +565,7 @@ export type UserCreateManyInput = {
   defaultLlmConfigId?: string | null
   settings?: string | null
   tokenBalance?: bigint | number
+  turnBalance?: number
   subscriptionExpiresAt?: Date | string | null
   appleSub?: string | null
   googleSub?: string | null
@@ -568,6 +589,7 @@ export type UserUpdateManyMutationInput = {
   defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  turnBalance?: Prisma.IntFieldUpdateOperationsInput | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -591,6 +613,7 @@ export type UserUncheckedUpdateManyInput = {
   defaultLlmConfigId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   settings?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenBalance?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  turnBalance?: Prisma.IntFieldUpdateOperationsInput | number
   subscriptionExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   appleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   googleSub?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -614,6 +637,7 @@ export type UserCountOrderByAggregateInput = {
   defaultLlmConfigId?: Prisma.SortOrder
   settings?: Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrder
   appleSub?: Prisma.SortOrder
   googleSub?: Prisma.SortOrder
@@ -627,6 +651,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserAvgOrderByAggregateInput = {
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -641,6 +666,7 @@ export type UserMaxOrderByAggregateInput = {
   defaultLlmConfigId?: Prisma.SortOrder
   settings?: Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrder
   appleSub?: Prisma.SortOrder
   googleSub?: Prisma.SortOrder
@@ -664,6 +690,7 @@ export type UserMinOrderByAggregateInput = {
   defaultLlmConfigId?: Prisma.SortOrder
   settings?: Prisma.SortOrder
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
   subscriptionExpiresAt?: Prisma.SortOrder
   appleSub?: Prisma.SortOrder
   googleSub?: Prisma.SortOrder
@@ -677,6 +704,7 @@ export type UserMinOrderByAggregateInput = {
 
 export type UserSumOrderByAggregateInput = {
   tokenBalance?: Prisma.SortOrder
+  turnBalance?: Prisma.SortOrder
 }
 
 export type BigIntFieldUpdateOperationsInput = {
@@ -701,6 +729,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
+  turnBalance?: boolean
   subscriptionExpiresAt?: boolean
   appleSub?: boolean
   googleSub?: boolean
@@ -724,6 +753,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
+  turnBalance?: boolean
   subscriptionExpiresAt?: boolean
   appleSub?: boolean
   googleSub?: boolean
@@ -747,6 +777,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
+  turnBalance?: boolean
   subscriptionExpiresAt?: boolean
   appleSub?: boolean
   googleSub?: boolean
@@ -770,6 +801,7 @@ export type UserSelectScalar = {
   defaultLlmConfigId?: boolean
   settings?: boolean
   tokenBalance?: boolean
+  turnBalance?: boolean
   subscriptionExpiresAt?: boolean
   appleSub?: boolean
   googleSub?: boolean
@@ -781,7 +813,7 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "passwordHash" | "nickname" | "avatarUrl" | "tierId" | "languageId" | "defaultLlmConfigId" | "settings" | "tokenBalance" | "subscriptionExpiresAt" | "appleSub" | "googleSub" | "status" | "lastLoginAt" | "remark" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "phone" | "email" | "passwordHash" | "nickname" | "avatarUrl" | "tierId" | "languageId" | "defaultLlmConfigId" | "settings" | "tokenBalance" | "turnBalance" | "subscriptionExpiresAt" | "appleSub" | "googleSub" | "status" | "lastLoginAt" | "remark" | "deletedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
@@ -807,6 +839,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
      * 可抵扣 LLM 对话的 token 余额（与 OpenAI usage.total_tokens 同量纲）；内购消耗型核销时累加。
      */
     tokenBalance: bigint
+    /**
+     * 永久对话次数余额（不过期，成功一轮对话扣 1）；档位无日/月限额时使用。
+     */
+    turnBalance: number
     /**
      * 当前商店订阅权益到期时间（UTC）；到期后 Go 端在 Principal 中按逻辑回落到免费档额度。
      */
@@ -1259,6 +1295,7 @@ export interface UserFieldRefs {
   readonly defaultLlmConfigId: Prisma.FieldRef<"User", 'String'>
   readonly settings: Prisma.FieldRef<"User", 'String'>
   readonly tokenBalance: Prisma.FieldRef<"User", 'BigInt'>
+  readonly turnBalance: Prisma.FieldRef<"User", 'Int'>
   readonly subscriptionExpiresAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly appleSub: Prisma.FieldRef<"User", 'String'>
   readonly googleSub: Prisma.FieldRef<"User", 'String'>
