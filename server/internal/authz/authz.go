@@ -248,15 +248,48 @@ func (p *Principal) UsesTurnBalance() bool {
 	return p.Tier.DailyLimit <= 0 && p.Tier.MonthlyLimit <= 0
 }
 
+type chatQuotaWallet uint8
+
+const (
+	chatQuotaIncluded chatQuotaWallet = iota
+	chatQuotaTurnBalance
+	chatQuotaTokenBalance
+	chatQuotaUnavailable
+)
+
+// walletForMonthUsage 决定下一轮对话的额度来源：月度包含额度优先，
+// 月度耗尽后依次使用永久次数与 token 钱包；无日/月额度的档位直接使用永久次数。
+func (p *Principal) walletForMonthUsage(monthUsage int) chatQuotaWallet {
+	if p == nil {
+		return chatQuotaIncluded
+	}
+	if p.UsesTurnBalance() {
+		if p.TurnBalance > 0 {
+			return chatQuotaTurnBalance
+		}
+		return chatQuotaUnavailable
+	}
+	if p.Tier == nil || p.Tier.MonthlyLimit <= 0 || monthUsage < p.Tier.MonthlyLimit {
+		return chatQuotaIncluded
+	}
+	if p.TurnBalance > 0 {
+		return chatQuotaTurnBalance
+	}
+	if p.TokenBalance > 0 {
+		return chatQuotaTokenBalance
+	}
+	return chatQuotaUnavailable
+}
+
 // EnsureChatQuota 发送对话前校验额度。
 // - 无日/月限额的档位（如 free）：检查 turn_balance
-// - 有日/月限额的档位（如 plus/pro）：沿用日历限额；月满后可用 token_balance 兜底
+// - 有日/月限额的档位（如 plus/pro）：沿用日历限额；月满后依次使用 turn_balance、token_balance 兜底
 func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
 	if p == nil {
 		return nil
 	}
 	if p.UsesTurnBalance() {
-		if p.TurnBalance > 0 {
+		if p.walletForMonthUsage(0) == chatQuotaTurnBalance {
 			return nil
 		}
 		return ErrQuotaTurns
@@ -277,35 +310,42 @@ func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
 		if err != nil {
 			return err
 		}
-		if n < monthly {
+		switch p.walletForMonthUsage(n) {
+		case chatQuotaIncluded, chatQuotaTurnBalance, chatQuotaTokenBalance:
 			return nil
+		default:
+			return ErrQuotaTokens
 		}
-		if p.TokenBalance > 0 {
-			return nil
-		}
-		return ErrQuotaTokens
 	}
 	return nil
 }
 
 // UsesTokenWalletForNextTurn 为 true 时，本回合完成后应按 LLM token 从钱包扣费（在仍通过 EnsureChatQuota 的前提下）。
 func (s *Service) UsesTokenWalletForNextTurn(ctx context.Context, p *Principal) (bool, error) {
-	if p == nil || p.UsesTurnBalance() || p.Tier == nil {
-		return false, nil
-	}
-	if p.Tier.MonthlyLimit <= 0 {
+	if p == nil || p.Tier == nil || p.Tier.MonthlyLimit <= 0 {
 		return false, nil
 	}
 	n, err := s.usage.MonthUsageCount(ctx, p.UserID)
 	if err != nil {
 		return false, err
 	}
-	return n >= p.Tier.MonthlyLimit, nil
+	return p.walletForMonthUsage(n) == chatQuotaTokenBalance, nil
 }
 
 // UsesTurnWalletForNextTurn 为 true 时，本回合完成后应从永久次数余额扣 1。
-func (s *Service) UsesTurnWalletForNextTurn(p *Principal) bool {
-	return p != nil && p.UsesTurnBalance()
+func (s *Service) UsesTurnWalletForNextTurn(ctx context.Context, p *Principal) (bool, error) {
+	if p == nil {
+		return false, nil
+	}
+	monthUsage := 0
+	if p.Tier != nil && p.Tier.MonthlyLimit > 0 {
+		var err error
+		monthUsage, err = s.usage.MonthUsageCount(ctx, p.UserID)
+		if err != nil {
+			return false, err
+		}
+	}
+	return p.walletForMonthUsage(monthUsage) == chatQuotaTurnBalance, nil
 }
 
 // DeductChatTokens 对话完成后按 LLM 用量扣减 token 余额（仅影响 usr_users.token_balance）。

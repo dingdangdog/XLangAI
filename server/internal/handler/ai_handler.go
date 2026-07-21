@@ -432,7 +432,10 @@ func (h *AIHandler) runConversationTurn(
 	debitTurn := false
 	if h.az != nil {
 		if p := CtxPrincipal(c); p != nil {
-			debitTurn = h.az.UsesTurnWalletForNextTurn(p)
+			debitTurn, err = h.az.UsesTurnWalletForNextTurn(ctx, p)
+			if err != nil {
+				return h.failUserTurn(ctx, userMsg, err)
+			}
 			if !debitTurn {
 				debitTokens, err = h.az.UsesTokenWalletForNextTurn(ctx, p)
 				if err != nil {
