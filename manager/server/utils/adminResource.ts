@@ -38,7 +38,8 @@ export const RESOURCE_SLUGS = [
 ] as const;
 
 const READ_ONLY = new Set<string>([
-  "users-backup",
+	"user-usage",
+	"users-backup",
   "conversations-backup",
   "messages-backup",
   "user-usage-backup",

@@ -289,6 +289,9 @@ func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
 		return nil
 	}
 	if p.UsesTurnBalance() {
+		if err := s.refreshEmptyTurnBalance(ctx, p); err != nil {
+			return err
+		}
 		if p.walletForMonthUsage(0) == chatQuotaTurnBalance {
 			return nil
 		}
@@ -310,6 +313,11 @@ func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
 		if err != nil {
 			return err
 		}
+		if n >= monthly {
+			if err := s.refreshEmptyTurnBalance(ctx, p); err != nil {
+				return err
+			}
+		}
 		switch p.walletForMonthUsage(n) {
 		case chatQuotaIncluded, chatQuotaTurnBalance, chatQuotaTokenBalance:
 			return nil
@@ -317,6 +325,19 @@ func (s *Service) EnsureChatQuota(ctx context.Context, p *Principal) error {
 			return ErrQuotaTokens
 		}
 	}
+	return nil
+}
+
+// refreshEmptyTurnBalance 仅在缓存余额为空时回源数据库，使管理后台刚发放的额度立即生效。
+func (s *Service) refreshEmptyTurnBalance(ctx context.Context, p *Principal) error {
+	if p == nil || p.TurnBalance > 0 || s.users == nil {
+		return nil
+	}
+	balance, err := s.users.TurnBalance(ctx, p.UserID)
+	if err != nil {
+		return err
+	}
+	p.TurnBalance = balance
 	return nil
 }
 

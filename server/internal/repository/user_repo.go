@@ -284,6 +284,18 @@ func (r *UserRepo) AddTurnBalance(ctx context.Context, userID string, delta int)
 		Update("turn_balance", gorm.Expr("GREATEST(0, COALESCE(turn_balance, 0) + ?)", delta)).Error
 }
 
+// TurnBalance 返回当前永久对话次数余额，用于管理员发放后刷新缓存中的空余额。
+func (r *UserRepo) TurnBalance(ctx context.Context, userID string) (int, error) {
+	var row entity.User
+	if err := r.activeUserQuery().WithContext(ctx).
+		Select("turn_balance").
+		Where("id = ?", userID).
+		First(&row).Error; err != nil {
+		return 0, err
+	}
+	return row.TurnBalance, nil
+}
+
 // DeductTurnBalance 原子扣减永久次数；余额不足时不扣减，返回 ok=false。
 func (r *UserRepo) DeductTurnBalance(ctx context.Context, userID string, n int) (ok bool, err error) {
 	if n <= 0 {

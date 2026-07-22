@@ -73,20 +73,13 @@ export async function prepareUserAdminWriteData(
     data.defaultLlmConfigId = await normalizeUserDefaultLlmConfigId(body.defaultLlmConfigId);
   }
 
-  // 运营加次：优先于绝对写入 turnBalance
-  if (mode === "update" && "addTurnBalance" in body) {
-    const delta = Math.floor(Number(body.addTurnBalance));
-    delete data.addTurnBalance;
-    if (Number.isFinite(delta) && delta > 0) {
-      delete data.turnBalance;
-      data.turnBalance = { increment: delta };
-      return data;
-    }
-  }
-
-  if ("turnBalance" in body || mode === "create") {
-    data.turnBalance = await normalizeTurnBalance(body.turnBalance, mode);
-  }
+	// 永久额度只能通过专用发放接口增加，普通用户编辑禁止覆盖余额。
+	delete data.addTurnBalance;
+	if (mode === "update") {
+		delete data.turnBalance;
+	} else {
+		data.turnBalance = await normalizeTurnBalance(undefined, "create");
+	}
 
   return data;
 }

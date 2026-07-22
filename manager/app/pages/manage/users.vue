@@ -157,11 +157,64 @@ function openUsage(row: Record<string, unknown>) {
   usageDialogVisible.value = true;
 }
 
-function userMobileActions(row: Record<string, unknown>) {
-  const actions: { label: string; onClick: () => void; danger?: boolean; disabled?: boolean }[] = [
-    { label: t("common.usage"), onClick: () => openUsage(row) },
-    { label: t("common.edit"), onClick: () => openEdit(row) },
-  ];
+const quotaDialogVisible = ref(false);
+const quotaUser = ref<Record<string, unknown> | null>(null);
+const grantAmount = ref<number | null>(null);
+const grantReason = ref("");
+const quotaSaving = ref(false);
+
+const grantAfterBalance = computed(() => {
+  const current = Number(quotaUser.value?.turnBalance ?? 0);
+  const amount = Number(grantAmount.value ?? 0);
+  return current + (Number.isFinite(amount) && amount > 0 ? Math.floor(amount) : 0);
+});
+
+function openQuota(row: Record<string, unknown>) {
+  quotaUser.value = row;
+  grantAmount.value = null;
+  grantReason.value = "";
+  quotaDialogVisible.value = true;
+}
+
+async function grantQuota() {
+  const user = quotaUser.value;
+  const amount = Math.floor(Number(grantAmount.value));
+  const reason = grantReason.value.trim();
+  if (!user || !Number.isFinite(amount) || amount <= 0) {
+    toast.warning(t("pages.users.grantAmountInvalid"));
+    return;
+  }
+  if (!reason) {
+    toast.warning(t("pages.users.grantReasonRequired"));
+    return;
+  }
+
+  quotaSaving.value = true;
+  try {
+    await $fetch(`/api/admin/users/${String(user.id)}/grant-turns`, {
+      method: "POST",
+      body: { amount, reason },
+    });
+    toast.success(t("pages.users.grantSuccess", { amount }));
+    quotaDialogVisible.value = false;
+    await load();
+  } catch (error) {
+    toast.error(t("toast.operationFailed"));
+    console.error(error);
+  } finally {
+    quotaSaving.value = false;
+  }
+}
+
+type UserAction = {
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
+  disabled?: boolean;
+};
+
+function userAccountActions(row: Record<string, unknown>): UserAction[] {
+  const actions: UserAction[] = [];
   if (!row.deletedAt) {
     if (row.status !== "inactive") {
       actions.push({
@@ -191,6 +244,19 @@ function userMobileActions(row: Record<string, unknown>) {
   return actions;
 }
 
+function userMobileActions(row: Record<string, unknown>): UserAction[] {
+  return [
+    {
+      label: t("pages.users.grantQuota"),
+      onClick: () => openQuota(row),
+      disabled: !!row.deletedAt,
+    },
+    { label: t("common.usage"), onClick: () => openUsage(row) },
+    { label: t("common.edit"), onClick: () => openEdit(row) },
+    ...userAccountActions(row),
+  ];
+}
+
 watch(usageDialogVisible, (open) => {
   if (!open) usageUser.value = null;
 });
@@ -209,8 +275,6 @@ const form = reactive({
   tierId: "",
   languageId: "",
   defaultLlmConfigId: "",
-  turnBalance: 20 as number | null,
-  addTurnBalance: null as number | null,
   settings: "{}",
   status: "active",
   remark: "",
@@ -226,8 +290,6 @@ function resetForm() {
   form.tierId = "";
   form.languageId = "";
   form.defaultLlmConfigId = "";
-  form.turnBalance = 20;
-  form.addTurnBalance = null;
   form.settings = "{}";
   form.status = "active";
   form.remark = "";
@@ -251,8 +313,6 @@ function openEdit(row: Record<string, unknown>) {
   form.tierId = String(row.tierId ?? "");
   form.languageId = String(row.languageId ?? "");
   form.defaultLlmConfigId = String(row.defaultLlmConfigId ?? "");
-  form.turnBalance = row.turnBalance != null ? Number(row.turnBalance) : 0;
-  form.addTurnBalance = null;
   form.settings = row.settings != null ? String(row.settings) : "{}";
   form.status = String(row.status ?? "active");
   form.remark = String(row.remark ?? "");
@@ -303,16 +363,6 @@ async function submit() {
   };
   if (form.password) {
     body.password = form.password;
-  }
-
-  const addTurns =
-    dialogMode.value === "edit" && form.addTurnBalance != null
-      ? Math.floor(Number(form.addTurnBalance))
-      : 0;
-  if (addTurns > 0) {
-    body.addTurnBalance = addTurns;
-  } else if (form.turnBalance != null && Number.isFinite(Number(form.turnBalance))) {
-    body.turnBalance = Math.max(0, Math.floor(Number(form.turnBalance)));
   }
 
   saving.value = true;
@@ -470,25 +520,15 @@ const llmSelectOptions = computed(() => [
           </AdminTd>
           <AdminTd nowrap>{{ formatDateTime(row.lastLoginAt) }}</AdminTd>
           <AdminTd align="right">
+            <AdminButton variant="link" :disabled="!!row.deletedAt" @click="openQuota(row)">
+              {{ $t("pages.users.grantQuota") }}
+            </AdminButton>
             <AdminButton variant="link" @click="openUsage(row)">{{ $t("common.usage") }}</AdminButton>
             <AdminButton variant="link" @click="openEdit(row)">{{ $t("common.edit") }}</AdminButton>
-            <template v-if="!row.deletedAt">
-              <AdminButton v-if="row.status !== 'inactive'" variant="link" :disabled="statusBusyId === String(row.id)"
-                @click="setUserStatus(row, 'inactive', t('pages.users.disable'))">
-                {{ $t("pages.users.disable") }}
-              </AdminButton>
-              <AdminButton v-if="row.status !== 'banned'" variant="link" class="!text-danger-600"
-                :disabled="statusBusyId === String(row.id)" @click="setUserStatus(row, 'banned', t('pages.users.ban'))">
-                {{ $t("pages.users.ban") }}
-              </AdminButton>
-              <AdminButton v-if="row.status !== 'active'" variant="link" :disabled="statusBusyId === String(row.id)"
-                @click="setUserStatus(row, 'active', t('pages.users.unban'))">
-                {{ $t("pages.users.unban") }}
-              </AdminButton>
-            </template>
-            <AdminButton variant="link" class="!text-danger-600" :disabled="!!row.deletedAt" @click="removeRow(row)">
-              {{ $t("common.softDelete") }}
-            </AdminButton>
+            <AdminOverflowMenu
+              v-if="userAccountActions(row).length"
+              :actions="userAccountActions(row)"
+            />
           </AdminTd>
         </AdminTr>
         <template #mobile>
@@ -575,16 +615,6 @@ const llmSelectOptions = computed(() => [
         <AdminFormField :label="$t('fields.tierLevel')">
           <AdminSelect v-model="form.tierId" :options="tierSelectOptions" />
         </AdminFormField>
-        <AdminFormField :label="$t('fields.turnBalance')" :hint="$t('pages.users.turnBalanceHint')">
-          <AdminInput v-model="form.turnBalance" type="number" min="0" step="1" />
-        </AdminFormField>
-        <AdminFormField
-          v-if="dialogMode === 'edit'"
-          :label="$t('fields.addTurnBalance')"
-          :hint="$t('pages.users.addTurnBalanceHint')"
-        >
-          <AdminInput v-model="form.addTurnBalance" type="number" min="0" step="1" :placeholder="$t('pages.users.addTurnBalancePlaceholder')" />
-        </AdminFormField>
         <AdminFormField :label="$t('fields.nativeLanguage')" :hint="$t('pages.users.nativeLanguageHint')">
           <AdminSelect v-model="form.languageId" :options="langSelectOptions" />
         </AdminFormField>
@@ -608,6 +638,64 @@ const llmSelectOptions = computed(() => [
     </AdminDialog>
 
     <AdminDialog
+      v-model="quotaDialogVisible"
+      :title="$t('pages.users.grantDialog')"
+      width="md"
+    >
+      <div v-if="quotaUser" class="space-y-4">
+        <div class="rounded-xl border border-border bg-surface-muted/40 p-4">
+          <p class="text-sm font-semibold text-foreground">{{ usageUserLabel(quotaUser) }}</p>
+          <p class="mt-1 text-xs text-muted">{{ quotaUser.phone || quotaUser.email || quotaUser.id }}</p>
+          <dl class="mt-4 grid grid-cols-3 gap-3 text-center">
+            <div>
+              <dt class="text-xs text-muted">{{ $t("pages.users.grantMonthlyUsage") }}</dt>
+              <dd class="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                {{ quotaUser.monthUsageCount ?? 0 }} / {{ quotaUser.tierMonthlyLimit || $t("common.emDash") }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted">{{ $t("pages.users.grantCurrentBalance") }}</dt>
+              <dd class="mt-1 text-lg font-semibold tabular-nums text-foreground">
+                {{ quotaUser.turnBalance ?? 0 }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted">{{ $t("pages.users.grantAfterBalance") }}</dt>
+              <dd class="mt-1 text-lg font-semibold tabular-nums text-primary-600">
+                {{ grantAfterBalance }}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <AdminFormField :label="$t('pages.users.grantAmount')" required>
+          <AdminInput
+            v-model="grantAmount"
+            type="number"
+            :placeholder="$t('pages.users.grantAmountPlaceholder')"
+          />
+        </AdminFormField>
+        <AdminFormField
+          :label="$t('pages.users.grantReason')"
+          :hint="$t('pages.users.grantReasonHint')"
+          required
+        >
+          <AdminInput
+            v-model="grantReason"
+            type="textarea"
+            :rows="2"
+            :placeholder="$t('pages.users.grantReasonPlaceholder')"
+          />
+        </AdminFormField>
+      </div>
+      <template #footer>
+        <AdminButton @click="quotaDialogVisible = false">{{ $t("common.cancel") }}</AdminButton>
+        <AdminButton variant="primary" :loading="quotaSaving" @click="grantQuota">
+          {{ $t("pages.users.grantSubmit") }}
+        </AdminButton>
+      </template>
+    </AdminDialog>
+
+    <AdminDialog
       v-model="usageDialogVisible"
       :title="
         usageUser
@@ -616,7 +704,7 @@ const llmSelectOptions = computed(() => [
       "
       width="lg"
     >
-      <UserUsagePanel v-if="usageUser" :user-id="usageUser.id" :user-label="usageUser.label" @changed="load" />
+      <UserUsagePanel v-if="usageUser" :user-id="usageUser.id" :user-label="usageUser.label" />
     </AdminDialog>
   </AdminListPage>
 </template>
