@@ -1,4 +1,5 @@
 import type { AppPrismaClient } from "./prisma";
+import { ensureReadAloudContentSeed } from "./readAloudContentSeed";
 
 /**
  * Startup seed data: written via Prisma models into sys_languages, sys_tts_service_configs, sys_voice_roles,
@@ -29,8 +30,8 @@ const AZURE_TTS_CONFIG_JSON = JSON.stringify({
 // Seed data definitions
 // ---------------------------------------------------------------------------
 
-/** Seed activates zh, ja, en only; other languages are inactive until enabled in admin */
-const DEFAULT_ACTIVE_LANGUAGE_CODES = new Set(["zh", "ja", "en"]);
+/** Seed activates core learning languages; others stay inactive until enabled in admin */
+const DEFAULT_ACTIVE_LANGUAGE_CODES = new Set(["zh", "ja", "en", "es", "fr", "de"]);
 
 const SEED_LANGUAGES = [
   { code: "en", name: "English", nameNative: "English", sortOrder: 10 },
@@ -453,12 +454,24 @@ async function ensureLanguages(db: AppPrismaClient) {
   for (const row of SEED_LANGUAGES) {
     const exists = await db.language.findUnique({ where: { code: row.code } });
     const previewSampleText = PREVIEW_SAMPLE_BY_LANG[row.code] ?? null;
+    const wantActive = DEFAULT_ACTIVE_LANGUAGE_CODES.has(row.code);
     if (exists) {
+      const patch: {
+        previewSampleText?: string;
+        status?: string;
+      } = {};
       if (!exists.previewSampleText && previewSampleText) {
-        await db.language.update({
-          where: { id: exists.id },
-          data: { previewSampleText },
-        });
+        patch.previewSampleText = previewSampleText;
+      }
+      // 将默认学习语言从 inactive 升为 active（不降级已手动启用的语言）
+      if (wantActive && exists.status !== "active") {
+        patch.status = "active";
+      }
+      if (Object.keys(patch).length > 0) {
+        await db.language.update({ where: { id: exists.id }, data: patch });
+        if (patch.status === "active") {
+          console.info(`[data-seed] activated language ${row.code}`);
+        }
       }
       continue;
     }
@@ -470,7 +483,7 @@ async function ensureLanguages(db: AppPrismaClient) {
         nameNative: row.nameNative,
         previewSampleText,
         sortOrder: row.sortOrder,
-        status: DEFAULT_ACTIVE_LANGUAGE_CODES.has(row.code) ? "active" : "inactive",
+        status: wantActive ? "active" : "inactive",
       },
     });
   }
@@ -542,6 +555,211 @@ async function ensureAzureVoiceRoles(db: AppPrismaClient, ttsId: string) {
         ...bundledVoicePreviewData(v.voiceCode),
       },
     });
+  }
+}
+
+/** 趣味人设角色：通过 role_prompt 注入风格；与基础音色并存 */
+const PERSONALITY_ROLE_PROMPT = {
+  overconfident: `[Character persona — overconfident]
+You are playfully overconfident: you slightly overestimate your charm and knowledge, use mild boasts and swagger, and sound sure of yourself even on small topics. Stay warm and supportive of the learner—never rude, never bullying. Keep short spoken replies.`,
+  humorous: `[Character persona — humorous]
+You are a lighthearted, witty conversation partner. Use gentle jokes, playful teasing, and upbeat energy—never mean sarcasm that could discourage a learner. Keep replies short, spoken-style, and easy to understand.`,
+  chill: `[Character persona — chill]
+You are calm, easygoing, and unhurried. Speak in a relaxed, low-pressure way; reassure the learner that mistakes are fine. Avoid rushing, lecturing, or high energy. Keep short, soft spoken replies.`,
+} as const;
+
+const SEED_PERSONALITY_VOICES = [
+  // English
+  {
+    langCode: "en",
+    style: "overconfident",
+    voiceCode: "en-US-EmmaMultilingualNeural",
+    name: "Cocky Max",
+    gender: "female",
+    sortOrder: 110,
+  },
+  {
+    langCode: "en",
+    style: "humorous",
+    voiceCode: "en-US-BrianMultilingualNeural",
+    name: "Funny Finn",
+    gender: "male",
+    sortOrder: 120,
+  },
+  {
+    langCode: "en",
+    style: "chill",
+    voiceCode: "en-US-SerenaMultilingualNeural",
+    name: "Chill Casey",
+    gender: "female",
+    sortOrder: 130,
+  },
+  // Chinese
+  {
+    langCode: "zh",
+    style: "overconfident",
+    voiceCode: "zh-CN-YunyangNeural",
+    name: "自信满满·阿杰",
+    gender: "male",
+    sortOrder: 110,
+  },
+  {
+    langCode: "zh",
+    style: "humorous",
+    voiceCode: "zh-CN-YunxiNeural",
+    name: "搞笑达人·小乐",
+    gender: "male",
+    sortOrder: 120,
+  },
+  {
+    langCode: "zh",
+    style: "chill",
+    voiceCode: "zh-CN-XiaohanNeural",
+    name: "佛系云淡",
+    gender: "female",
+    sortOrder: 130,
+  },
+  // Japanese
+  {
+    langCode: "ja",
+    style: "overconfident",
+    voiceCode: "ja-JP-KeitaNeural",
+    name: "自信過剰なケン",
+    gender: "male",
+    sortOrder: 110,
+  },
+  {
+    langCode: "ja",
+    style: "humorous",
+    voiceCode: "ja-JP-AoiNeural",
+    name: "お笑いのハナ",
+    gender: "female",
+    sortOrder: 120,
+  },
+  {
+    langCode: "ja",
+    style: "chill",
+    voiceCode: "ja-JP-DaichiNeural",
+    name: "まったりユウ",
+    gender: "male",
+    sortOrder: 130,
+  },
+  // Spanish
+  {
+    langCode: "es",
+    style: "overconfident",
+    voiceCode: "es-ES-AlvaroNeural",
+    name: "Max el Seguro",
+    gender: "male",
+    sortOrder: 110,
+  },
+  {
+    langCode: "es",
+    style: "humorous",
+    voiceCode: "es-MX-JorgeNeural",
+    name: "Risas Rico",
+    gender: "male",
+    sortOrder: 120,
+  },
+  {
+    langCode: "es",
+    style: "chill",
+    voiceCode: "es-ES-ElviraNeural",
+    name: "Zen Carla",
+    gender: "female",
+    sortOrder: 130,
+  },
+  // French
+  {
+    langCode: "fr",
+    style: "overconfident",
+    voiceCode: "fr-FR-HenriNeural",
+    name: "Max le Sûr",
+    gender: "male",
+    sortOrder: 110,
+  },
+  {
+    langCode: "fr",
+    style: "humorous",
+    voiceCode: "fr-FR-DeniseNeural",
+    name: "Denise l'Humoriste",
+    gender: "female",
+    sortOrder: 120,
+  },
+  {
+    langCode: "fr",
+    style: "chill",
+    voiceCode: "fr-FR-EloiseNeural",
+    name: "Léa Zen",
+    gender: "female",
+    sortOrder: 130,
+  },
+  // German
+  {
+    langCode: "de",
+    style: "overconfident",
+    voiceCode: "de-DE-ConradNeural",
+    name: "Max der Selbstsichere",
+    gender: "male",
+    sortOrder: 110,
+  },
+  {
+    langCode: "de",
+    style: "humorous",
+    voiceCode: "de-DE-KillianNeural",
+    name: "Witziger Willi",
+    gender: "male",
+    sortOrder: 120,
+  },
+  {
+    langCode: "de",
+    style: "chill",
+    voiceCode: "de-DE-KatjaNeural",
+    name: "Ruhige Rita",
+    gender: "female",
+    sortOrder: 130,
+  },
+] as const;
+
+async function ensurePersonalityVoiceRoles(db: AppPrismaClient, ttsId: string) {
+  for (const v of SEED_PERSONALITY_VOICES) {
+    const lang = await db.language.findUnique({ where: { code: v.langCode } });
+    if (!lang) continue;
+
+    const remark = `seed_personality:${v.style}`;
+    const rolePrompt = PERSONALITY_ROLE_PROMPT[v.style];
+    const existing = await db.voiceRole.findFirst({
+      where: {
+        languageId: lang.id,
+        remark,
+        status: "active",
+      },
+    });
+    if (existing) {
+      const patch: { rolePrompt?: string; name?: string; voiceCode?: string } = {};
+      if (existing.rolePrompt !== rolePrompt) patch.rolePrompt = rolePrompt;
+      if (existing.name !== v.name) patch.name = v.name;
+      if (existing.voiceCode !== v.voiceCode) patch.voiceCode = v.voiceCode;
+      if (Object.keys(patch).length > 0) {
+        await db.voiceRole.update({ where: { id: existing.id }, data: patch });
+      }
+      continue;
+    }
+
+    await db.voiceRole.create({
+      data: {
+        languageId: lang.id,
+        ttsServiceConfigId: ttsId,
+        voiceCode: v.voiceCode,
+        name: v.name,
+        gender: v.gender,
+        rolePrompt,
+        sortOrder: v.sortOrder,
+        status: "active",
+        remark,
+      },
+    });
+    console.info(`[data-seed] personality voice ${v.langCode}/${v.name} (${v.style})`);
   }
 }
 
@@ -967,10 +1185,12 @@ export async function runBusinessDataSeed(db: AppPrismaClient): Promise<void> {
 
   const azureTts = await ensureAzureTtsConfig(db);
   await ensureAzureVoiceRoles(db, azureTts.id);
+  await ensurePersonalityVoiceRoles(db, azureTts.id);
 
   await ensureMembershipTiers(db);
   await ensureLlmServiceConfig(db);
   await ensurePromptTemplate(db);
   await ensurePracticeScenarios(db);
   await ensureScenarioOpeningLines(db);
+  await ensureReadAloudContentSeed(db);
 }

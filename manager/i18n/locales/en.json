@@ -588,7 +588,21 @@
       "llmImportFailed": "Batch import failed",
       "llmGenerated": "Generated {count} preview items",
       "llmImported": "Imported {count} items",
-      "llmSelectedCount": "{count} selected"
+      "llmSelectedCount": "{count} selected",
+      "batchAudio": "Batch generate audio",
+      "batchAudioDialog": "Batch generate audio",
+      "batchAudioHint": "Synthesize word/sentence reference audio for the current category and language filter. Up to 30 items per run; re-run for the rest. TTS can be slow.",
+      "batchAudioModeMissing": "Only items missing audio (recommended)",
+      "batchAudioModeAll": "Regenerate all under current filter (overwrite)",
+      "batchAudioModeSelected": "Only the {count} selected row(s) (overwrite)",
+      "batchAudioRun": "Start",
+      "batchAudioRunning": "Generating in batch — please keep this page open…",
+      "batchAudioNothingSelected": "Select vocabulary rows first",
+      "batchAudioTooManySelected": "Select at most 30 rows per run",
+      "batchAudioNothingToDo": "Nothing to generate",
+      "batchAudioDone": "Generated {ok}; {remaining} remaining — run again if needed",
+      "batchAudioPartial": "OK {ok}, failed {failed}; {remaining} remaining",
+      "batchAudioFailed": "Batch audio generation failed"
     },
     "messages": {
       "title": "Messages",

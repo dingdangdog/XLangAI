@@ -585,7 +585,21 @@
       "llmImportFailed": "批量导入失败",
       "llmGenerated": "已生成 {count} 条预览",
       "llmImported": "已导入 {count} 条词汇",
-      "llmSelectedCount": "已选 {count} 条"
+      "llmSelectedCount": "已选 {count} 条",
+      "batchAudio": "批量生成音频",
+      "batchAudioDialog": "批量生成音频",
+      "batchAudioHint": "按当前场景与语言筛选批量合成词/句参考音频。单次最多 30 条；若有剩余可再次执行。TTS 较慢，请耐心等待。",
+      "batchAudioModeMissing": "仅生成缺失音频的词汇（推荐）",
+      "batchAudioModeAll": "当前筛选下全部重新生成（覆盖已有）",
+      "batchAudioModeSelected": "仅处理表格勾选的 {count} 条（覆盖已有）",
+      "batchAudioRun": "开始生成",
+      "batchAudioRunning": "正在批量合成，请勿关闭页面…",
+      "batchAudioNothingSelected": "请先勾选要生成的词汇",
+      "batchAudioTooManySelected": "勾选不能超过 30 条，请分批处理",
+      "batchAudioNothingToDo": "没有需要生成的词汇",
+      "batchAudioDone": "成功生成 {ok} 条；剩余 {remaining} 条可再次执行",
+      "batchAudioPartial": "成功 {ok} 条，失败 {failed} 条；剩余 {remaining} 条",
+      "batchAudioFailed": "批量生成音频失败"
     },
     "messages": {
       "title": "消息",

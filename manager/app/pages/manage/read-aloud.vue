@@ -88,6 +88,10 @@ const vocabList = ref<Record<string, unknown>[]>([]);
 const vocabLoading = ref(false);
 const filterLanguageId = ref("");
 const audioGeneratingId = ref("");
+const selectedVocabIds = ref<string[]>([]);
+const batchAudioDialogVisible = ref(false);
+const batchAudioRunning = ref(false);
+const batchAudioMode = ref<"missing" | "all" | "selected">("missing");
 
 const languageOptions = ref<LangOpt[]>([]);
 /** 场景表单用：每次打开对话框从「语言管理」重新拉取 active 语言 */
@@ -159,6 +163,8 @@ async function loadVocabularies() {
     const res = await vocabApi.list(query);
     vocabList.value = res.items;
     vocabTotal.value = res.total;
+    const visible = new Set(res.items.map((r) => String(r.id)));
+    selectedVocabIds.value = selectedVocabIds.value.filter((id) => visible.has(id));
   } catch (e) {
     toast.error(t("toast.loadFailed"));
     console.error(e);
@@ -612,6 +618,114 @@ async function generateAudio(row: Record<string, unknown>, part: "word" | "sente
   }
 }
 
+const allVocabSelectedOnPage = computed(() => {
+  if (!vocabList.value.length) return false;
+  return vocabList.value.every((r) => selectedVocabIds.value.includes(String(r.id)));
+});
+
+function toggleSelectAllVocab(checked: boolean) {
+  if (checked) {
+    const ids = new Set(selectedVocabIds.value);
+    for (const r of vocabList.value) ids.add(String(r.id));
+    selectedVocabIds.value = [...ids];
+  } else {
+    const pageIds = new Set(vocabList.value.map((r) => String(r.id)));
+    selectedVocabIds.value = selectedVocabIds.value.filter((id) => !pageIds.has(id));
+  }
+}
+
+function toggleVocabSelected(id: string, checked: boolean) {
+  if (checked) {
+    if (!selectedVocabIds.value.includes(id)) {
+      selectedVocabIds.value = [...selectedVocabIds.value, id];
+    }
+  } else {
+    selectedVocabIds.value = selectedVocabIds.value.filter((x) => x !== id);
+  }
+}
+
+function openBatchAudio() {
+  if (!selectedCategoryId.value) {
+    toast.warning(t("pages.readAloud.selectCategoryFirst"));
+    return;
+  }
+  batchAudioMode.value = selectedVocabIds.value.length > 0 ? "selected" : "missing";
+  batchAudioDialogVisible.value = true;
+}
+
+async function runBatchAudio() {
+  if (!selectedCategoryId.value) {
+    toast.warning(t("pages.readAloud.selectCategoryFirst"));
+    return;
+  }
+  if (batchAudioMode.value === "selected" && selectedVocabIds.value.length === 0) {
+    toast.warning(t("pages.readAloudVocabularies.batchAudioNothingSelected"));
+    return;
+  }
+  if (batchAudioMode.value === "selected" && selectedVocabIds.value.length > 30) {
+    toast.warning(t("pages.readAloudVocabularies.batchAudioTooManySelected"));
+    return;
+  }
+
+  batchAudioRunning.value = true;
+  try {
+    const body: Record<string, unknown> = {
+      part: "both",
+      onlyMissing: batchAudioMode.value === "missing",
+    };
+    if (batchAudioMode.value === "selected") {
+      body.ids = [...selectedVocabIds.value];
+      // 勾选模式下仍尊重「仅缺失」以外的两种：selected 用 onlyMissing=false 覆盖已有
+      body.onlyMissing = false;
+    } else {
+      body.categoryId = selectedCategoryId.value;
+      if (filterLanguageId.value) body.languageId = filterLanguageId.value;
+    }
+
+    const res = await $fetch<{
+      ok: number;
+      failed: Array<{ id: string; word?: string; error: string }>;
+      processed: number;
+      remaining: number;
+      totalMatched: number;
+    }>("/api/admin/read-aloud-vocabularies/batch-generate-audio", {
+      method: "POST",
+      body,
+      timeout: 600_000,
+    });
+
+    const failCount = res.failed?.length ?? 0;
+    if (failCount === 0 && (res.ok ?? 0) === 0 && (res.totalMatched ?? 0) === 0) {
+      toast.warning(t("pages.readAloudVocabularies.batchAudioNothingToDo"));
+    } else if (failCount === 0) {
+      toast.success(
+        t("pages.readAloudVocabularies.batchAudioDone", {
+          ok: res.ok ?? 0,
+          remaining: res.remaining ?? 0,
+        }),
+      );
+    } else {
+      toast.warning(
+        t("pages.readAloudVocabularies.batchAudioPartial", {
+          ok: res.ok ?? 0,
+          failed: failCount,
+          remaining: res.remaining ?? 0,
+        }),
+      );
+      console.warn("[batch-generate-audio] failures", res.failed);
+    }
+
+    batchAudioDialogVisible.value = false;
+    selectedVocabIds.value = [];
+    await loadVocabularies();
+  } catch (e) {
+    toast.error(t("pages.readAloudVocabularies.batchAudioFailed"));
+    console.error(e);
+  } finally {
+    batchAudioRunning.value = false;
+  }
+}
+
 const readAloudAudioEl = ref<HTMLAudioElement | null>(null);
 
 function readAloudAudioPlayUrl(audioUrl: unknown, localFilename: unknown): string | null {
@@ -824,6 +938,9 @@ onMounted(() => {
                 <AdminButton size="sm" @click="openLlmBatch">
                   {{ $t("pages.readAloudVocabularies.llmBatch") }}
                 </AdminButton>
+                <AdminButton size="sm" variant="secondary" @click="openBatchAudio">
+                  {{ $t("pages.readAloudVocabularies.batchAudio") }}
+                </AdminButton>
                 <AdminButton size="sm" variant="primary" @click="openVocabCreate">
                   {{ $t("pages.readAloud.addVocabulary") }}
                 </AdminButton>
@@ -844,6 +961,15 @@ onMounted(() => {
           <div class="min-h-0 flex-1 overflow-auto">
             <AdminTable :loading="vocabLoading" class="border-0 shadow-none">
               <template #head>
+                <AdminTh width="40px">
+                  <input
+                    type="checkbox"
+                    class="rounded border-border"
+                    :checked="allVocabSelectedOnPage"
+                    :disabled="!vocabList.length"
+                    @change="toggleSelectAllVocab(($event.target as HTMLInputElement).checked)"
+                  />
+                </AdminTh>
                 <AdminTh>{{ $t("pages.readAloudVocabularies.word") }}</AdminTh>
                 <AdminTh>{{ $t("pages.readAloudVocabularies.exampleSentence") }}</AdminTh>
                 <AdminTh>{{ $t("pages.readAloudVocabularies.language") }}</AdminTh>
@@ -852,6 +978,14 @@ onMounted(() => {
                 <AdminTh width="280px" align="right">{{ $t("common.actions") }}</AdminTh>
               </template>
               <AdminTr v-for="row in vocabList" :key="String(row.id)">
+                <AdminTd>
+                  <input
+                    type="checkbox"
+                    class="rounded border-border"
+                    :checked="selectedVocabIds.includes(String(row.id))"
+                    @change="toggleVocabSelected(String(row.id), ($event.target as HTMLInputElement).checked)"
+                  />
+                </AdminTd>
                 <AdminTd>{{ row.word }}</AdminTd>
                 <AdminTd>
                   <AdminCellText :title="String(row.exampleSentence ?? '')">
@@ -1197,6 +1331,56 @@ onMounted(() => {
           @click="importLlmPreview"
         >
           {{ $t("pages.readAloudVocabularies.llmImportSelected") }}
+        </AdminButton>
+      </template>
+    </AdminDialog>
+
+    <!-- 批量生成音频 -->
+    <AdminDialog
+      v-model="batchAudioDialogVisible"
+      :title="$t('pages.readAloudVocabularies.batchAudioDialog')"
+      size="md"
+    >
+      <div class="space-y-4">
+        <p class="text-sm text-muted">
+          {{ $t("pages.readAloudVocabularies.batchAudioHint") }}
+        </p>
+        <div class="space-y-2">
+          <label class="flex cursor-pointer items-start gap-2 text-sm">
+            <input v-model="batchAudioMode" type="radio" value="missing" class="mt-1" />
+            <span>{{ $t("pages.readAloudVocabularies.batchAudioModeMissing") }}</span>
+          </label>
+          <label class="flex cursor-pointer items-start gap-2 text-sm">
+            <input v-model="batchAudioMode" type="radio" value="all" class="mt-1" />
+            <span>{{ $t("pages.readAloudVocabularies.batchAudioModeAll") }}</span>
+          </label>
+          <label class="flex cursor-pointer items-start gap-2 text-sm">
+            <input
+              v-model="batchAudioMode"
+              type="radio"
+              value="selected"
+              class="mt-1"
+              :disabled="selectedVocabIds.length === 0"
+            />
+            <span>
+              {{
+                $t("pages.readAloudVocabularies.batchAudioModeSelected", {
+                  count: selectedVocabIds.length,
+                })
+              }}
+            </span>
+          </label>
+        </div>
+        <p v-if="batchAudioRunning" class="text-sm text-muted">
+          {{ $t("pages.readAloudVocabularies.batchAudioRunning") }}
+        </p>
+      </div>
+      <template #footer>
+        <AdminButton :disabled="batchAudioRunning" @click="batchAudioDialogVisible = false">
+          {{ $t("common.cancel") }}
+        </AdminButton>
+        <AdminButton variant="primary" :loading="batchAudioRunning" @click="runBatchAudio">
+          {{ $t("pages.readAloudVocabularies.batchAudioRun") }}
         </AdminButton>
       </template>
     </AdminDialog>
