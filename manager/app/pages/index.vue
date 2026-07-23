@@ -237,7 +237,7 @@ const loading = computed(() => statsPending.value || trendsPending.value);
 </script>
 
 <template>
-  <AdminListPage>
+  <AdminListPage :fill="false">
     <template #header>
       <AdminPageHeader :title="$t('pages.dashboard.title')" :description="$t('pages.dashboard.description')" />
     </template>

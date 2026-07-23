@@ -105,9 +105,10 @@ const SEED_VOICES = [
   { langCode: "zh", voiceCode: "zh-CN-XiaoxiaoMultilingualNeural", name: "晓晓", gender: "female", sortOrder: 10 },
   { langCode: "zh", voiceCode: "zh-CN-YunxiaoMultilingualNeural", name: "云萧", gender: "male", sortOrder: 20 },
   { langCode: "zh", voiceCode: "zh-CN-XiaoyuMultilingualNeural", name: "晓雨", gender: "female", sortOrder: 30 },
-  // Japanese — Group1 male Multilingual only; female voices remain monolingual Neural
+  // Japanese — Nanami monolingual; male uses KeitaNeural
+  // (ja-JP-MasaruMultilingualNeural is preview-only and unavailable in japanwest)
   { langCode: "ja", voiceCode: "ja-JP-NanamiNeural", name: "Nanami", gender: "female", sortOrder: 10 },
-  { langCode: "ja", voiceCode: "ja-JP-MasaruMultilingualNeural", name: "Masaru", gender: "male", sortOrder: 20 },
+  { langCode: "ja", voiceCode: "ja-JP-KeitaNeural", name: "Keita", gender: "male", sortOrder: 20 },
   // Korean
   { langCode: "ko", voiceCode: "ko-KR-SunHiNeural", name: "SunHi", gender: "female", sortOrder: 10 },
   { langCode: "ko", voiceCode: "ko-KR-HyunsuMultilingualNeural", name: "Hyunsu", gender: "male", sortOrder: 20 },
@@ -514,6 +515,35 @@ async function ensureAzureTtsConfig(db: AppPrismaClient) {
 }
 
 async function ensureAzureVoiceRoles(db: AppPrismaClient, ttsId: string) {
+  // Preview Multilingual voices unavailable in some regions (e.g. japanwest) → GA Neural fallbacks
+  const legacyVoiceMigrations: Array<{ from: string; to: string; name: string }> = [
+    {
+      from: "ja-JP-MasaruMultilingualNeural",
+      to: "ja-JP-KeitaNeural",
+      name: "Keita",
+    },
+  ];
+  for (const mig of legacyVoiceMigrations) {
+    const legacyRows = await db.voiceRole.findMany({
+      where: { voiceCode: mig.from },
+    });
+    for (const row of legacyRows) {
+      await db.voiceRole.update({
+        where: { id: row.id },
+        data: {
+          voiceCode: mig.to,
+          name: row.name === "Masaru" ? mig.name : row.name,
+          previewAudioUrl: null,
+          previewLocalFilename: null,
+          previewGeneratedAt: null,
+        },
+      });
+      console.info(
+        `[data-seed] migrated voice role ${row.id}: ${mig.from} → ${mig.to}`,
+      );
+    }
+  }
+
   for (const v of SEED_VOICES) {
     const lang = await db.language.findUnique({ where: { code: v.langCode } });
     if (!lang) continue;

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    /** 子内容占满剩余高度并在内部自行滚动，而非整页滚动 */
+    /**
+     * 默认 true：页头固定，内容区占满剩余高度（配合 AdminPanel + AdminTable + AdminPagination：
+     * 仅表格滚动，分页与操作栏不跟着滚）。
+     * 仪表盘等需要整页滚动的长内容页设为 false。
+     */
     fill?: boolean;
   }>(),
-  { fill: false },
+  { fill: true },
 );
 </script>
 

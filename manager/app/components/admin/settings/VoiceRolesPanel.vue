@@ -503,8 +503,8 @@ async function deletePreview(row: Record<string, unknown>) {
 </script>
 
 <template>
-  <div class="flex min-h-0 flex-1 flex-col gap-3">
-    <div class="flex flex-wrap justify-end gap-2">
+  <div class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+    <div class="flex shrink-0 flex-wrap justify-end gap-2">
       <AdminButton
         variant="secondary"
         class="w-full sm:w-auto"
@@ -518,7 +518,7 @@ async function deletePreview(row: Record<string, unknown>) {
       </AdminButton>
     </div>
 
-    <AdminAlert :title="$t('pages.voiceRoles.usageAlertTitle')">
+    <AdminAlert class="mb-0 shrink-0" :title="$t('pages.voiceRoles.usageAlertTitle')">
       {{ $t("pages.voiceRoles.usageAlert") }}
     </AdminAlert>
 

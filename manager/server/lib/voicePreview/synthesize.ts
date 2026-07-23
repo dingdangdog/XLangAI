@@ -48,7 +48,12 @@ async function azureTts(
   const endpoint = `https://${r}.tts.speech.microsoft.com/cognitiveservices/v1`;
   const fmt = outputFormat.trim() || "audio-16khz-128kbitrate-mono-mp3";
   const lang = localeFromAzureVoice(voice);
-  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${lang}"><voice name="${voice}">${escapeXmlText(text)}</voice></speak>`;
+  // Multilingual voices: wrap <lang> so speaking locale is explicit (Azure recommendation).
+  const isMultilingual = /MultilingualNeural$/i.test(voice);
+  const inner = isMultilingual
+    ? `<lang xml:lang="${lang}">${escapeXmlText(text)}</lang>`
+    : escapeXmlText(text);
+  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="${lang}"><voice name="${voice}">${inner}</voice></speak>`;
   const res = await fetch(endpoint, {
     method: "POST",
     headers: {
@@ -61,7 +66,13 @@ async function azureTts(
   });
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Azure TTS ${res.status}: ${body.slice(0, 200)}`);
+    const detail = body.trim() || "(empty body)";
+    throw new Error(
+      `Azure TTS ${res.status} voice=${voice} region=${r}: ${detail.slice(0, 200)}` +
+        (res.status === 400
+          ? " — 该音色可能在当前区域不可用（preview 音色常见），请换 GA Neural 或支持 preview 的区域"
+          : ""),
+    );
   }
   return Buffer.from(await res.arrayBuffer());
 }
