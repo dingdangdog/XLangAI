@@ -486,7 +486,13 @@
       "hintAzure": "Azure neural short name, e.g. zh-CN-XiaoxiaoNeural; must match region.",
       "hintOpenai": "OpenAI TTS voice name, e.g. alloy, nova (per API docs).",
       "hintNoTts": "Select TTS config first. Empty provider may default to OpenAI on server.",
-      "hintProvider": "Provider is “{provider}”; voice code must match server protocol."
+      "hintProvider": "Provider is “{provider}”; voice code must match server protocol.",
+      "batchPreview": "Batch generate previews",
+      "batchPreviewConfirm": "Generate previews for all voice roles that do not have one yet (skips audio→text). Up to 30 per run; one failure does not stop the rest. TTS can be slow.",
+      "batchPreviewNothingToDo": "No voice roles need a preview",
+      "batchPreviewDone": "Generated {ok}; {remaining} remaining — run again if needed",
+      "batchPreviewPartial": "OK {ok}, failed {failed} (failures skipped); {remaining} remaining",
+      "batchPreviewFailed": "Batch preview generation failed"
     },
     "conversations": {
       "title": "Conversations",

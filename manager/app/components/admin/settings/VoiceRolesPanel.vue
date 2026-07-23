@@ -365,6 +365,58 @@ const { activateRow, activatingId } = useActivateConfigRow({
 const previewGeneratingId = ref<string | null>(null);
 const previewDeletingId = ref<string | null>(null);
 const previewAudioEl = ref<HTMLAudioElement | null>(null);
+const batchPreviewRunning = ref(false);
+
+async function batchGenerateMissingPreviews() {
+  if (batchPreviewRunning.value) return;
+  const ok = await confirm({
+    message: t("pages.voiceRoles.batchPreviewConfirm"),
+    confirmLabel: t("pages.voiceRoles.batchPreview"),
+  });
+  if (!ok) return;
+
+  batchPreviewRunning.value = true;
+  try {
+    const res = await $fetch<{
+      ok: number;
+      failed: Array<{ id: string; name?: string; error: string }>;
+      processed: number;
+      remaining: number;
+      totalMatched: number;
+    }>("/api/admin/voice-roles/batch-generate-preview", {
+      method: "POST",
+      body: { onlyMissing: true },
+      timeout: 600_000,
+    });
+
+    const failCount = res.failed?.length ?? 0;
+    if (failCount === 0 && (res.ok ?? 0) === 0 && (res.totalMatched ?? 0) === 0) {
+      toast.warning(t("pages.voiceRoles.batchPreviewNothingToDo"));
+    } else if (failCount === 0) {
+      toast.success(
+        t("pages.voiceRoles.batchPreviewDone", {
+          ok: res.ok ?? 0,
+          remaining: res.remaining ?? 0,
+        }),
+      );
+    } else {
+      toast.warning(
+        t("pages.voiceRoles.batchPreviewPartial", {
+          ok: res.ok ?? 0,
+          failed: failCount,
+          remaining: res.remaining ?? 0,
+        }),
+      );
+      console.warn("[batch-generate-preview] failures", res.failed);
+    }
+    await load();
+  } catch (e) {
+    toast.error(t("pages.voiceRoles.batchPreviewFailed"));
+    console.error(e);
+  } finally {
+    batchPreviewRunning.value = false;
+  }
+}
 
 function previewPlayUrl(row: Record<string, unknown>): string | null {
   const raw = String(row.previewAudioUrl ?? "").trim();
@@ -452,7 +504,15 @@ async function deletePreview(row: Record<string, unknown>) {
 
 <template>
   <div class="flex min-h-0 flex-1 flex-col gap-3">
-    <div class="flex justify-end">
+    <div class="flex flex-wrap justify-end gap-2">
+      <AdminButton
+        variant="secondary"
+        class="w-full sm:w-auto"
+        :loading="batchPreviewRunning"
+        @click="batchGenerateMissingPreviews"
+      >
+        {{ $t("pages.voiceRoles.batchPreview") }}
+      </AdminButton>
       <AdminButton variant="primary" class="w-full sm:w-auto" @click="openCreate">
         {{ $t("common.create") }}
       </AdminButton>

@@ -483,7 +483,13 @@
       "hintAzure": "Azure 神经语音短名，例如 zh-CN-XiaoxiaoNeural、en-US-JennyNeural；须与语音资源区域能力一致。",
       "hintOpenai": "OpenAI TTS 的 voice 名称，如 alloy、nova、echo 等（以当前 API 文档为准）。",
       "hintNoTts": "未选择 TTS 配置时无法判断协议；请先选择配置。空 provider 时服务端可能按 OpenAI 处理。",
-      "hintProvider": "当前 provider 为「{provider}」，音色代码须与服务端对该协议的约定一致。"
+      "hintProvider": "当前 provider 为「{provider}」，音色代码须与服务端对该协议的约定一致。",
+      "batchPreview": "批量生成试听",
+      "batchPreviewConfirm": "将为一键生成所有尚未试听的语音角色（跳过「音频→文字」类型）。单次最多 30 条；单条失败不影响其余。TTS 较慢，请耐心等待。",
+      "batchPreviewNothingToDo": "没有需要生成试听的角色",
+      "batchPreviewDone": "成功生成 {ok} 条；剩余 {remaining} 条可再次执行",
+      "batchPreviewPartial": "成功 {ok} 条，失败 {failed} 条（失败项已跳过）；剩余 {remaining} 条",
+      "batchPreviewFailed": "批量生成试听失败"
     },
     "conversations": {
       "title": "会话",
